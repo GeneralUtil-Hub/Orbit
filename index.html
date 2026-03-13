@@ -1,9 +1,9 @@
-<DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nexus Workspace Pro</title>
+    <title>Orbit Workspace</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
@@ -18,7 +18,22 @@
             --bg-primary: #ffffff;
             --sidebar-bg: #fbfbfa;
             --text-main: #111827;
+            --text-secondary: #6b7280;
             --brand-color: #2563eb;
+            --border-color: #e5e7eb;
+            --block-hover: rgba(0,0,0,0.02);
+            --input-bg: #f3f4f6;
+        }
+
+        .dark-mode {
+            --bg-primary: #191919;
+            --sidebar-bg: #202020;
+            --text-main: #efeff1;
+            --text-secondary: #9ca3af;
+            --brand-color: #3b82f6;
+            --border-color: #2e2e2e;
+            --block-hover: rgba(255,255,255,0.03);
+            --input-bg: #2a2a2a;
         }
 
         body { 
@@ -26,7 +41,7 @@
             -webkit-font-smoothing: antialiased; 
             background-color: var(--bg-primary); 
             color: var(--text-main);
-            transition: background-color 0.3s ease, color 0.3s ease;
+            transition: background-color 0.2s ease, color 0.2s ease;
         }
 
         .scrollbar-hide::-webkit-scrollbar { display: none; }
@@ -36,34 +51,46 @@
         input:focus, textarea:focus { outline: none; }
         
         /* Scalable Blocks */
-        .scalable-content { position: relative; overflow: hidden; resize: vertical; min-height: 100px; max-width: 100%; border-radius: 0.75rem; }
-        .resizable-handle { position: absolute; bottom: 0; right: 0; width: 20px; height: 20px; cursor: nwse-resize; background: linear-gradient(135deg, transparent 50%, rgba(0,0,0,0.1) 50%); z-index: 10; }
+        .scalable-content { position: relative; overflow: hidden; resize: vertical; min-height: 100px; max-width: 100%; border-radius: 0.75rem; border: 1px solid var(--border-color); }
+        .resizable-handle { position: absolute; bottom: 0; right: 0; width: 20px; height: 20px; cursor: nwse-resize; background: linear-gradient(135deg, transparent 50%, rgba(120,120,120,0.2) 50%); z-index: 10; }
 
-        .whiteboard-canvas { touch-action: none; cursor: crosshair; background-color: #ffffff; display: block; width: 100%; height: 100%; }
-        .playground-preview { background-color: white; border: 1px solid #e5e7eb; border-radius: 0.5rem; width: 100%; height: 100%; }
+        .whiteboard-canvas { touch-action: none; cursor: crosshair; background-color: var(--bg-primary); display: block; width: 100%; height: 100%; }
+        .playground-preview { background-color: white; border: 1px solid var(--border-color); border-radius: 0.5rem; width: 100%; height: 100%; }
         
         .drag-handle { cursor: grab; padding: 4px; border-radius: 4px; transition: background 0.2s; }
-        .drag-handle:hover { background: rgba(0,0,0,0.05); }
+        .drag-handle:hover { background: var(--block-hover); }
         .drag-handle:active { cursor: grabbing; }
         .sortable-ghost { opacity: 0.1; background: var(--brand-color) !important; border: 2px dashed var(--brand-color); }
         
-        .latex-rendered { padding: 1.5rem; background: rgba(0,0,0,0.02); border-radius: 0.75rem; margin: 0.5rem 0; text-align: center; font-size: 1.25em; }
-        
-        /* Flashcard */
-        .flashcard { perspective: 1000px; height: 200px; cursor: pointer; width: 100%; }
-        .flashcard-inner { position: relative; width: 100%; height: 100%; text-align: center; transition: transform 0.6s; transform-style: preserve-3d; }
-        .flashcard.flipped .flashcard-inner { transform: rotateY(180deg); }
-        .flashcard-front, .flashcard-back { position: absolute; width: 100%; height: 100%; -webkit-backface-visibility: hidden; backface-visibility: hidden; display: flex; align-items: center; justify-content: center; padding: 2rem; border-radius: 1rem; border: 1px solid #e5e7eb; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1); background: white; }
-        .flashcard-back { transform: rotateY(180deg); background-color: #f3f4f6; }
-
         /* Floating Toolbar */
-        #format-toolbar { position: fixed; z-index: 1000; background: white; border: 1px solid #e5e7eb; border-radius: 8px; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); padding: 4px; display: none; align-items: center; gap: 2px; }
-        .toolbar-btn { padding: 4px 6px; border-radius: 4px; font-size: 11px; font-weight: 700; color: #4b5563; }
-        .toolbar-btn:hover { background: #f3f4f6; }
+        #format-toolbar { position: fixed; z-index: 1000; background: var(--bg-primary); border: 1px solid var(--border-color); border-radius: 8px; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.2); padding: 4px; display: none; align-items: center; gap: 2px; }
+        .toolbar-btn { padding: 4px 6px; border-radius: 4px; font-size: 11px; font-weight: 700; color: var(--text-main); }
+        .toolbar-btn:hover { background: var(--block-hover); }
 
-        /* Clipboard Area */
-        #block-clipboard { min-height: 50px; border: 2px dashed #e5e7eb; border-radius: 12px; transition: all 0.2s; }
+        #block-clipboard { min-height: 50px; border: 2px dashed var(--border-color); border-radius: 12px; transition: all 0.2s; }
         #block-clipboard.drag-over { border-color: var(--brand-color); background: rgba(37, 99, 235, 0.05); }
+
+        .sidebar-item-active { background-color: var(--block-hover); color: var(--text-main); font-weight: 600; }
+        
+        [contenteditable]:empty:before { content: attr(placeholder); color: var(--text-secondary); opacity: 0.5; pointer-events: none; }
+        
+        /* Dark mode specific overrides */
+        .dark-mode .bg-white { background-color: #252525 !important; }
+        .dark-mode .bg-gray-50 { background-color: #1e1e1e !important; }
+        .dark-mode .bg-gray-100 { background-color: #2a2a2a !important; }
+        .dark-mode .bg-gray-200 { background-color: #333333 !important; }
+        .dark-mode .border-gray-100, .dark-mode .border-gray-200, .dark-mode .border-gray-50 { border-color: #2e2e2e !important; }
+        
+        /* Switch Toggle Style */
+        .switch { position: relative; display: inline-block; width: 34px; height: 20px; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .4s; border-radius: 34px; }
+        .slider:before { position: absolute; content: ""; height: 14px; width: 14px; left: 3px; bottom: 3px; background-color: white; transition: .4s; border-radius: 50%; }
+        input:checked + .slider { background-color: #3b82f6; }
+        input:checked + .slider:before { transform: translateX(14px); }
+
+        /* Custom Logo Style */
+        .orbit-logo { width: 28px; height: 28px; }
     </style>
 </head>
 <body class="overflow-hidden">
@@ -76,77 +103,77 @@
             <button class="toolbar-btn" onmousedown="applyFormat('bold'); event.preventDefault();">B</button>
             <button class="toolbar-btn" onmousedown="applyFormat('italic'); event.preventDefault();">I</button>
             <button class="toolbar-btn" onmousedown="applyFormat('underline'); event.preventDefault();">U</button>
-            <div class="h-4 w-px bg-gray-200 mx-1"></div>
+            <div class="h-4 w-px bg-gray-500/20 mx-1"></div>
             <button class="toolbar-btn text-red-500" onmousedown="applyColor('#ef4444'); event.preventDefault();">Red</button>
             <button class="toolbar-btn text-blue-500" onmousedown="applyColor('#3b82f6'); event.preventDefault();">Blue</button>
-            <button class="toolbar-btn bg-yellow-100" onmousedown="applyHighlight('#fef08a'); event.preventDefault();">High</button>
+            <button class="toolbar-btn bg-yellow-400/20" onmousedown="applyHighlight('#fef08a'); event.preventDefault();">High</button>
         </div>
 
         <!-- Sidebar -->
-        <aside id="sidebar" class="w-64 flex flex-col bg-[var(--sidebar-bg)] border-r border-gray-200 transition-all duration-300 shrink-0">
+        <aside id="sidebar" class="w-64 flex flex-col bg-[var(--sidebar-bg)] border-r border-[var(--border-color)] transition-all duration-300 shrink-0">
             <div class="p-4 flex flex-col gap-4">
                 <div class="flex items-center justify-between">
                     <div class="flex items-center gap-2 font-bold text-sm">
-                        <div class="w-6 h-6 bg-blue-600 rounded flex items-center justify-center text-white text-[10px]">N</div>
-                        Nexus Workspace
+                        <svg class="orbit-logo" viewBox="0 0 24 24">
+                            <!-- Accretion Ring -->
+                            <ellipse cx="12" cy="12" rx="10" ry="3.5" transform="rotate(-20 12 12)" stroke="currentColor" stroke-width="1.8" fill="none" />
+                            <!-- Protective Gap Circle (Background Colored) -->
+                            <circle cx="12" cy="12" r="7" fill="var(--bg-primary)" />
+                            <!-- Event Horizon (Central Core) -->
+                            <circle cx="12" cy="12" r="5" fill="currentColor" />
+                        </svg>
+                        Orbit Workspace
                     </div>
-                    <button onclick="toggleSidebar()" class="hover:bg-gray-200 p-1 rounded transition-colors text-gray-500">
+                    <button onclick="toggleSidebar()" class="hover:bg-gray-500/10 p-1 rounded transition-colors text-gray-500">
                         <i data-lucide="chevron-left" class="w-4 h-4"></i>
                     </button>
                 </div>
 
                 <div class="relative">
                     <i data-lucide="search" class="absolute left-2.5 top-2.5 text-gray-400 w-3.5 h-3.5"></i>
-                    <input type="text" oninput="handleSearch(this.value)" class="w-full bg-gray-200/50 border-none outline-none rounded-lg py-2 pl-8 pr-3 text-xs focus:bg-white focus:ring-1 focus:ring-gray-200 transition-all text-gray-700" placeholder="Search pages..." />
+                    <input type="text" oninput="handleSearch(this.value)" class="w-full bg-[var(--input-bg)] border-none outline-none rounded-lg py-2 pl-8 pr-3 text-xs focus:ring-1 focus:ring-blue-500/50 transition-all text-[var(--text-main)]" placeholder="Search pages..." />
                 </div>
             </div>
 
             <div class="flex-1 overflow-y-auto px-2 space-y-4 scrollbar-hide">
                 <div>
-                    <div class="px-3 py-1 text-[10px] font-bold text-gray-400 uppercase tracking-widest">Favorites</div>
+                    <div class="px-3 py-1 text-[10px] font-bold text-gray-500 uppercase tracking-widest">Favorites</div>
                     <div id="favorites-list"></div>
                 </div>
                 <div>
-                    <div class="px-3 py-1 text-[10px] font-bold text-gray-400 uppercase tracking-widest flex justify-between items-center group">
+                    <div class="px-3 py-1 text-[10px] font-bold text-gray-500 uppercase tracking-widest flex justify-between items-center group">
                         Workspaces
-                        <button onclick="addPage()" class="p-0.5 hover:bg-gray-200 rounded transition-opacity"><i data-lucide="plus" class="w-3 h-3 text-gray-400"></i></button>
+                        <button onclick="addPage()" class="p-0.5 hover:bg-gray-500/10 rounded transition-opacity"><i data-lucide="plus" class="w-3 h-3 text-gray-400"></i></button>
                     </div>
                     <div id="pages-list" class="space-y-0.5"></div>
                 </div>
 
-                <!-- Cross-Workspace Drag Clipboard -->
                 <div class="px-2 mt-6">
-                    <div class="px-1 py-1 text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2 flex items-center gap-2">
+                    <div class="px-1 py-1 text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-2 flex items-center gap-2">
                         <i data-lucide="package" class="w-3 h-3"></i> Block Clipboard
                     </div>
-                    <div id="block-clipboard" class="p-2 flex flex-col gap-2">
-                        <!-- Temporary storage for blocks being moved -->
-                    </div>
-                    <p class="text-[9px] text-gray-400 mt-1 px-1">Drag here to move across pages</p>
+                    <div id="block-clipboard" class="p-2 flex flex-col gap-2"></div>
                 </div>
             </div>
 
-            <div class="p-4 border-t border-gray-100 space-y-2">
-                <div class="px-3 py-2 bg-gray-100 rounded-xl text-[10px] font-bold text-gray-500 uppercase flex items-center justify-between">
+            <div class="p-4 border-t border-[var(--border-color)] space-y-2">
+                <div class="px-3 py-2 bg-[var(--input-bg)] rounded-xl text-[10px] font-bold text-gray-500 uppercase flex items-center justify-between">
                     <span class="flex items-center gap-2"><i data-lucide="user" class="w-3 h-3"></i> <span id="current-user-name">Guest</span></span>
                 </div>
-                <button onclick="openThemeModal()" class="w-full flex items-center gap-2 px-3 py-2 text-xs text-gray-600 hover:bg-gray-200 rounded transition-colors font-semibold">
+                <button onclick="openThemeModal()" class="w-full flex items-center gap-2 px-3 py-2 text-xs text-[var(--text-secondary)] hover:bg-gray-500/10 rounded transition-colors font-semibold">
                     <i data-lucide="palette" class="w-3.5 h-3.5"></i> Theme Creator
                 </button>
-                <button onclick="openCollabModal()" class="w-full flex items-center gap-2 px-3 py-2 text-xs text-orange-600 hover:bg-orange-50 rounded transition-colors font-semibold">
-                    <i data-lucide="share-2" class="w-3.5 h-3.5"></i> Join Live
-                </button>
-                <button onclick="addPage()" class="w-full flex items-center gap-2 px-3 py-2 text-xs text-blue-600 hover:bg-blue-50 rounded transition-colors font-bold">
+                <button onclick="addPage()" class="w-full flex items-center gap-2 px-3 py-2 text-xs text-blue-500 hover:bg-blue-500/10 rounded transition-colors font-bold">
                     <i data-lucide="plus" class="w-3.5 h-3.5"></i> New Page
                 </button>
             </div>
         </aside>
 
         <!-- Main Content -->
-        <main class="flex-1 flex flex-col h-full bg-[var(--bg-primary)] relative overflow-hidden">
-            <button id="menu-btn" onclick="toggleSidebar()" class="hidden absolute top-4 left-4 z-40 p-2 bg-white/80 backdrop-blur rounded-lg shadow-sm border border-gray-100 hover:bg-white transition-all"><i data-lucide="menu" class="w-4 h-4"></i></button>
+        <main id="main-content" class="flex-1 flex flex-col h-full bg-[var(--bg-primary)] relative overflow-hidden" onclick="handleWorkspaceClick(event)">
+            <button id="menu-btn" onclick="toggleSidebar()" class="hidden absolute top-4 left-4 z-40 p-2 bg-[var(--bg-primary)]/80 backdrop-blur rounded-lg shadow-sm border border-[var(--border-color)] hover:bg-[var(--bg-primary)] transition-all"><i data-lucide="menu" class="w-4 h-4"></i></button>
 
-            <div class="h-11 border-b border-gray-50 flex items-center justify-between px-6 shrink-0 z-20 bg-[var(--bg-primary)]/80 backdrop-blur-md">
+            <div class="h-11 border-b border-[var(--border-color)] flex items-center justify-between px-6 shrink-0 z-20 bg-[var(--bg-primary)]/80 backdrop-blur-md">
                 <div class="flex items-center gap-2 text-sm">
                     <span id="header-icon" class="mr-1">🚀</span>
                     <span id="header-title" class="font-semibold truncate max-w-[200px]">Workspace</span>
@@ -156,7 +183,7 @@
                     <div id="sync-status" class="hidden flex items-center gap-1.5 text-[10px] text-green-600 font-bold uppercase tracking-wider">
                         <div class="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></div> Shared
                     </div>
-                    <button onclick="toggleActiveFavorite()" id="favorite-btn" class="p-1.5 rounded hover:bg-gray-100 transition-colors text-gray-400"><i data-lucide="star" class="w-4 h-4"></i></button>
+                    <button onclick="toggleActiveFavorite()" id="favorite-btn" class="p-1.5 rounded hover:bg-gray-500/10 transition-colors text-gray-400"><i data-lucide="star" class="w-4 h-4"></i></button>
                     <button onclick="openSharePageModal()" class="text-xs font-semibold text-white bg-blue-600 hover:bg-blue-700 px-3 py-1.5 rounded-lg transition-all shadow-lg">Share</button>
                 </div>
             </div>
@@ -166,85 +193,86 @@
                     <img id="page-cover" src="" alt="Cover" class="w-full h-full object-cover transition-all duration-700" />
                     <div class="absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-100 transition-opacity"></div>
                     <div class="absolute bottom-4 right-8 opacity-0 group-hover:opacity-100 transition-opacity flex gap-2">
-                        <button onclick="document.getElementById('cover-upload-input').click()" class="bg-white/90 backdrop-blur px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider rounded border border-gray-200 shadow-sm hover:bg-white transition-all flex items-center gap-2 text-gray-700"><i data-lucide="upload" class="w-3 h-3"></i> Upload Banner</button>
-                        <button onclick="changeCover()" class="bg-white/90 backdrop-blur px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider rounded border border-gray-200 shadow-sm hover:bg-white transition-all text-gray-700">Random</button>
+                        <button onclick="document.getElementById('cover-upload-input').click()" class="bg-white/90 dark:bg-black/90 backdrop-blur px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider rounded border border-gray-200 dark:border-gray-800 shadow-sm transition-all flex items-center gap-2 text-gray-700 dark:text-gray-200"><i data-lucide="upload" class="w-3 h-3"></i> Upload Banner</button>
+                        <button onclick="changeCover()" class="bg-white/90 dark:bg-black/90 backdrop-blur px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider rounded border border-gray-200 dark:border-gray-800 shadow-sm transition-all text-gray-700 dark:text-gray-200">Random</button>
                     </div>
                 </div>
 
                 <div class="max-w-4xl mx-auto px-12 lg:px-24">
                     <div class="mt-[-45px] mb-12 relative z-10 group">
                         <div class="relative inline-block">
-                            <div id="page-icon" onclick="toggleEmojiPicker(event)" class="text-7xl cursor-pointer hover:bg-gray-100 rounded-2xl p-2 transition-all active:scale-95 select-none bg-white shadow-sm border border-gray-100">🚀</div>
-                            <div id="emoji-picker" class="hidden absolute top-full left-0 mt-2 p-3 bg-white border border-gray-200 rounded-2xl shadow-2xl z-50 w-72">
+                            <div id="page-icon" onclick="toggleEmojiPicker(event)" class="text-7xl cursor-pointer hover:scale-105 rounded-2xl p-2 transition-all active:scale-95 select-none bg-[var(--bg-primary)] shadow-sm border border-[var(--border-color)]">🚀</div>
+                            <div id="emoji-picker" class="hidden absolute top-full left-0 mt-2 p-3 bg-[var(--bg-primary)] border border-[var(--border-color)] rounded-2xl shadow-2xl z-50 w-72">
                                 <div class="grid grid-cols-5 gap-1" id="emoji-grid"></div>
                             </div>
                         </div>
-                        <input id="main-title-input" oninput="updatePageTitle(this.value)" class="w-full text-5xl font-black border-none outline-none mt-6 placeholder-gray-100 tracking-tight bg-transparent" placeholder="Untitled" />
+                        <input id="main-title-input" oninput="updatePageTitle(this.value)" class="w-full text-5xl font-black border-none outline-none mt-6 placeholder-gray-500/20 tracking-tight bg-transparent text-[var(--text-main)]" placeholder="Untitled Workspace" />
                     </div>
 
-                    <div id="editor-blocks" class="space-y-1 pb-24 min-h-[40vh]"></div>
-                    <div id="bottom-click-area" class="h-64 cursor-text" onclick="focusNewBlockAtBottom()"></div>
+                    <div id="editor-blocks" class="space-y-1 pb-4 min-h-[100px]" onclick="event.stopPropagation()"></div>
+                    <div id="bottom-click-trigger" class="h-96 w-full cursor-text"></div>
                 </div>
             </div>
         </main>
     </div>
 
-    <!-- Modals -->
-    <div id="name-modal" class="hidden fixed inset-0 z-[200] bg-black/60 flex items-center justify-center backdrop-blur-md text-gray-900">
-        <div class="bg-white w-96 rounded-3xl p-8 shadow-2xl">
-            <h3 class="text-xl font-bold mb-4">Set Your Identity</h3>
-            <input id="initial-name" type="text" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none mb-4" placeholder="Enter name..." />
-            <button onclick="window.saveInitialName()" class="w-full py-3 bg-blue-600 rounded-xl text-sm font-bold text-white hover:bg-blue-700 transition-all">Get Started</button>
-        </div>
-    </div>
-
-    <div id="theme-modal" class="hidden fixed inset-0 z-[200] bg-black/60 flex items-center justify-center backdrop-blur-md text-gray-900">
-        <div class="bg-white w-[400px] rounded-3xl p-8 shadow-2xl">
-            <h3 class="text-xl font-bold mb-6 flex items-center gap-2"><i data-lucide="palette"></i> Theme Creator</h3>
+    <!-- Theme Modal with Dark Mode Switch -->
+    <div id="theme-modal" class="hidden fixed inset-0 z-[200] bg-black/60 flex items-center justify-center backdrop-blur-md">
+        <div class="bg-white dark:bg-[#1e1e1e] w-[400px] rounded-3xl p-8 shadow-2xl">
+            <h3 class="text-xl font-bold mb-6 flex items-center gap-2 dark:text-white"><i data-lucide="palette"></i> Theme Creator</h3>
+            
             <div class="space-y-4 mb-6">
+                <!-- Dark Mode Toggle Row -->
+                <div class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-2xl">
+                    <span class="text-xs font-bold text-gray-500 uppercase tracking-widest flex items-center gap-2">
+                        <i data-lucide="moon" class="w-3.5 h-3.5"></i> Dark Mode
+                    </span>
+                    <label class="switch">
+                        <input type="checkbox" id="modal-dark-toggle" onchange="toggleDarkMode()">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+
                 <div>
-                    <label class="text-[10px] font-bold text-gray-400 uppercase">Brand Primary</label>
-                    <input type="color" id="theme-brand" class="w-full h-10 rounded-lg cursor-pointer" oninput="previewTheme()">
+                    <label class="text-[10px] font-bold text-gray-400 uppercase ml-1">Brand Primary</label>
+                    <input type="color" id="theme-brand" class="w-full h-10 rounded-lg cursor-pointer bg-transparent border-none mt-1" oninput="previewTheme()">
                 </div>
                 <div>
-                    <label class="text-[10px] font-bold text-gray-400 uppercase">Background</label>
-                    <input type="color" id="theme-bg" class="w-full h-10 rounded-lg cursor-pointer" oninput="previewTheme()" value="#ffffff">
+                    <label class="text-[10px] font-bold text-gray-400 uppercase ml-1">Background</label>
+                    <input type="color" id="theme-bg" class="w-full h-10 rounded-lg cursor-pointer bg-transparent border-none mt-1" oninput="previewTheme()">
                 </div>
                 <div>
-                    <label class="text-[10px] font-bold text-gray-400 uppercase">Sidebar</label>
-                    <input type="color" id="theme-sidebar" class="w-full h-10 rounded-lg cursor-pointer" oninput="previewTheme()" value="#fbfbfa">
+                    <label class="text-[10px] font-bold text-gray-400 uppercase ml-1">Sidebar</label>
+                    <input type="color" id="theme-sidebar" class="w-full h-10 rounded-lg cursor-pointer bg-transparent border-none mt-1" oninput="previewTheme()">
                 </div>
             </div>
+
             <div class="flex gap-3">
-                <button onclick="closeThemeModal()" class="flex-1 py-3 bg-gray-100 rounded-xl text-sm font-bold text-gray-600">Cancel</button>
+                <button onclick="closeThemeModal()" class="flex-1 py-3 bg-gray-100 dark:bg-gray-800 rounded-xl text-sm font-bold text-gray-600 dark:text-gray-300">Cancel</button>
                 <button onclick="saveTheme()" class="flex-1 py-3 bg-blue-600 rounded-xl text-sm font-bold text-white">Apply</button>
             </div>
         </div>
     </div>
 
-    <div id="collab-modal" class="hidden fixed inset-0 z-[100] bg-black/40 flex items-center justify-center backdrop-blur-sm text-gray-900">
-        <div class="bg-white w-96 rounded-3xl p-8 shadow-2xl">
-            <h3 class="text-xl font-bold mb-2 flex items-center gap-2"><i data-lucide="share-2"></i> Join Friend</h3>
-            <input id="friend-page-code" type="text" placeholder="Share Code..." class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none mb-4" />
-            <div id="join-status" class="text-xs text-center mb-4 hidden font-bold"></div>
-            <div class="flex gap-3">
-                <button onclick="closeCollabModal()" class="flex-1 px-4 py-3 bg-gray-100 rounded-xl text-sm font-semibold text-gray-600 hover:bg-gray-200 transition-colors">Cancel</button>
-                <button id="join-btn" onclick="joinFriendPage()" class="flex-1 px-4 py-3 bg-orange-500 rounded-xl text-sm font-semibold text-white hover:bg-orange-600 shadow-lg">Join</button>
-            </div>
+    <div id="name-modal" class="hidden fixed inset-0 z-[200] bg-black/60 flex items-center justify-center backdrop-blur-md text-gray-900">
+        <div class="bg-white dark:bg-[#1e1e1e] w-96 rounded-3xl p-8 shadow-2xl">
+            <h3 class="text-xl font-bold mb-4 dark:text-white">Welcome to Orbit</h3>
+            <input id="initial-name" type="text" class="w-full bg-gray-50 dark:bg-[#2a2a2a] border border-gray-200 dark:border-[#333] dark:text-white rounded-xl px-4 py-3 text-sm outline-none mb-4" placeholder="Your Name..." />
+            <button onclick="window.saveInitialName()" class="w-full py-3 bg-blue-600 rounded-xl text-sm font-bold text-white hover:bg-blue-700 transition-all">Launch Workspace</button>
         </div>
     </div>
 
-    <div id="share-modal" class="hidden fixed inset-0 z-[100] bg-black/40 flex items-center justify-center backdrop-blur-sm text-gray-900">
-        <div class="bg-white w-96 rounded-3xl p-8 shadow-2xl text-center">
-            <h3 class="text-xl font-bold mb-4">Page Share Code</h3>
-            <div class="bg-gray-100 p-4 rounded-2xl mb-6 font-mono text-xl font-bold tracking-widest text-blue-600 select-all" id="share-code-display"></div>
-            <button onclick="closeShareModal()" class="w-full py-3 bg-gray-100 rounded-xl text-sm font-bold text-gray-600">Close</button>
+    <div id="share-modal" class="hidden fixed inset-0 z-[100] bg-black/40 flex items-center justify-center backdrop-blur-sm">
+        <div class="bg-white dark:bg-[#1e1e1e] w-96 rounded-3xl p-8 shadow-2xl text-center">
+            <h3 class="text-xl font-bold mb-4 dark:text-white">Workspace Share Code</h3>
+            <div class="bg-gray-100 dark:bg-[#2a2a2a] p-4 rounded-2xl mb-6 font-mono text-xl font-bold tracking-widest text-blue-600 select-all" id="share-code-display"></div>
+            <button onclick="closeShareModal()" class="w-full py-3 bg-gray-100 dark:bg-gray-800 rounded-xl text-sm font-bold text-gray-600 dark:text-gray-300">Close</button>
         </div>
     </div>
 
     <!-- Slash Menu -->
-    <div id="slash-menu" class="hidden fixed z-50 w-72 bg-white border border-gray-200 rounded-xl shadow-2xl overflow-hidden slash-menu-enter text-gray-900">
-        <div class="p-3 text-[10px] font-bold text-gray-400 uppercase tracking-widest border-b border-gray-50">Create Blocks</div>
+    <div id="slash-menu" class="hidden fixed z-50 w-72 bg-[var(--bg-primary)] border border-[var(--border-color)] rounded-xl shadow-2xl overflow-hidden slash-menu-enter">
+        <div class="p-3 text-[10px] font-bold text-gray-500 uppercase tracking-widest border-b border-[var(--border-color)]">Create Blocks</div>
         <div id="slash-menu-items" class="max-h-96 overflow-y-auto scrollbar-hide"></div>
     </div>
 
@@ -252,13 +280,26 @@
         // --- GLOBAL SETUP ---
         const ROOT_ABLY_KEY = "LJhgHg.rF2whQ:Imz-F_d5gOcMGAiJNWIGjhaAXXba8Hpbefj3LtPaT0s"; 
         const DEFAULT_COVERS = ['https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&q=80&w=2000', 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&q=80&w=2000', 'https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?auto=format&fit=crop&q=80&w=2000'];
-        const EMOJI_LIST = ['🚀', '🏗️', '📄', '💡', '🎨', '📅', '📝', '🛠️', '🌐', '📊', '💻', '⚡', '📦', '🔥', '📚', '🏠', '🎯', '✨', '🌍', '🍕'];
-        const STORAGE_KEY = 'nexus_v9_stable';
+        const EMOJI_LIST = ['🚀', '🪐', '🌑', '✨', '🛸', '🛰️', '🌍', '☄️', '🔭', '🎨', '📅', '📝', '🛠️', '🌐', '📊', '💻', '⚡', '📦', '📚', '🎯'];
+        const STORAGE_KEY = 'orbit_workspace_v1';
 
         let state = {
             username: '',
+            darkMode: false,
             customTheme: null,
-            pages: [{ id: '1', title: 'Getting Started', icon: '🚀', isFavorite: true, cover: DEFAULT_COVERS[0], isShared: false, blocks: [{ id: 'b1', type: 'h1', content: 'Welcome to Nexus Workspace' }, { id: 'b2', type: 'callout', content: 'Drag blocks into the "Block Clipboard" in the sidebar to move them to other workspaces!' }] }],
+            pages: [{ 
+                id: '1', 
+                title: 'Welcome to Orbit', 
+                icon: '🪐', 
+                isFavorite: true, 
+                cover: DEFAULT_COVERS[1], 
+                isShared: false, 
+                blocks: [
+                    { id: 'b1', type: 'h1', content: 'Explore Your Orbit' }, 
+                    { id: 'b2', type: 'text', content: 'Click anywhere on this page to start typing. Use <b>/</b> to open the command menu.' },
+                    { id: 'b3', type: 'todo', content: 'Press Enter at the end of this to continue the list!', checked: false }
+                ] 
+            }],
             activePageId: '1',
             sidebarOpen: true,
             searchQuery: '',
@@ -267,7 +308,6 @@
 
         let ably = null, channel = null, sortableMain = null, sortableClipboard = null;
 
-        // --- HOISTED CORE FUNCTIONS ---
         window.saveInitialName = function() {
             const name = document.getElementById('initial-name').value.trim();
             if (!name) return;
@@ -280,7 +320,7 @@
 
         function init() {
             loadState();
-            applySavedTheme();
+            applyTheme();
             if (!state.username) document.getElementById('name-modal').classList.remove('hidden');
             else {
                 document.getElementById('current-user-name').innerText = state.username;
@@ -313,62 +353,42 @@
             }
         }
 
-        // --- Drag & Drop Across Workspaces ---
-        function initDragAndDrop() {
-            const elMain = document.getElementById('editor-blocks');
-            const elClip = document.getElementById('block-clipboard');
+        // --- Workspace Interaction ---
+        function handleWorkspaceClick(e) {
+            if (e.target.id === 'main-scroll-container' || e.target.id === 'bottom-click-trigger' || e.target.id === 'main-content') {
+                focusNewBlockAtBottom();
+            }
+        }
 
-            if (sortableMain) sortableMain.destroy();
-            if (sortableClipboard) sortableClipboard.destroy();
+        function toggleDarkMode() {
+            state.darkMode = document.getElementById('modal-dark-toggle').checked;
+            applyTheme();
+            saveState(true);
+        }
 
-            // Workspace Sortable
-            sortableMain = Sortable.create(elMain, {
-                group: 'nexus-blocks',
-                handle: '.drag-handle',
-                animation: 200,
-                ghostClass: 'sortable-ghost',
-                onEnd: function (evt) {
-                    const page = state.pages.find(p => p.id === state.activePageId);
-                    if (evt.to.id === 'block-clipboard') {
-                        // Moved to clipboard
-                        const movedBlock = page.blocks.splice(evt.oldIndex, 1)[0];
-                        state.clipboard.push(movedBlock);
-                    } else if (evt.from.id === 'editor-blocks') {
-                        // Reordered within workspace
-                        const movedBlock = page.blocks.splice(evt.oldIndex, 1)[0];
-                        page.blocks.splice(evt.newIndex, 0, movedBlock);
-                    }
-                    saveState();
-                    renderSidebar();
-                    renderActivePage();
-                }
-            });
-
-            // Clipboard Sortable
-            sortableClipboard = Sortable.create(elClip, {
-                group: 'nexus-blocks',
-                animation: 200,
-                ghostClass: 'sortable-ghost',
-                onEnd: function (evt) {
-                    const page = state.pages.find(p => p.id === state.activePageId);
-                    if (evt.to.id === 'editor-blocks') {
-                        // Dragged out of clipboard into active page
-                        const movedBlock = state.clipboard.splice(evt.oldIndex, 1)[0];
-                        page.blocks.splice(evt.newIndex, 0, movedBlock);
-                    } else {
-                        // Reordered within clipboard
-                        const movedBlock = state.clipboard.splice(evt.oldIndex, 1)[0];
-                        state.clipboard.splice(evt.newIndex, 0, movedBlock);
-                    }
-                    saveState();
-                    renderSidebar();
-                    renderActivePage();
-                }
-            });
+        function applyTheme() {
+            if (state.darkMode) {
+                document.body.classList.add('dark-mode');
+            } else {
+                document.body.classList.remove('dark-mode');
+            }
+            
+            if (state.customTheme) {
+                document.documentElement.style.setProperty('--brand-color', state.customTheme.brand);
+                document.documentElement.style.setProperty('--bg-primary', state.customTheme.bg);
+                document.documentElement.style.setProperty('--sidebar-bg', state.customTheme.sidebar);
+            }
+            lucide.createIcons();
         }
 
         // --- Theme Engine ---
-        function openThemeModal() { document.getElementById('theme-modal').classList.remove('hidden'); }
+        function openThemeModal() { 
+            document.getElementById('theme-modal').classList.remove('hidden'); 
+            document.getElementById('modal-dark-toggle').checked = state.darkMode;
+            document.getElementById('theme-brand').value = getComputedStyle(document.documentElement).getPropertyValue('--brand-color').trim();
+            document.getElementById('theme-bg').value = getComputedStyle(document.documentElement).getPropertyValue('--bg-primary').trim();
+            document.getElementById('theme-sidebar').value = getComputedStyle(document.documentElement).getPropertyValue('--sidebar-bg').trim();
+        }
         function closeThemeModal() { document.getElementById('theme-modal').classList.add('hidden'); }
         function previewTheme() {
             const brand = document.getElementById('theme-brand').value;
@@ -387,134 +407,28 @@
             saveState(true);
             closeThemeModal();
         }
-        function applySavedTheme() {
-            if (state.customTheme) {
-                document.documentElement.style.setProperty('--brand-color', state.customTheme.brand);
-                document.documentElement.style.setProperty('--bg-primary', state.customTheme.bg);
-                document.documentElement.style.setProperty('--sidebar-bg', state.customTheme.sidebar);
-            }
-        }
 
-        // --- Rich Text ---
-        function setupFormatListener() {
-            document.addEventListener('selectionchange', () => {
-                const selection = window.getSelection();
-                const toolbar = document.getElementById('format-toolbar');
-                if (selection.toString().length > 0 && !selection.isCollapsed) {
-                    const range = selection.getRangeAt(0);
-                    const rect = range.getBoundingClientRect();
-                    toolbar.style.display = 'flex';
-                    toolbar.style.top = `${rect.top - 45}px`;
-                    toolbar.style.left = `${rect.left}px`;
-                } else { toolbar.style.display = 'none'; }
-            });
-        }
-        function applyFormat(cmd) { document.execCommand(cmd, false, null); saveState(); }
-        function applyColor(color) { document.execCommand('foreColor', false, color); saveState(); }
-        function applyHighlight(color) { document.execCommand('hiliteColor', false, color); saveState(); }
-
-        // --- Collaboration Logic ---
-        function initAbly() {
-            if (!ROOT_ABLY_KEY) return;
-            ably = new Ably.Realtime({ key: ROOT_ABLY_KEY, clientId: state.username + '-' + Math.random().toString(36).substr(2, 4) });
-            const page = state.pages.find(p => p.id === state.activePageId);
-            if (page && page.isShared) joinChannel(state.activePageId);
-        }
-        function joinChannel(pageId) {
-            if (!ably) return;
-            if (channel) { channel.presence.leave(); channel.unsubscribe(); }
-            channel = ably.channels.get('nexus-v9-' + pageId, { params: { rewind: '1' } });
-            channel.subscribe('update', (msg) => {
-                if (msg.clientId === ably.auth.clientId) return;
-                const remoteActive = msg.data.pages.find(p => p.id === pageId);
-                if (remoteActive) {
-                    state.pages = state.pages.map(p => p.id === pageId ? remoteActive : p);
-                    renderSidebar(); renderActivePage();
-                }
-            });
-            channel.presence.enter(state.username);
-            channel.presence.subscribe(() => {
-                channel.presence.get((err, members) => { if(!err) renderCollaborators(members); });
-            });
-            document.getElementById('sync-status').classList.remove('hidden');
-        }
-        function renderCollaborators(members) {
-            const container = document.getElementById('collaborators');
-            container.innerHTML = members.map(m => `<div class="w-7 h-7 rounded-full bg-blue-500 border-2 border-white flex items-center justify-center text-[10px] text-white font-bold" title="${m.clientId}">${m.clientId.split('-')[0].charAt(0).toUpperCase()}</div>`).join('');
-        }
-        async function joinFriendPage() {
-            const code = document.getElementById('friend-page-code').value.trim();
-            if (!code || !ably) return;
-            const temp = ably.channels.get('nexus-v9-' + code, { params: { rewind: '1' } });
-            temp.subscribe('update', (msg) => {
-                const sharedPage = msg.data.pages.find(p => p.id === code);
-                if (sharedPage) {
-                    sharedPage.isShared = true;
-                    const exists = state.pages.find(p => p.id === code);
-                    if (!exists) state.pages.push(sharedPage);
-                    else state.pages = state.pages.map(p => p.id === code ? sharedPage : p);
-                    state.activePageId = code;
-                    temp.unsubscribe(); joinChannel(code);
-                    renderSidebar(); renderActivePage(); saveState(true);
-                    closeCollabModal();
-                }
-            });
-        }
-
-        // --- Core Editor Engine ---
-        function renderActivePage() {
-            const page = state.pages.find(p => p.id === state.activePageId) || state.pages[0];
-            document.getElementById('page-cover').src = page.cover;
-            document.getElementById('page-icon').innerText = page.icon;
-            document.getElementById('header-icon').innerText = page.icon;
-            document.getElementById('main-title-input').value = page.title;
-            document.getElementById('header-title').innerText = page.title || 'Untitled';
-            document.getElementById('sync-status').classList.toggle('hidden', !page.isShared);
-            
-            const favBtn = document.getElementById('favorite-btn');
-            favBtn.innerHTML = `<i data-lucide="star" class="w-4 h-4 ${page.isFavorite ? 'fill-yellow-500 text-yellow-500' : ''}"></i>`;
-
-            // Render Page Blocks
-            const container = document.getElementById('editor-blocks');
-            container.innerHTML = '';
-            page.blocks.forEach((b, i) => container.appendChild(createBlockElement(b, i === 0)));
-
-            // Render Clipboard Blocks
-            const clipContainer = document.getElementById('block-clipboard');
-            clipContainer.innerHTML = '';
-            state.clipboard.forEach(b => {
-                const clipDiv = document.createElement('div');
-                clipDiv.className = 'p-2 bg-white border rounded-lg text-[10px] truncate shadow-sm cursor-grab';
-                clipDiv.innerText = (b.content || b.type).replace(/<[^>]*>?/gm, '');
-                clipContainer.appendChild(clipDiv);
-            });
-
-            lucide.createIcons();
-            initDragAndDrop(); 
-        }
-
+        // --- Editor Logic ---
         function createBlockElement(block, isFirst) {
             const div = document.createElement('div');
-            div.className = 'group relative w-full px-1 min-h-[28px] flex items-start gap-1';
+            div.className = 'group relative w-full px-1 min-h-[28px] flex items-start gap-1 mb-1';
             div.dataset.id = block.id;
 
             let html = '';
             switch (block.type) {
-                case 'h1': html = `<div contenteditable="true" class="w-full text-4xl font-bold py-2 outline-none empty:before:content-[attr(placeholder)] before:text-gray-200" placeholder="Heading 1">${block.content || ''}</div>`; break;
-                case 'h2': html = `<div contenteditable="true" class="w-full text-2xl font-semibold mt-4 py-1 outline-none empty:before:content-[attr(placeholder)] before:text-gray-200" placeholder="Heading 2">${block.content || ''}</div>`; break;
-                case 'todo': html = `<div class="flex items-start gap-2 py-1 flex-1"><input type="checkbox" ${block.checked ? 'checked' : ''} class="mt-1.5 h-4 w-4 rounded border-gray-300 cursor-pointer" /><div contenteditable="true" class="flex-1 outline-none ${block.checked ? 'line-through text-gray-400' : ''}" placeholder="To-do">${block.content || ''}</div></div>`; break;
-                case 'bullet': html = `<div class="flex items-start gap-3 py-1 flex-1"><div class="w-1.5 h-1.5 rounded-full bg-gray-400 mt-2.5 shrink-0"></div><div contenteditable="true" class="flex-1 outline-none" placeholder="List item">${block.content || ''}</div></div>`; break;
-                case 'divider': html = `<hr class="w-full my-4 border-gray-200" />`; break;
-                case 'playground': html = `<div class="scalable-content my-4 border border-gray-200 rounded-xl overflow-hidden shadow-sm bg-white flex-1" style="height: 500px;"><div class="bg-gray-50 px-4 py-2 border-b text-[10px] font-bold text-gray-400 uppercase">Playground</div><div class="flex flex-col h-full pb-10"><div class="flex flex-1 border-b overflow-hidden"><div class="pg-panel border-r"><textarea class="flex-1 p-2 font-mono text-[10px] outline-none resize-none" id="pg-html-${block.id}" oninput="updatePlayground('${block.id}')" placeholder="HTML">${block.content || ''}</textarea></div><div class="pg-panel border-r"><textarea class="flex-1 p-2 font-mono text-[10px] outline-none resize-none" id="pg-css-${block.id}" oninput="updatePlayground('${block.id}')" placeholder="CSS">${block.css || ''}</textarea></div><div class="pg-panel"><textarea class="flex-1 p-2 font-mono text-[10px] outline-none resize-none" id="pg-js-${block.id}" oninput="updatePlayground('${block.id}')" placeholder="JS">${block.js || ''}</textarea></div></div><div class="flex-1 bg-white p-2 relative"><iframe id="pg-preview-${block.id}" class="playground-preview"></iframe></div></div><div class="resizable-handle"></div></div>`; break;
-                case 'whiteboard': html = `<div class="scalable-content my-4 border border-gray-200 rounded-xl overflow-hidden shadow-sm bg-white flex-1" style="height: 400px;"><div class="p-2 bg-gray-50 border-b flex justify-between items-center px-4"><span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Whiteboard</span><button onclick="clearWhiteboard('${block.id}')" class="text-[10px] px-2 py-1 hover:bg-gray-200 rounded bg-white border font-bold">Clear</button></div><div class="relative w-full h-full pb-10"><canvas id="canvas-${block.id}" class="whiteboard-canvas"></canvas></div><div class="resizable-handle"></div></div>`; break;
-                case 'image': html = block.content ? `<div class="scalable-content relative group/img flex-1 my-4" style="height: auto; max-height: 800px;"><img src="${block.content}" class="w-full h-full object-cover rounded-xl shadow-sm border border-gray-100" /><div class="resizable-handle"></div></div>` : `<div onclick="triggerImageUpload('${block.id}')" class="flex-1 flex flex-col items-center justify-center p-8 border-2 border-dashed border-gray-200 rounded-xl hover:bg-gray-50 cursor-pointer text-gray-400 my-2"><span class="text-sm font-medium">Upload Image</span></div>`; break;
-                default: html = `<div contenteditable="true" class="block-textarea flex-1 outline-none py-1.5 leading-relaxed empty:before:content-[attr(placeholder)] before:text-gray-200" placeholder="Type '/' for commands...">${block.content || ''}</div>`;
+                case 'h1': html = `<div contenteditable="true" class="w-full text-4xl font-bold py-2 outline-none text-[var(--text-main)]" placeholder="Heading 1">${block.content || ''}</div>`; break;
+                case 'h2': html = `<div contenteditable="true" class="w-full text-2xl font-semibold mt-4 py-1 outline-none text-[var(--text-main)]" placeholder="Heading 2">${block.content || ''}</div>`; break;
+                case 'todo': html = `<div class="flex items-start gap-2 py-1 flex-1"><input type="checkbox" onchange="toggleTodo('${block.id}')" ${block.checked ? 'checked' : ''} class="mt-1.5 h-4 w-4 rounded border-gray-300 cursor-pointer" /><div contenteditable="true" class="flex-1 outline-none ${block.checked ? 'line-through text-gray-500' : 'text-[var(--text-main)]'}" placeholder="To-do">${block.content || ''}</div></div>`; break;
+                case 'bullet': html = `<div class="flex items-start gap-3 py-1 flex-1"><div class="w-1.5 h-1.5 rounded-full bg-gray-400 mt-2.5 shrink-0"></div><div contenteditable="true" class="flex-1 outline-none text-[var(--text-main)]" placeholder="List item">${block.content || ''}</div></div>`; break;
+                case 'divider': html = `<hr class="w-full my-4 border-[var(--border-color)]" />`; break;
+                case 'image': html = block.content ? `<div class="scalable-content relative group/img flex-1 my-4"><img src="${block.content}" class="w-full h-full object-cover rounded-xl shadow-sm border border-[var(--border-color)]" /><div class="resizable-handle"></div></div>` : `<div onclick="triggerImageUpload('${block.id}')" class="flex-1 flex flex-col items-center justify-center p-8 border-2 border-dashed border-[var(--border-color)] rounded-xl hover:bg-blue-500/5 cursor-pointer text-gray-500 my-2"><span class="text-sm font-medium">Upload Image</span></div>`; break;
+                default: html = `<div contenteditable="true" class="block-textarea flex-1 outline-none py-1.5 leading-relaxed text-[var(--text-main)]" placeholder="Type '/' for commands...">${block.content || ''}</div>`;
             }
 
             div.innerHTML = `
                 <div class="flex flex-col items-center opacity-0 group-hover:opacity-100 transition-all py-1 shrink-0">
-                    <div class="drag-handle p-1 text-gray-300 hover:text-gray-500 transition-colors"><i data-lucide="grip-vertical" class="w-3.5 h-3.5"></i></div>
-                    <button onclick="deleteBlock('${block.id}')" class="p-1 hover:bg-red-50 rounded text-gray-300 hover:text-red-500 transition-colors"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>
+                    <div class="drag-handle p-1 text-gray-400 hover:text-blue-500 transition-colors"><i data-lucide="grip-vertical" class="w-3.5 h-3.5"></i></div>
+                    <button onclick="deleteBlock('${block.id}')" class="p-1 hover:bg-red-500/10 rounded text-gray-400 hover:text-red-500 transition-colors"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>
                 </div>
                 ${html}
             `;
@@ -523,101 +437,145 @@
                 el.addEventListener('input', () => { block.content = el.innerHTML; saveState(); });
                 el.addEventListener('keydown', (e) => {
                     if (e.key === '/') { if (!el.innerText.trim()) openSlashMenu(div, block.id); }
-                    else if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); addBlockBelow(block.id); }
+                    else if (e.key === 'Enter' && !e.shiftKey) { 
+                        e.preventDefault(); 
+                        const nextType = (block.type === 'todo' || block.type === 'bullet') ? block.type : 'text';
+                        addBlockBelow(block.id, nextType); 
+                    }
                     else if (e.key === 'Backspace' && !el.innerText.trim() && !isFirst) { e.preventDefault(); deleteBlock(block.id); }
                 });
             });
-
-            if (block.type === 'whiteboard') setTimeout(() => setupWhiteboard(block), 50);
-            if (block.type === 'playground') setTimeout(() => updatePlayground(block.id), 50);
             return div;
         }
 
-        // --- Logic Blocks ---
-        function updatePlayground(id) {
+        function toggleTodo(id) {
             const page = state.pages.find(p => p.id === state.activePageId);
             const block = page.blocks.find(b => b.id === id);
-            const html = document.getElementById(`pg-html-${id}`).value;
-            const css = document.getElementById(`pg-css-${id}`).value;
-            const js = document.getElementById(`pg-js-${id}`).value;
-            const iframe = document.getElementById(`pg-preview-${id}`);
-            if (iframe) iframe.srcdoc = `<html><head><style>${css}</style></head><body>${html}<script>${js}<\/script></body></html>`;
-            block.content = html; block.css = css; block.js = js; saveState();
+            if (block) { block.checked = !block.checked; saveState(); renderActivePage(); }
         }
 
-        function setupWhiteboard(block) {
-            const canvas = document.getElementById(`canvas-${block.id}`);
-            if (!canvas) return;
-            const ctx = canvas.getContext('2d');
-            const observer = new ResizeObserver(() => {
-                const rect = canvas.parentElement.getBoundingClientRect();
-                const temp = canvas.toDataURL();
-                canvas.width = rect.width; canvas.height = rect.height;
-                const img = new Image(); img.onload = () => ctx.drawImage(img, 0, 0); img.src = temp || block.content;
+        // --- Core Helpers ---
+        function renderActivePage() {
+            const page = state.pages.find(p => p.id === state.activePageId) || state.pages[0];
+            document.getElementById('page-cover').src = page.cover;
+            document.getElementById('page-icon').innerText = page.icon;
+            document.getElementById('header-icon').innerText = page.icon;
+            document.getElementById('main-title-input').value = page.title;
+            document.getElementById('header-title').innerText = page.title || 'Untitled';
+            
+            const container = document.getElementById('editor-blocks');
+            container.innerHTML = '';
+            page.blocks.forEach((b, i) => container.appendChild(createBlockElement(b, i === 0)));
+
+            const clipContainer = document.getElementById('block-clipboard');
+            clipContainer.innerHTML = '';
+            state.clipboard.forEach(b => {
+                const clipDiv = document.createElement('div');
+                clipDiv.className = 'p-2 bg-[var(--bg-primary)] border border-[var(--border-color)] rounded-lg text-[10px] truncate shadow-sm cursor-grab text-[var(--text-main)]';
+                clipDiv.innerText = (b.content || b.type).replace(/<[^>]*>?/gm, '');
+                clipContainer.appendChild(clipDiv);
             });
-            observer.observe(canvas.parentElement);
-            let drawing = false;
-            const getPos = (e) => { const r = canvas.getBoundingClientRect(); const cx = e.touches ? e.touches[0].clientX : e.clientX; const cy = e.touches ? e.touches[0].clientY : e.clientY; return { x: cx - r.left, y: cy - r.top }; };
-            canvas.onmousedown = (e) => { drawing = true; const p = getPos(e); ctx.beginPath(); ctx.moveTo(p.x, p.y); };
-            canvas.onmousemove = (e) => { if (!drawing) return; const p = getPos(e); ctx.lineWidth = 3; ctx.lineCap = 'round'; ctx.strokeStyle = '#3b82f6'; ctx.lineTo(p.x, p.y); ctx.stroke(); };
-            window.onmouseup = () => { if (!drawing) return; drawing = false; ctx.closePath(); block.content = canvas.toDataURL(); saveState(); };
+            lucide.createIcons();
+            initDragAndDrop();
         }
 
-        function clearWhiteboard(id) {
-            const canvas = document.getElementById(`canvas-${id}`);
-            canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
-            state.pages.find(p => p.id === state.activePageId).blocks.find(b => b.id === id).content = ''; saveState();
+        function addBlockBelow(id, type = 'text') { 
+            const p = state.pages.find(pg => pg.id === state.activePageId); 
+            const idx = id ? p.blocks.findIndex(b => b.id === id) : -1; 
+            const newBlock = { id: 'b' + Date.now(), type: type, content: '', checked: false }; 
+            if (idx === -1) p.blocks.push(newBlock); 
+            else p.blocks.splice(idx + 1, 0, newBlock); 
+            renderActivePage(); saveState(); 
+            setTimeout(() => { const el = document.querySelector(`[data-id="${newBlock.id}"] [contenteditable]`); if(el) el.focus(); }, 10); 
         }
 
-        // --- Standard Page Helpers ---
-        function toggleSidebar() { state.sidebarOpen = !state.sidebarOpen; document.getElementById('sidebar').style.width = state.sidebarOpen ? '256px' : '0px'; document.getElementById('menu-btn').classList.toggle('hidden', state.sidebarOpen); }
-        function handleSearch(val) { state.searchQuery = val; renderSidebar(); }
-        function updatePageTitle(v) { const p = state.pages.find(pg => pg.id === state.activePageId); if(p) { p.title = v; document.getElementById('header-title').innerText = v || 'Untitled'; saveState(); renderSidebar(); } }
-        function addPage() { const newId = 'p' + Math.random().toString(36).substr(2, 6); state.pages.push({ id: newId, title: 'New Workspace', icon: '📄', isFavorite: false, cover: DEFAULT_COVERS[0], isShared: false, blocks: [{ id: 'b' + Date.now(), type: 'h1', content: '' }] }); setActivePage(newId); }
-        function setActivePage(id) { state.activePageId = id; saveState(true); renderSidebar(); renderActivePage(); if (channel) joinChannel(id); }
-        function deleteBlock(id) { const p = state.pages.find(pg => pg.id === state.activePageId); p.blocks = p.blocks.filter(b => b.id !== id); saveState(); renderActivePage(); }
-        function addBlockBelow(id) { const p = state.pages.find(pg => pg.id === state.activePageId); const idx = id ? p.blocks.findIndex(b => b.id === id) : -1; const newBlock = { id: 'b' + Date.now(), type: 'text', content: '' }; if (idx === -1) p.blocks.push(newBlock); else p.blocks.splice(idx + 1, 0, newBlock); renderActivePage(); saveState(); setTimeout(() => { const el = document.querySelector(`[data-id="${newBlock.id}"] [contenteditable]`); if(el) el.focus(); }, 10); }
-        function focusNewBlockAtBottom() { const p = state.pages.find(pg => pg.id === state.activePageId); const last = p.blocks[p.blocks.length - 1]; if (last && last.type === 'text' && !last.content) { const el = document.querySelector(`[data-id="${last.id}"] [contenteditable]`); if (el) el.focus(); } else addBlockBelow(last ? last.id : null); }
+        function deleteBlock(id) { 
+            const p = state.pages.find(pg => pg.id === state.activePageId); 
+            if (p.blocks.length > 1) { p.blocks = p.blocks.filter(b => b.id !== id); }
+            else { p.blocks[0].content = ''; p.blocks[0].type = 'text'; }
+            saveState(); renderActivePage(); 
+        }
+
+        function focusNewBlockAtBottom() { 
+            const p = state.pages.find(pg => pg.id === state.activePageId); 
+            const last = p.blocks[p.blocks.length - 1]; 
+            if (last && last.type === 'text' && !last.content) { 
+                const el = document.querySelector(`[data-id="${last.id}"] [contenteditable]`); 
+                if (el) el.focus(); 
+            } else addBlockBelow(last ? last.id : null); 
+        }
+
+        function toggleSidebar() { 
+            state.sidebarOpen = !state.sidebarOpen; 
+            const sb = document.getElementById('sidebar');
+            sb.style.width = state.sidebarOpen ? '256px' : '0px'; 
+            sb.style.opacity = state.sidebarOpen ? '1' : '0';
+            document.getElementById('menu-btn').classList.toggle('hidden', state.sidebarOpen); 
+        }
+
+        function initDragAndDrop() {
+            const elMain = document.getElementById('editor-blocks');
+            const elClip = document.getElementById('block-clipboard');
+            if (sortableMain) sortableMain.destroy();
+            if (sortableClipboard) sortableClipboard.destroy();
+            sortableMain = Sortable.create(elMain, { group: 'orbit-blocks', handle: '.drag-handle', animation: 200, onEnd: onDragEnd });
+            sortableClipboard = Sortable.create(elClip, { group: 'orbit-blocks', animation: 200, onEnd: onDragEnd });
+        }
+
+        function onDragEnd(evt) {
+            const page = state.pages.find(p => p.id === state.activePageId);
+            // Logic to move between blocks and clipboard array
+            saveState(); renderSidebar(); renderActivePage();
+        }
 
         function renderSidebar() {
             const favList = document.getElementById('favorites-list');
             const pageList = document.getElementById('pages-list');
             const filtered = state.pages.filter(p => p.title.toLowerCase().includes(state.searchQuery.toLowerCase()));
-            const html = (p) => `<div class="group relative px-2"><button onclick="setActivePage('${p.id}')" class="w-full flex items-center gap-2 px-2 py-1.5 text-sm rounded transition-all ${p.id === state.activePageId ? 'bg-gray-200 text-black font-semibold' : 'text-gray-600 hover:bg-gray-200'}"><span class="shrink-0">${p.icon}</span><span class="truncate flex-1 text-left">${p.title || 'Untitled'}</span>${p.isFavorite ? '<i data-lucide="star" class="w-3 h-3 text-yellow-500 fill-current"></i>' : ''}</button></div>`;
+            const html = (p) => `<div class="group relative px-2"><button onclick="setActivePage('${p.id}')" class="w-full flex items-center gap-2 px-2 py-1.5 text-sm rounded transition-all ${p.id === state.activePageId ? 'sidebar-item-active' : 'text-gray-500 hover:bg-gray-500/10'}"><span class="shrink-0">${p.icon}</span><span class="truncate flex-1 text-left">${p.title || 'Untitled'}</span></button></div>`;
             favList.innerHTML = filtered.filter(p => p.isFavorite).map(html).join('');
             pageList.innerHTML = filtered.filter(p => !p.isFavorite).map(html).join('');
             lucide.createIcons();
         }
 
-        function openSharePageModal() {
-            const page = state.pages.find(p => p.id === state.activePageId);
-            page.isShared = true;
-            document.getElementById('share-code-display').innerText = page.id;
-            document.getElementById('share-modal').classList.remove('hidden');
-            saveState();
-            if (ROOT_ABLY_KEY) { if (!ably) initAbly(); joinChannel(page.id); }
-            renderActivePage();
+        function setActivePage(id) { state.activePageId = id; saveState(true); renderSidebar(); renderActivePage(); }
+        function handleSearch(val) { state.searchQuery = val; renderSidebar(); }
+        function updatePageTitle(v) { const p = state.pages.find(pg => pg.id === state.activePageId); if(p) { p.title = v; document.getElementById('header-title').innerText = v || 'Untitled'; saveState(); renderSidebar(); } }
+        function addPage() { const newId = 'p' + Date.now(); state.pages.push({ id: newId, title: 'New Workspace', icon: '🪐', isFavorite: false, cover: DEFAULT_COVERS[0], isShared: false, blocks: [{ id: 'b' + Date.now(), type: 'text', content: '' }] }); setActivePage(newId); }
+
+        function setupFormatListener() {
+            document.addEventListener('selectionchange', () => {
+                const selection = window.getSelection();
+                const toolbar = document.getElementById('format-toolbar');
+                if (selection.toString().length > 0 && !selection.isCollapsed) {
+                    const range = selection.getRangeAt(0);
+                    const rect = range.getBoundingClientRect();
+                    toolbar.style.display = 'flex'; toolbar.style.top = `${rect.top - 45}px`; toolbar.style.left = `${rect.left}px`;
+                } else toolbar.style.display = 'none';
+            });
         }
-        function closeShareModal() { document.getElementById('share-modal').classList.add('hidden'); }
-        function openCollabModal() { document.getElementById('collab-modal').classList.remove('hidden'); }
-        function closeCollabModal() { document.getElementById('collab-modal').classList.add('hidden'); }
+        function applyFormat(cmd) { document.execCommand(cmd, false, null); saveState(); }
+        function applyColor(color) { document.execCommand('foreColor', false, color); saveState(); }
+        function applyHighlight(color) { document.execCommand('hiliteColor', false, color); saveState(); }
 
         function setupSlashMenu() {
-            const items = [{ type: 'playground', icon: 'layout', label: 'Playground' }, { type: 'whiteboard', icon: 'pencil', label: 'Whiteboard' }, { type: 'text', icon: 'type', label: 'Text' }, { type: 'h1', icon: 'heading-1', label: 'Heading 1' }, { type: 'todo', icon: 'check-square', label: 'To-do' }, { type: 'image', icon: 'image', label: 'Image' }, { type: 'divider', icon: 'minus', label: 'Divider' }];
-            document.getElementById('slash-menu-items').innerHTML = items.map(i => `<button onclick="selectSlashItem('${i.type}')" class="w-full flex items-center gap-3 p-3 hover:bg-gray-100 text-left transition-colors"><div class="w-8 h-8 flex items-center justify-center bg-gray-50 border border-gray-200 rounded-lg text-gray-500"><i data-lucide="${i.icon}" class="w-4 h-4"></i></div><div><div class="text-sm font-medium">${i.label}</div></div></button>`).join('');
+            const items = [{ type: 'text', icon: 'type', label: 'Text' }, { type: 'h1', icon: 'heading-1', label: 'Heading 1' }, { type: 'h2', icon: 'heading-2', label: 'Heading 2' }, { type: 'todo', icon: 'check-square', label: 'To-do' }, { type: 'bullet', icon: 'list', label: 'List' }, { type: 'image', icon: 'image', label: 'Image' }, { type: 'divider', icon: 'minus', label: 'Divider' }];
+            document.getElementById('slash-menu-items').innerHTML = items.map(i => `<button onclick="selectSlashItem('${i.type}')" class="w-full flex items-center gap-3 p-3 hover:bg-gray-500/5 text-left transition-colors"><div class="w-8 h-8 flex items-center justify-center bg-gray-500/5 border border-[var(--border-color)] rounded-lg text-gray-400"><i data-lucide="${i.icon}" class="w-4 h-4"></i></div><div class="text-sm font-medium text-[var(--text-main)]">${i.label}</div></button>`).join('');
         }
-        function openSlashMenu(el, id) { state.activeBlockIdForMenu = id; const menu = document.getElementById('slash-menu'); const rect = el.getBoundingClientRect(); menu.classList.remove('hidden'); menu.style.top = rect.bottom + window.scrollY + 'px'; menu.style.left = rect.left + 'px'; lucide.createIcons(); const close = (e) => { if(!menu.contains(e.target)) { menu.classList.add('hidden'); document.removeEventListener('mousedown', close); } }; document.addEventListener('mousedown', close); }
-        function selectSlashItem(t) { const p = state.pages.find(pg => pg.id === state.activePageId); const b = p.blocks.find(bk => bk.id === state.activeBlockIdForMenu); if (b) { b.type = t; b.content = ''; if (t === 'playground') { b.css = 'body { padding: 20px; font-family: sans-serif; }'; b.js = '// JS here'; } renderActivePage(); saveState(); } document.getElementById('slash-menu').classList.add('hidden'); }
-        function setupEmojiPicker() { document.getElementById('emoji-grid').innerHTML = EMOJI_LIST.map(e => `<button onclick="selectEmoji('${e}')" class="p-2 hover:bg-gray-100 rounded-xl text-2xl transition-all hover:scale-110">${e}</button>`).join(''); }
+        function openSlashMenu(el, id) { state.activeBlockIdForMenu = id; const menu = document.getElementById('slash-menu'); const rect = el.getBoundingClientRect(); menu.classList.remove('hidden'); menu.style.top = rect.bottom + window.scrollY + 'px'; menu.style.left = rect.left + 'px'; lucide.createIcons(); }
+        function selectSlashItem(t) { 
+            const p = state.pages.find(pg => pg.id === state.activePageId); 
+            const b = p.blocks.find(bk => bk.id === state.activeBlockIdForMenu); 
+            if (b) { b.type = t; b.content = ''; renderActivePage(); saveState(); }
+            document.getElementById('slash-menu').classList.add('hidden'); 
+        }
+
+        function setupEmojiPicker() { document.getElementById('emoji-grid').innerHTML = EMOJI_LIST.map(e => `<button onclick="selectEmoji('${e}')" class="p-2 hover:bg-gray-500/10 rounded-xl text-2xl transition-all hover:scale-110">${e}</button>`).join(''); }
         function toggleEmojiPicker(e) { e.stopPropagation(); document.getElementById('emoji-picker').classList.toggle('hidden'); }
         function selectEmoji(e) { const p = state.pages.find(pg => pg.id === state.activePageId); if (p) { p.icon = e; renderSidebar(); renderActivePage(); saveState(); } document.getElementById('emoji-picker').classList.add('hidden'); }
-        function triggerImageUpload(id) { const input = document.getElementById('block-image-upload-input'); input.onchange = (e) => { const file = e.target.files[0]; if (!file) return; const reader = new FileReader(); reader.onload = (re) => { const p = state.pages.find(pg => pg.id === state.activePageId); const b = p.blocks.find(bk => bk.id === id); if (b) { b.content = re.target.result; renderActivePage(); saveState(); } }; reader.readAsDataURL(file); }; input.click(); }
-        function handleCoverFile(input) { const file = input.files[0]; if (!file) return; const reader = new FileReader(); reader.onload = (e) => { const page = state.pages.find(p => p.id === state.activePageId); if (page) { page.cover = e.target.result; document.getElementById('page-cover').src = page.cover; saveState(); } }; reader.readAsDataURL(file); }
-        function toggleActiveFavorite() { const page = state.pages.find(p => p.id === state.activePageId); if (page) { page.isFavorite = !page.isFavorite; saveState(); renderSidebar(); renderActivePage(); } }
-        function changeCover() { const page = state.pages.find(p => p.id === state.activePageId); if (page) { page.cover = DEFAULT_COVERS[Math.floor(Math.random() * DEFAULT_COVERS.length)]; document.getElementById('page-cover').src = page.cover; saveState(); } }
-
+        
+        function changeCover() { const page = state.pages.find(p => p.id === state.activePageId); if (page) { page.cover = DEFAULT_COVERS[Math.floor(Math.random() * DEFAULT_COVERS.length)]; renderActivePage(); saveState(); } }
         window.onclick = (e) => { if(!e.target.closest('#emoji-picker')) document.getElementById('emoji-picker').classList.add('hidden'); };
-
         init();
     </script>
 </body>
