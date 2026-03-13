@@ -57,6 +57,10 @@
         .flashcard.flipped .flashcard-inner { transform: rotateY(180deg); }
         .flashcard-front, .flashcard-back { position: absolute; width: 100%; height: 100%; -webkit-backface-visibility: hidden; backface-visibility: hidden; display: flex; align-items: center; justify-content: center; padding: 2rem; border-radius: 1rem; border: 1px solid #e5e7eb; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1); }
         .flashcard-back { transform: rotateY(180deg); background-color: #f3f4f6; }
+
+        /* Playground Panels */
+        .pg-panel { display: flex; flex-direction: column; flex: 1; min-height: 0; }
+        .pg-label { background: rgba(0,0,0,0.05); padding: 2px 8px; font-size: 9px; font-weight: bold; color: #666; text-transform: uppercase; border-bottom: 1px solid rgba(0,0,0,0.05); }
     </style>
 </head>
 <body class="overflow-hidden">
@@ -127,10 +131,10 @@
                 <div class="flex items-center gap-3">
                     <div id="collaborators" class="flex -space-x-2 overflow-hidden mr-2"></div>
                     <div id="sync-status" class="hidden flex items-center gap-1.5 text-[10px] text-green-600 font-bold uppercase tracking-wider">
-                        <div class="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></div> Live
+                        <div class="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></div> Live Sync
                     </div>
                     <button onclick="toggleActiveFavorite()" id="favorite-btn" class="p-1.5 rounded hover:bg-gray-100 transition-colors text-gray-400"><i data-lucide="star" class="w-4 h-4"></i></button>
-                    <button onclick="openSharePageModal()" class="text-xs font-semibold text-white bg-blue-600 hover:bg-blue-700 px-3 py-1.5 rounded-lg transition-all shadow-lg shadow-blue-200">Share</button>
+                    <button onclick="openSharePageModal()" class="text-xs font-semibold text-white bg-blue-600 hover:bg-blue-700 px-3 py-1.5 rounded-lg transition-all shadow-lg shadow-blue-200">Share Page</button>
                 </div>
             </div>
 
@@ -166,17 +170,17 @@
     <!-- Modals -->
     <div id="name-modal" class="hidden fixed inset-0 z-[200] bg-black/60 flex items-center justify-center backdrop-blur-md text-gray-900">
         <div class="bg-white w-96 rounded-3xl p-8 shadow-2xl">
-            <h3 class="text-xl font-bold mb-4">What's your name?</h3>
-            <p class="text-sm text-gray-500 mb-6 italic">Visible to friends when collaborating.</p>
-            <input id="initial-name" type="text" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none mb-4" placeholder="Enter name..." />
-            <button onclick="saveInitialName()" class="w-full py-3 bg-blue-600 rounded-xl text-sm font-bold text-white hover:bg-blue-700 transition-all">Get Started</button>
+            <h3 class="text-xl font-bold mb-4">Identity Setup</h3>
+            <p class="text-sm text-gray-500 mb-6 italic">This name will be visible to your friends when you edit pages together.</p>
+            <input id="initial-name" type="text" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none mb-4" placeholder="Enter your name..." />
+            <button onclick="saveInitialName()" class="w-full py-3 bg-blue-600 rounded-xl text-sm font-bold text-white hover:bg-blue-700 transition-all shadow-lg shadow-blue-600/30">Continue</button>
         </div>
     </div>
 
     <div id="share-modal" class="hidden fixed inset-0 z-[100] bg-black/40 flex items-center justify-center backdrop-blur-sm text-gray-900">
         <div class="bg-white w-96 rounded-3xl p-8 shadow-2xl">
             <h3 class="text-xl font-bold mb-2">Share this Page</h3>
-            <p class="text-sm text-gray-500 mb-6 leading-relaxed">Give this code to a friend to collaborate live.</p>
+            <p class="text-sm text-gray-500 mb-6 leading-relaxed">Friends can enter this code in their "Join Collaboration" menu to work with you.</p>
             <div class="bg-gray-100 p-4 rounded-2xl mb-6 text-center border border-gray-200">
                 <span id="share-code-display" class="font-mono text-lg font-bold tracking-widest text-blue-600 select-all"></span>
             </div>
@@ -209,12 +213,12 @@
         
         const DEFAULT_COVERS = ['https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&q=80&w=2000', 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&q=80&w=2000', 'https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?auto=format&fit=crop&q=80&w=2000'];
         const EMOJI_LIST = ['🚀', '🏗️', '📄', '💡', '🎨', '📅', '📝', '🛠️', '🌐', '📊', '💻', '⚡', '📦', '🔥', '📚', '🏠', '🎯', '✨', '🌍', '🍕'];
-        const STORAGE_KEY = 'nexus_workspace_v7';
+        const STORAGE_KEY = 'nexus_workspace_v8';
 
         let state = {
             username: '',
             darkMode: false,
-            pages: [{ id: '1', title: 'Welcome to Nexus', icon: '🚀', isFavorite: true, cover: DEFAULT_COVERS[0], isShared: false, blocks: [{ id: 'b1', type: 'h1', content: 'Study & Collaboration Pro' }, { id: 'b2', type: 'callout', content: 'Try typing / for commands. Fixed page switching!' }] }],
+            pages: [{ id: '1', title: 'Welcome to Nexus', icon: '🚀', isFavorite: true, cover: DEFAULT_COVERS[0], isShared: false, blocks: [{ id: 'b1', type: 'h1', content: 'Study & Collaboration Pro' }, { id: 'b2', type: 'callout', content: 'Try typing / for commands. Live bi-directional sync fixed!' }] }],
             activePageId: '1',
             sidebarOpen: true,
             searchQuery: ''
@@ -241,7 +245,8 @@
         function saveState(skipBroadcast = false) {
             localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
             const activePage = state.pages.find(p => p.id === state.activePageId);
-            if (!skipBroadcast && channel && activePage.isShared) {
+            // Bi-directional fix: Both host and joiner can publish if isShared is true locally
+            if (!skipBroadcast && channel && activePage && activePage.isShared) {
                 channel.publish('update', { pages: state.pages });
             }
         }
@@ -291,25 +296,38 @@
         function initAbly() {
             if (!ROOT_ABLY_KEY) return;
             try {
-                ably = new Ably.Realtime({ key: ROOT_ABLY_KEY, clientId: state.username + '-' + Math.random().toString(36).substr(2, 4) });
+                // Ensure unique clientId for this user session
+                ably = new Ably.Realtime({ 
+                    key: ROOT_ABLY_KEY, 
+                    clientId: state.username + '-' + Math.random().toString(36).substr(2, 4) 
+                });
                 const page = state.pages.find(p => p.id === state.activePageId);
                 if (page && page.isShared) joinChannel(state.activePageId);
-            } catch (e) { console.error(e); }
+            } catch (e) { console.error("Ably Init failed", e); }
         }
 
         function joinChannel(pageId) {
             if (!ably) return;
             if (channel) { channel.presence.leave(); channel.unsubscribe(); }
-            channel = ably.channels.get('nexus-v7-' + pageId, { params: { rewind: '1' } });
+            
+            // Connect to specific page channel
+            channel = ably.channels.get('nexus-v8-' + pageId, { params: { rewind: '1' } });
+            
             channel.subscribe('update', (msg) => {
+                // Ignore our own updates
                 if (msg.clientId === ably.auth.clientId) return;
+                
                 const remoteActive = msg.data.pages.find(p => p.id === pageId);
                 if (remoteActive) {
+                    // Update state and refresh
                     state.pages = state.pages.map(p => p.id === pageId ? remoteActive : p);
                     renderSidebar();
                     renderActivePage();
+                    // Save the synced data locally
+                    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
                 }
             });
+
             channel.presence.enter(state.username);
             channel.presence.subscribe(() => {
                 channel.presence.get((err, members) => { if(!err) renderCollaborators(members); });
@@ -319,25 +337,37 @@
 
         function renderCollaborators(members) {
             const container = document.getElementById('collaborators');
-            container.innerHTML = members.map(m => `<div class="w-7 h-7 rounded-full bg-blue-500 border-2 border-white flex items-center justify-center text-[10px] text-white font-bold" title="${m.clientId}">${m.clientId.split('-')[0].charAt(0).toUpperCase()}</div>`).join('');
+            container.innerHTML = members.map(m => `
+                <div class="w-7 h-7 rounded-full bg-blue-500 border-2 border-white flex items-center justify-center text-[10px] text-white font-bold" title="${m.clientId}">
+                    ${m.clientId.split('-')[0].charAt(0).toUpperCase()}
+                </div>
+            `).join('');
         }
 
         async function joinFriendPage() {
             const code = document.getElementById('friend-page-code').value.trim();
             const status = document.getElementById('join-status');
             if (!code || !ably) return;
-            status.classList.remove('hidden'); status.innerText = 'Connecting...';
-            const temp = ably.channels.get('nexus-v7-' + code, { params: { rewind: '1' } });
+            
+            status.classList.remove('hidden'); 
+            status.innerHTML = '<span class="text-blue-500 animate-pulse">Syncing session...</span>';
+            
+            const temp = ably.channels.get('nexus-v8-' + code, { params: { rewind: '1' } });
+            
+            // Wait for first message to pull host data
             temp.subscribe('update', (msg) => {
                 const sharedPage = msg.data.pages.find(p => p.id === code);
                 if (sharedPage) {
+                    sharedPage.isShared = true; // Set locally so we can broadcast too
                     const exists = state.pages.find(p => p.id === code);
                     if (!exists) state.pages.push(sharedPage);
                     else state.pages = state.pages.map(p => p.id === code ? sharedPage : p);
+                    
                     state.activePageId = code;
                     temp.unsubscribe();
                     joinChannel(code);
-                    renderSidebar(); renderActivePage(); closeCollabModal();
+                    renderSidebar(); renderActivePage(); saveState(true);
+                    closeCollabModal();
                 }
             });
         }
@@ -360,7 +390,7 @@
             container.innerHTML = '';
             page.blocks.forEach((b, i) => container.appendChild(createBlockElement(b, i === 0)));
             lucide.createIcons();
-            initDragAndDrop(); // Re-init sortable
+            initDragAndDrop(); 
         }
 
         function createBlockElement(block, isFirst) {
@@ -379,19 +409,42 @@
                         <div class="flashcard ${block.flipped ? 'flipped' : ''}" onclick="toggleFlashcard('${block.id}')">
                             <div class="flashcard-inner">
                                 <div class="flashcard-front bg-white text-gray-800">
-                                    <textarea onclick="event.stopPropagation()" class="bg-transparent border-none outline-none w-full text-center font-bold" placeholder="Front: Term or Question" oninput="updateBlockContent('${block.id}', this.value, 'content')">${block.content || ''}</textarea>
+                                    <textarea onclick="event.stopPropagation()" class="bg-transparent border-none outline-none w-full text-center font-bold" placeholder="Front" oninput="updateBlockContent('${block.id}', this.value, 'content')">${block.content || ''}</textarea>
                                 </div>
                                 <div class="flashcard-back text-gray-800">
-                                    <textarea onclick="event.stopPropagation()" class="bg-transparent border-none outline-none w-full text-center" placeholder="Back: Definition or Answer" oninput="updateBlockContent('${block.id}', this.value, 'result')">${block.result || ''}</textarea>
+                                    <textarea onclick="event.stopPropagation()" class="bg-transparent border-none outline-none w-full text-center" placeholder="Back" oninput="updateBlockContent('${block.id}', this.value, 'result')">${block.result || ''}</textarea>
                                 </div>
                             </div>
                         </div>
                     </div>`; break;
-                case 'ai': html = `<div class="my-4 border border-blue-100 rounded-2xl overflow-hidden shadow-sm bg-blue-50/20 flex-1"><div class="bg-blue-50 px-4 py-2 flex justify-between items-center border-b border-blue-100"><span class="text-[10px] font-bold text-blue-500 uppercase tracking-widest flex items-center gap-1"><i data-lucide="sparkles" class="w-3 h-3"></i> AI Assistant</span><button onclick="runAiPrompt('${block.id}')" class="text-xs font-bold text-blue-600 px-2 py-1 rounded">Generate</button></div><input class="w-full bg-white p-4 outline-none text-sm italic" placeholder="Summarize..." value="${block.content}" oninput="updateBlockContent('${block.id}', this.value)" /><div id="ai-result-${block.id}" class="p-4 text-sm text-gray-700 whitespace-pre-wrap">${block.result || 'Thinking...'}</div></div>`; break;
+                case 'ai': html = `<div class="my-4 border border-blue-100 rounded-2xl overflow-hidden shadow-sm bg-blue-50/20 flex-1"><div class="bg-blue-50 px-4 py-2 flex justify-between items-center border-b border-blue-100"><span class="text-[10px] font-bold text-blue-500 uppercase tracking-widest flex items-center gap-1"><i data-lucide="sparkles" class="w-3 h-3"></i> AI Assistant</span><button onclick="runAiPrompt('${block.id}')" class="text-xs font-bold text-blue-600 px-2 py-1 rounded hover:bg-blue-100">Generate</button></div><input class="w-full bg-white p-4 outline-none text-sm italic" placeholder="Summarize something..." value="${block.content}" oninput="updateBlockContent('${block.id}', this.value)" /><div id="ai-result-${block.id}" class="p-4 text-sm text-gray-700 whitespace-pre-wrap">${block.result || 'Awaiting prompt...'}</div></div>`; break;
                 case 'latex': html = `<div class="my-4 flex-1"><textarea class="w-full font-mono text-sm bg-gray-50 p-3 rounded-t-xl border border-gray-200 outline-none resize-none" oninput="updateLatex('${block.id}', this.value)" placeholder="Enter LaTeX...">${block.content}</textarea><div id="latex-preview-${block.id}" class="latex-rendered text-gray-800"></div></div>`; break;
-                case 'playground': html = `<div class="my-4 border border-gray-200 rounded-xl overflow-hidden shadow-sm bg-white flex-1"><div class="bg-gray-50 px-4 py-2 border-b text-[10px] font-bold text-gray-400 uppercase">Code Playground</div><div class="flex flex-col md:flex-row h-96"><div class="flex-1 flex flex-col border-r"><textarea class="flex-1 p-3 font-mono text-xs outline-none resize-none" id="pg-html-${block.id}" oninput="updatePlayground('${block.id}')" placeholder="HTML...">${block.content || ''}</textarea><textarea class="flex-1 p-3 font-mono text-xs border-t border-gray-100 outline-none resize-none" id="pg-css-${block.id}" oninput="updatePlayground('${block.id}')" placeholder="CSS...">${block.css || ''}</textarea></div><div class="flex-1 bg-white p-2"><iframe id="pg-preview-${block.id}" class="playground-preview"></iframe></div></div></div>`; break;
+                case 'playground': html = `
+                    <div class="my-4 border border-gray-200 rounded-xl overflow-hidden shadow-sm bg-white flex-1">
+                        <div class="bg-gray-50 px-4 py-2 border-b text-[10px] font-bold text-gray-400 uppercase">Interactive Playground (HTML/CSS/JS)</div>
+                        <div class="flex flex-col h-[500px]">
+                            <div class="flex flex-1 border-b">
+                                <div class="pg-panel border-r">
+                                    <div class="pg-label">HTML</div>
+                                    <textarea class="flex-1 p-3 font-mono text-xs outline-none resize-none" id="pg-html-${block.id}" oninput="updatePlayground('${block.id}')" placeholder="HTML...">${block.content || ''}</textarea>
+                                </div>
+                                <div class="pg-panel border-r">
+                                    <div class="pg-label">CSS</div>
+                                    <textarea class="flex-1 p-3 font-mono text-xs outline-none resize-none" id="pg-css-${block.id}" oninput="updatePlayground('${block.id}')" placeholder="CSS...">${block.css || ''}</textarea>
+                                </div>
+                                <div class="pg-panel">
+                                    <div class="pg-label">JavaScript</div>
+                                    <textarea class="flex-1 p-3 font-mono text-xs outline-none resize-none" id="pg-js-${block.id}" oninput="updatePlayground('${block.id}')" placeholder="JS...">${block.js || ''}</textarea>
+                                </div>
+                            </div>
+                            <div class="flex-1 bg-white p-2">
+                                <div class="pg-label mb-1">Live Preview</div>
+                                <iframe id="pg-preview-${block.id}" class="playground-preview"></iframe>
+                            </div>
+                        </div>
+                    </div>`; break;
                 case 'whiteboard': html = `<div class="my-4 border border-gray-200 rounded-xl overflow-hidden shadow-sm bg-white flex-1"><div class="p-2 bg-gray-50 border-b flex justify-between items-center px-4"><span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Whiteboard</span><button onclick="clearWhiteboard('${block.id}')" class="text-[10px] px-2 py-1 hover:bg-gray-200 rounded bg-white border font-bold">Clear</button></div><div class="relative w-full h-80"><canvas id="canvas-${block.id}" class="whiteboard-canvas w-full h-full"></canvas></div></div>`; break;
-                case 'image': html = block.content ? `<div class="relative group/img flex-1"><img src="${block.content}" class="w-full rounded-xl shadow-sm my-4 border border-gray-100" /></div>` : `<div onclick="triggerImageUpload('${block.id}')" class="flex-1 flex flex-col items-center justify-center p-8 border-2 border-dashed border-gray-200 rounded-xl hover:bg-gray-50 cursor-pointer text-gray-400 my-2"><span class="text-sm font-medium">Upload Image</span></div>`; break;
+                case 'image': html = block.content ? `<div class="relative group/img flex-1"><img src="${block.content}" class="w-full rounded-xl shadow-sm my-4 border border-gray-100" /></div>` : `<div onclick="triggerImageUpload('${block.id}')" class="flex-1 flex flex-col items-center justify-center p-8 border-2 border-dashed border-gray-200 rounded-xl hover:bg-gray-50 cursor-pointer text-gray-400 my-2 transition-all"><span class="text-sm font-medium">Click to Upload Image</span></div>`; break;
                 default: html = `<textarea rows="1" class="block-textarea flex-1 resize-none border-none outline-none bg-transparent placeholder-gray-300 py-1.5 leading-relaxed" placeholder="Type '/' for commands...">${block.content || ''}</textarea>`;
             }
 
@@ -417,6 +470,15 @@
                     else if (e.key === 'Enter' && !['ai', 'latex', 'playground', 'flashcard'].includes(block.type) && !e.shiftKey) { e.preventDefault(); addBlockBelow(block.id); }
                     else if (e.key === 'Backspace' && !block.content && !isFirst) { e.preventDefault(); deleteBlock(block.id); }
                 });
+
+                if (input.type === 'checkbox') {
+                    input.addEventListener('change', (e) => {
+                        block.checked = e.target.checked;
+                        const t = div.querySelector('input[type="text"], textarea');
+                        if (t) { t.classList.toggle('line-through', block.checked); t.classList.toggle('text-gray-400', block.checked); }
+                        saveState();
+                    });
+                }
             });
 
             if (block.type === 'whiteboard') setTimeout(() => setupWhiteboard(block), 50);
@@ -435,7 +497,7 @@
             try {
                 const response = await puter.ai.chat(block.content);
                 block.result = response; resEl.innerText = response; saveState();
-            } catch (err) { resEl.innerText = "Error: Check Puter Connection."; }
+            } catch (err) { resEl.innerText = "Error connecting to Puter AI."; }
         }
 
         function updatePlayground(id) {
@@ -443,9 +505,20 @@
             const block = page.blocks.find(b => b.id === id);
             const html = document.getElementById(`pg-html-${id}`).value;
             const css = document.getElementById(`pg-css-${id}`).value;
+            const js = document.getElementById(`pg-js-${id}`).value;
             const iframe = document.getElementById(`pg-preview-${id}`);
-            if (iframe) iframe.srcdoc = `<html><head><style>${css}</style></head><body>${html}</body></html>`;
-            block.content = html; block.css = css; saveState();
+            if (iframe) {
+                iframe.srcdoc = `
+                    <html>
+                        <head><style>${css}</style></head>
+                        <body>
+                            ${html}
+                            <script>${js}<\/script>
+                        </body>
+                    </html>
+                `;
+            }
+            block.content = html; block.css = css; block.js = js; saveState();
         }
 
         function toggleFlashcard(id) {
@@ -532,7 +605,9 @@
         function updateBlockContent(id, val, field = 'content') {
             const page = state.pages.find(p => p.id === state.activePageId);
             const block = page.blocks.find(b => b.id === id);
-            block[field] = val; saveState();
+            if (block) {
+                block[field] = val; saveState();
+            }
         }
 
         function updateLatex(id, val) {
@@ -542,7 +617,7 @@
             if (pre) katex.render(val, pre, { throwOnError: false, displayMode: true });
             saveState();
         }
-
+        
         function triggerImageUpload(id) {
             const input = document.getElementById('block-image-upload-input');
             input.onchange = (e) => {
@@ -566,8 +641,6 @@
             };
             reader.readAsDataURL(file);
         }
-
-        // --- UI Rendering ---
 
         function renderSidebar() {
             const favList = document.getElementById('favorites-list');
@@ -648,6 +721,7 @@
             if (b) {
                 b.type = t; b.content = (b.content || '').replace('/', '');
                 if (t === 'flashcard') { b.result = ''; b.flipped = false; }
+                if (t === 'playground') { b.css = 'body { padding: 20px; font-family: sans-serif; }'; b.js = '// Write JS here'; }
                 renderActivePage(); saveState();
                 setTimeout(() => { const el = document.querySelector(`[data-id="${b.id}"] textarea, [data-id="${b.id}"] input`); if(el) el.focus(); }, 20);
             }
@@ -657,6 +731,11 @@
         function setupEmojiPicker() { document.getElementById('emoji-grid').innerHTML = EMOJI_LIST.map(e => `<button onclick="selectEmoji('${e}')" class="p-2 hover:bg-gray-100 rounded-xl text-2xl transition-all hover:scale-110">${e}</button>`).join(''); }
         function toggleEmojiPicker(e) { e.stopPropagation(); document.getElementById('emoji-picker').classList.toggle('hidden'); }
         function selectEmoji(e) { const p = state.pages.find(pg => pg.id === state.activePageId); if (p) { p.icon = e; renderSidebar(); renderActivePage(); saveState(); } document.getElementById('emoji-picker').classList.add('hidden'); }
+
+        function changeCover() {
+            const page = state.pages.find(p => p.id === state.activePageId);
+            if (page) { page.cover = DEFAULT_COVERS[Math.floor(Math.random() * DEFAULT_COVERS.length)]; document.getElementById('page-cover').src = page.cover; saveState(); }
+        }
 
         window.onclick = (e) => { if(!e.target.closest('#emoji-picker')) document.getElementById('emoji-picker').classList.add('hidden'); };
 
