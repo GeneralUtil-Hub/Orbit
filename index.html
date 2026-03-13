@@ -1,4 +1,5 @@
 <DOCTYPE html>
+
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -88,9 +89,9 @@
 
             <!-- Top Header Bar -->
             <div class="h-11 border-b border-gray-50 flex items-center justify-between px-6 shrink-0 z-20 bg-white/80 backdrop-blur-md">
-                <div class="flex items-center gap-2 text-xs text-gray-500">
-                    <span id="header-icon">🚀</span>
-                    <span id="header-title" class="font-medium text-gray-700 truncate max-w-[200px]">Workspace</span>
+                <div class="flex items-center gap-2 text-sm">
+                    <span id="header-icon" class="mr-1">🚀</span>
+                    <span id="header-title" class="font-semibold text-gray-800 truncate max-w-[200px]">Workspace</span>
                 </div>
                 <div class="flex items-center gap-4">
                     <div id="collaborators" class="flex -space-x-2 overflow-hidden mr-2"></div>
@@ -98,7 +99,7 @@
                         <div class="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></div> Live Sync
                     </div>
                     <button onclick="toggleActiveFavorite()" id="favorite-btn" class="p-1.5 rounded hover:bg-gray-100 transition-colors"><i data-lucide="star" class="w-4 h-4"></i></button>
-                    <button onclick="openSharePageModal()" class="text-xs font-semibold text-gray-500 hover:bg-gray-100 px-3 py-1.5 rounded transition-all">Share Page</button>
+                    <button onclick="openSharePageModal()" class="text-xs font-semibold text-white bg-blue-600 hover:bg-blue-700 px-3 py-1.5 rounded-lg transition-all shadow-md shadow-blue-200">Share Page</button>
                 </div>
             </div>
 
@@ -157,9 +158,10 @@
             <h3 class="text-xl font-bold mb-2 flex items-center gap-2"><i data-lucide="share-2" class="text-orange-500"></i> Join Collaboration</h3>
             <p class="text-sm text-gray-500 mb-6 leading-relaxed">Ask your friend for their page's Share Code to join their session.</p>
             <input id="friend-page-code" type="text" placeholder="Enter code..." class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none mb-4" />
+            <div id="join-status" class="text-xs text-center mb-4 hidden"></div>
             <div class="flex gap-3">
                 <button onclick="closeCollabModal()" class="flex-1 px-4 py-3 bg-gray-100 rounded-xl text-sm font-semibold text-gray-600 hover:bg-gray-200 transition-colors">Cancel</button>
-                <button onclick="joinFriendPage()" class="flex-1 px-4 py-3 bg-orange-500 rounded-xl text-sm font-semibold text-white hover:bg-orange-600 shadow-lg shadow-orange-500/30 transition-all">Join Live</button>
+                <button id="join-btn" onclick="joinFriendPage()" class="flex-1 px-4 py-3 bg-orange-500 rounded-xl text-sm font-semibold text-white hover:bg-orange-600 shadow-lg shadow-orange-500/30 transition-all">Join Live</button>
             </div>
         </div>
     </div>
@@ -224,7 +226,8 @@
         }
 
         function saveInitialName() {
-            const name = document.getElementById('initial-name').value;
+            const nameInput = document.getElementById('initial-name');
+            const name = nameInput.value.trim();
             if (!name) return;
             state.username = name;
             document.getElementById('name-modal').classList.add('hidden');
@@ -251,22 +254,30 @@
 
         function initAbly() {
             if (!ROOT_ABLY_KEY) return;
-            ably = new Ably.Realtime({ key: ROOT_ABLY_KEY, clientId: state.username });
-            const page = state.pages.find(p => p.id === state.activePageId);
-            if (page.isShared) joinChannel(state.activePageId);
+            try {
+                ably = new Ably.Realtime({ key: ROOT_ABLY_KEY, clientId: state.username + '-' + Math.random().toString(36).substr(2, 4) });
+                const page = state.pages.find(p => p.id === state.activePageId);
+                if (page && page.isShared) joinChannel(state.activePageId);
+            } catch (e) {
+                console.error("Ably Init Error:", e);
+            }
         }
 
         function joinChannel(pageId) {
             if (!ably) return;
             if (channel) { channel.presence.leave(); channel.unsubscribe(); }
             
-            // Ably Option: 'rewind: 1' ensures late joiners see the latest version
             channel = ably.channels.get('nexus-v6-' + pageId, { params: { rewind: '1' } });
             channel.subscribe('update', (msg) => {
                 if (msg.clientId === ably.auth.clientId) return;
-                state.pages = msg.data.pages;
-                renderSidebar();
-                renderActivePage();
+                // Merge specifically for the shared page to prevent total workspace wipe
+                const remotePages = msg.data.pages;
+                const remoteActivePage = remotePages.find(p => p.id === pageId);
+                if (remoteActivePage) {
+                    state.pages = state.pages.map(p => p.id === pageId ? remoteActivePage : p);
+                    renderSidebar();
+                    renderActivePage();
+                }
             });
             channel.presence.enter(state.username);
             channel.presence.subscribe(() => {
@@ -279,7 +290,7 @@
             const container = document.getElementById('collaborators');
             container.innerHTML = members.map(m => `
                 <div class="w-7 h-7 rounded-full bg-blue-500 border-2 border-white flex items-center justify-center text-[10px] text-white font-bold" title="${m.clientId}">
-                    ${m.clientId.charAt(0).toUpperCase()}
+                    ${m.clientId.split('-')[0].charAt(0).toUpperCase()}
                 </div>
             `).join('');
         }
@@ -290,49 +301,75 @@
             document.getElementById('share-code-display').innerText = page.id;
             document.getElementById('share-modal').classList.remove('hidden');
             saveState();
-            if (ROOT_ABLY_KEY && !channel) joinChannel(page.id);
+            if (ROOT_ABLY_KEY) {
+                if (!ably) initAbly();
+                joinChannel(page.id);
+                // Force an immediate broadcast so joiners see it
+                setTimeout(() => channel.publish('update', { pages: state.pages }), 500);
+            }
             renderActivePage();
         }
 
         function closeShareModal() { document.getElementById('share-modal').classList.add('hidden'); }
-        function openCollabModal() { document.getElementById('collab-modal').classList.remove('hidden'); }
+        function openCollabModal() { 
+            document.getElementById('collab-modal').classList.remove('hidden'); 
+            document.getElementById('join-status').classList.add('hidden');
+        }
         function closeCollabModal() { document.getElementById('collab-modal').classList.add('hidden'); }
 
         async function joinFriendPage() {
-            const code = document.getElementById('friend-page-code').value;
-            if (!code || !ably) return;
-            // Temporary subscribe to get initial page state
+            const codeInput = document.getElementById('friend-page-code');
+            const status = document.getElementById('join-status');
+            const code = codeInput.value.trim();
+            
+            if (!code) return;
+            if (!ROOT_ABLY_KEY) {
+                alert("Please add a ROOT_ABLY_KEY in the script section first.");
+                return;
+            }
+            if (!ably) initAbly();
+
+            status.classList.remove('hidden');
+            status.innerHTML = '<span class="text-blue-500 animate-pulse font-bold">Connecting...</span>';
+
+            // We subscribe to the friend's channel to get their page data
             const temp = ably.channels.get('nexus-v6-' + code, { params: { rewind: '1' } });
+            
+            let received = false;
+            const timeout = setTimeout(() => {
+                if (!received) {
+                    status.innerHTML = '<span class="text-red-500 font-bold">Error: Page not found or offline.</span>';
+                    temp.unsubscribe();
+                }
+            }, 5000);
+
             temp.subscribe('update', (msg) => {
-                state.pages = msg.data.pages;
-                state.activePageId = code;
-                temp.unsubscribe();
-                joinChannel(code);
-                renderSidebar();
-                renderActivePage();
-                closeCollabModal();
+                received = true;
+                clearTimeout(timeout);
+                
+                const sharedPage = msg.data.pages.find(p => p.id === code);
+                if (sharedPage) {
+                    // Add to local pages if not exists
+                    const exists = state.pages.find(p => p.id === code);
+                    if (!exists) {
+                        state.pages.push(sharedPage);
+                    } else {
+                        state.pages = state.pages.map(p => p.id === code ? sharedPage : p);
+                    }
+                    
+                    state.activePageId = code;
+                    temp.unsubscribe();
+                    joinChannel(code);
+                    renderSidebar();
+                    renderActivePage();
+                    closeCollabModal();
+                } else {
+                    status.innerHTML = '<span class="text-red-500 font-bold">Error: Invalid share code.</span>';
+                }
             });
         }
 
         // --- Core Editor Engine ---
-
-        function renderActivePage() {
-            const page = state.pages.find(p => p.id === state.activePageId) || state.pages[0];
-            document.getElementById('page-cover').src = page.cover;
-            document.getElementById('page-icon').innerText = page.icon;
-            document.getElementById('header-icon').innerText = page.icon;
-            document.getElementById('main-title-input').value = page.title;
-            document.getElementById('header-title').innerText = page.title || 'Untitled';
-            document.getElementById('sync-status').classList.toggle('hidden', !page.isShared);
-            
-            const favBtn = document.getElementById('favorite-btn');
-            favBtn.innerHTML = `<i data-lucide="star" class="w-4 h-4 ${page.isFavorite ? 'fill-yellow-500 text-yellow-500' : ''}"></i>`;
-
-            const container = document.getElementById('editor-blocks');
-            container.innerHTML = '';
-            page.blocks.forEach((b, i) => container.appendChild(createBlockElement(b, i === 0)));
-            lucide.createIcons();
-        }
 
         function createBlockElement(block, isFirst) {
             const div = document.createElement('div');
@@ -363,7 +400,6 @@
                 ${html}
             `;
 
-            // Setup Events
             div.querySelectorAll('input, textarea').forEach(input => {
                 if (input.tagName === 'TEXTAREA') {
                     const adjust = () => { input.style.height = 'auto'; input.style.height = input.scrollHeight + 'px'; };
@@ -395,7 +431,7 @@
             return div;
         }
 
-        // --- Logic: AI, Playground, & Whiteboard ---
+        // --- Logic Blocks ---
 
         async function runAiPrompt(id) {
             const page = state.pages.find(p => p.id === state.activePageId);
@@ -413,7 +449,8 @@
             const block = page.blocks.find(b => b.id === id);
             const html = document.getElementById(`pg-html-${id}`).value;
             const css = document.getElementById(`pg-css-${id}`).value;
-            document.getElementById(`pg-preview-${id}`).srcdoc = `<html><head><style>${css}</style></head><body>${html}</body></html>`;
+            const iframe = document.getElementById(`pg-preview-${id}`);
+            if (iframe) iframe.srcdoc = `<html><head><style>${css}</style></head><body>${html}</body></html>`;
             block.content = html; block.css = css; saveState();
         }
 
@@ -444,7 +481,7 @@
             block.content = ''; saveState();
         }
 
-        // --- Helpers ---
+        // --- Standard Page Helpers ---
 
         function toggleSidebar() { state.sidebarOpen = !state.sidebarOpen; document.getElementById('sidebar').style.width = state.sidebarOpen ? '256px' : '0px'; document.getElementById('menu-btn').classList.toggle('hidden', state.sidebarOpen); }
         function handleSearch(val) { state.searchQuery = val; renderSidebar(); }
@@ -482,8 +519,6 @@
             reader.readAsDataURL(file);
         }
 
-        // --- Sidebar & Search ---
-
         function renderSidebar() {
             const favList = document.getElementById('favorites-list');
             const pageList = document.getElementById('pages-list');
@@ -512,8 +547,6 @@
             const page = state.pages.find(p => p.id === state.activePageId);
             if (page) { page.isFavorite = !page.isFavorite; saveState(); renderSidebar(); renderActivePage(); }
         }
-
-        // --- Slash Menu & Pickers ---
 
         function setupSlashMenu() {
             const items = [
