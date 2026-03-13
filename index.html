@@ -12,18 +12,13 @@
     <script src="https://cdn.ably.com/lib/ably.min-1.js"></script>
     
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Roboto+Mono&family=Playfair+Display:wght@700&family=Lora&display=swap');
         
         :root {
             --bg-primary: #ffffff;
             --sidebar-bg: #fbfbfa;
             --text-main: #111827;
-        }
-
-        .dark-mode {
-            --bg-primary: #191919;
-            --sidebar-bg: #202020;
-            --text-main: #e5e7eb;
+            --brand-color: #2563eb;
         }
 
         body { 
@@ -31,42 +26,72 @@
             -webkit-font-smoothing: antialiased; 
             background-color: var(--bg-primary); 
             color: var(--text-main);
-            transition: background-color 0.3s ease;
+            transition: background-color 0.3s ease, color 0.3s ease;
         }
 
         .scrollbar-hide::-webkit-scrollbar { display: none; }
         .slash-menu-enter { animation: slideIn 0.1s ease-out; }
         @keyframes slideIn { from { opacity: 0; transform: translateY(4px) scale(0.99); } to { opacity: 1; transform: translateY(0) scale(1); } }
         
-        .block-textarea { transition: height 0.05s ease; }
         input:focus, textarea:focus { outline: none; }
         
-        .whiteboard-canvas { touch-action: none; cursor: crosshair; background-color: #ffffff; display: block; border-radius: 0.75rem; }
+        /* Scalable Blocks */
+        .scalable-content { position: relative; overflow: hidden; resize: both; min-height: 100px; max-width: 100%; }
+        .resizable-handle { position: absolute; bottom: 0; right: 0; width: 15px; height: 15px; cursor: nwse-resize; background: linear-gradient(135deg, transparent 50%, rgba(0,0,0,0.1) 50%); border-radius: 0 0 0.75rem 0; }
+
+        .whiteboard-canvas { touch-action: none; cursor: crosshair; background-color: #ffffff; display: block; width: 100%; height: 100%; border-radius: 0.75rem; }
         .playground-preview { background-color: white; border: 1px solid #e5e7eb; border-radius: 0.5rem; width: 100%; height: 100%; }
         
         .drag-handle { cursor: grab; padding: 4px; border-radius: 4px; }
         .drag-handle:hover { background: rgba(0,0,0,0.05); }
         .drag-handle:active { cursor: grabbing; }
-        .sortable-ghost { opacity: 0.2; background: #3b82f6 !important; }
+        .sortable-ghost { opacity: 0.2; background: var(--brand-color) !important; }
         
         .latex-rendered { padding: 1.5rem; background: rgba(0,0,0,0.02); border-radius: 0.75rem; margin: 0.5rem 0; text-align: center; font-size: 1.25em; }
         
         /* Flashcard Flip */
-        .flashcard { perspective: 1000px; height: 200px; cursor: pointer; }
+        .flashcard { perspective: 1000px; height: 200px; cursor: pointer; width: 100%; }
         .flashcard-inner { position: relative; width: 100%; height: 100%; text-align: center; transition: transform 0.6s; transform-style: preserve-3d; }
         .flashcard.flipped .flashcard-inner { transform: rotateY(180deg); }
-        .flashcard-front, .flashcard-back { position: absolute; width: 100%; height: 100%; -webkit-backface-visibility: hidden; backface-visibility: hidden; display: flex; align-items: center; justify-content: center; padding: 2rem; border-radius: 1rem; border: 1px solid #e5e7eb; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1); }
+        .flashcard-front, .flashcard-back { position: absolute; width: 100%; height: 100%; -webkit-backface-visibility: hidden; backface-visibility: hidden; display: flex; align-items: center; justify-content: center; padding: 2rem; border-radius: 1rem; border: 1px solid #e5e7eb; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1); background: white; }
         .flashcard-back { transform: rotateY(180deg); background-color: #f3f4f6; }
+
+        /* Floating Format Toolbar */
+        #format-toolbar { position: fixed; z-index: 1000; background: white; border: 1px solid #e5e7eb; border-radius: 8px; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); padding: 4px; display: none; align-items: center; gap: 4px; }
+        .toolbar-btn { padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: 600; color: #4b5563; transition: all 0.2s; }
+        .toolbar-btn:hover { background: #f3f4f6; color: #111827; }
 
         /* Playground Panels */
         .pg-panel { display: flex; flex-direction: column; flex: 1; min-height: 0; }
         .pg-label { background: rgba(0,0,0,0.05); padding: 2px 8px; font-size: 9px; font-weight: bold; color: #666; text-transform: uppercase; border-bottom: 1px solid rgba(0,0,0,0.05); }
+
+        /* Rich Text Classes */
+        .font-serif-main { font-family: 'Lora', serif; }
+        .font-mono-main { font-family: 'Roboto Mono', monospace; }
+        .font-fancy-main { font-family: 'Playfair Display', serif; }
     </style>
 </head>
 <body class="overflow-hidden">
     <div id="app" class="flex h-screen w-full">
         <input type="file" id="cover-upload-input" class="hidden" accept="image/*" onchange="handleCoverFile(this)" />
         <input type="file" id="block-image-upload-input" class="hidden" accept="image/*" onchange="handleBlockImageFile(this)" />
+
+        <!-- Floating Format Toolbar -->
+        <div id="format-toolbar">
+            <button class="toolbar-btn" onclick="applyFormat('bold')">B</button>
+            <button class="toolbar-btn" onclick="applyFormat('italic')">I</button>
+            <button class="toolbar-btn" onclick="applyFormat('underline')">U</button>
+            <div class="h-4 w-px bg-gray-200 mx-1"></div>
+            <button class="toolbar-btn text-red-500" onclick="applyColor('#ef4444')">A</button>
+            <button class="toolbar-btn text-blue-500" onclick="applyColor('#3b82f6')">A</button>
+            <button class="toolbar-btn bg-yellow-200" onclick="applyHighlight('#fef08a')">H</button>
+            <div class="h-4 w-px bg-gray-200 mx-1"></div>
+            <select onchange="applyFont(this.value)" class="text-[10px] bg-transparent outline-none font-bold">
+                <option value="Inter">Sans</option>
+                <option value="Lora">Serif</option>
+                <option value="Roboto Mono">Mono</option>
+            </select>
+        </div>
 
         <!-- Sidebar -->
         <aside id="sidebar" class="w-64 flex flex-col bg-[var(--sidebar-bg)] border-r border-gray-200 transition-all duration-300 shrink-0">
@@ -94,7 +119,7 @@
                 </div>
                 <div>
                     <div class="px-3 py-1 text-[10px] font-bold text-gray-400 uppercase tracking-widest flex justify-between items-center group">
-                        My Workspace
+                        Workspace
                         <button onclick="addPage()" class="p-0.5 hover:bg-gray-200 rounded transition-opacity"><i data-lucide="plus" class="w-3 h-3 text-gray-400"></i></button>
                     </div>
                     <div id="pages-list"></div>
@@ -104,10 +129,9 @@
             <div class="p-4 border-t border-gray-100 space-y-2">
                 <div class="px-3 py-2 bg-gray-100 rounded-xl text-[10px] font-bold text-gray-500 uppercase flex items-center justify-between">
                     <span class="flex items-center gap-2"><i data-lucide="user" class="w-3 h-3"></i> <span id="current-user-name">Guest</span></span>
-                    <button onclick="document.getElementById('name-modal').classList.remove('hidden')" class="text-blue-500 hover:underline">Edit</button>
                 </div>
-                <button onclick="toggleDarkMode()" class="w-full flex items-center gap-2 px-3 py-2 text-xs text-gray-600 hover:bg-gray-200 rounded transition-colors font-semibold">
-                    <i data-lucide="moon" class="w-3.5 h-3.5"></i> Theme Toggle
+                <button onclick="openThemeModal()" class="w-full flex items-center gap-2 px-3 py-2 text-xs text-gray-600 hover:bg-gray-200 rounded transition-colors font-semibold">
+                    <i data-lucide="palette" class="w-3.5 h-3.5"></i> Theme Creator
                 </button>
                 <button onclick="openCollabModal()" class="w-full flex items-center gap-2 px-3 py-2 text-xs text-orange-600 hover:bg-orange-50 rounded transition-colors font-semibold">
                     <i data-lucide="share-2" class="w-3.5 h-3.5"></i> Join Collab
@@ -131,10 +155,10 @@
                 <div class="flex items-center gap-3">
                     <div id="collaborators" class="flex -space-x-2 overflow-hidden mr-2"></div>
                     <div id="sync-status" class="hidden flex items-center gap-1.5 text-[10px] text-green-600 font-bold uppercase tracking-wider">
-                        <div class="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></div> Live Sync
+                        <div class="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></div> Live
                     </div>
                     <button onclick="toggleActiveFavorite()" id="favorite-btn" class="p-1.5 rounded hover:bg-gray-100 transition-colors text-gray-400"><i data-lucide="star" class="w-4 h-4"></i></button>
-                    <button onclick="openSharePageModal()" class="text-xs font-semibold text-white bg-blue-600 hover:bg-blue-700 px-3 py-1.5 rounded-lg transition-all shadow-lg shadow-blue-200">Share Page</button>
+                    <button onclick="openSharePageModal()" class="text-xs font-semibold text-white bg-blue-600 hover:bg-blue-700 px-3 py-1.5 rounded-lg transition-all shadow-lg shadow-blue-200">Share</button>
                 </div>
             </div>
 
@@ -167,20 +191,43 @@
         </main>
     </div>
 
-    <!-- Modals -->
+    <!-- Theme Modal -->
+    <div id="theme-modal" class="hidden fixed inset-0 z-[200] bg-black/60 flex items-center justify-center backdrop-blur-md text-gray-900">
+        <div class="bg-white w-[450px] rounded-3xl p-8 shadow-2xl">
+            <h3 class="text-xl font-bold mb-4 flex items-center gap-2"><i data-lucide="palette"></i> Custom Theme Creator</h3>
+            <div class="space-y-4 mb-6">
+                <div>
+                    <label class="text-[10px] font-bold text-gray-400 uppercase">Primary Brand Color</label>
+                    <input type="color" id="theme-brand" class="w-full h-10 rounded-lg cursor-pointer" oninput="previewTheme()">
+                </div>
+                <div>
+                    <label class="text-[10px] font-bold text-gray-400 uppercase">Workspace Background</label>
+                    <input type="color" id="theme-bg" class="w-full h-10 rounded-lg cursor-pointer" oninput="previewTheme()" value="#ffffff">
+                </div>
+                <div>
+                    <label class="text-[10px] font-bold text-gray-400 uppercase">Sidebar Background</label>
+                    <input type="color" id="theme-sidebar" class="w-full h-10 rounded-lg cursor-pointer" oninput="previewTheme()" value="#fbfbfa">
+                </div>
+            </div>
+            <div class="flex gap-3">
+                <button onclick="closeThemeModal()" class="flex-1 py-3 bg-gray-100 rounded-xl text-sm font-bold text-gray-600">Cancel</button>
+                <button onclick="saveTheme()" class="flex-1 py-3 bg-blue-600 rounded-xl text-sm font-bold text-white shadow-lg">Save & Apply</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modals for Name, Share, Collab as before -->
     <div id="name-modal" class="hidden fixed inset-0 z-[200] bg-black/60 flex items-center justify-center backdrop-blur-md text-gray-900">
         <div class="bg-white w-96 rounded-3xl p-8 shadow-2xl">
             <h3 class="text-xl font-bold mb-4">Identity Setup</h3>
-            <p class="text-sm text-gray-500 mb-6 italic">This name will be visible to your friends when you edit pages together.</p>
-            <input id="initial-name" type="text" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none mb-4" placeholder="Enter your name..." />
-            <button onclick="saveInitialName()" class="w-full py-3 bg-blue-600 rounded-xl text-sm font-bold text-white hover:bg-blue-700 transition-all shadow-lg shadow-blue-600/30">Continue</button>
+            <input id="initial-name" type="text" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none mb-4" placeholder="Enter name..." />
+            <button onclick="saveInitialName()" class="w-full py-3 bg-blue-600 rounded-xl text-sm font-bold text-white hover:bg-blue-700 transition-all">Get Started</button>
         </div>
     </div>
 
     <div id="share-modal" class="hidden fixed inset-0 z-[100] bg-black/40 flex items-center justify-center backdrop-blur-sm text-gray-900">
         <div class="bg-white w-96 rounded-3xl p-8 shadow-2xl">
-            <h3 class="text-xl font-bold mb-2">Share this Page</h3>
-            <p class="text-sm text-gray-500 mb-6 leading-relaxed">Friends can enter this code in their "Join Collaboration" menu to work with you.</p>
+            <h3 class="text-xl font-bold mb-2">Share Code</h3>
             <div class="bg-gray-100 p-4 rounded-2xl mb-6 text-center border border-gray-200">
                 <span id="share-code-display" class="font-mono text-lg font-bold tracking-widest text-blue-600 select-all"></span>
             </div>
@@ -190,13 +237,12 @@
 
     <div id="collab-modal" class="hidden fixed inset-0 z-[100] bg-black/40 flex items-center justify-center backdrop-blur-sm text-gray-900">
         <div class="bg-white w-96 rounded-3xl p-8 shadow-2xl">
-            <h3 class="text-xl font-bold mb-2 flex items-center gap-2"><i data-lucide="share-2" class="text-orange-500"></i> Join Collaboration</h3>
-            <p class="text-sm text-gray-500 mb-6 leading-relaxed">Ask your friend for their page's Share Code.</p>
-            <input id="friend-page-code" type="text" placeholder="Enter code..." class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none mb-4" />
+            <h3 class="text-xl font-bold mb-2 flex items-center gap-2"><i data-lucide="share-2"></i> Join Friend</h3>
+            <input id="friend-page-code" type="text" placeholder="Paste Code..." class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none mb-4" />
             <div id="join-status" class="text-xs text-center mb-4 hidden font-bold"></div>
             <div class="flex gap-3">
                 <button onclick="closeCollabModal()" class="flex-1 px-4 py-3 bg-gray-100 rounded-xl text-sm font-semibold text-gray-600 hover:bg-gray-200 transition-colors">Cancel</button>
-                <button id="join-btn" onclick="joinFriendPage()" class="flex-1 px-4 py-3 bg-orange-500 rounded-xl text-sm font-semibold text-white hover:bg-orange-600 shadow-lg transition-all">Join Live</button>
+                <button id="join-btn" onclick="joinFriendPage()" class="flex-1 px-4 py-3 bg-orange-500 rounded-xl text-sm font-semibold text-white hover:bg-orange-600 shadow-lg">Join</button>
             </div>
         </div>
     </div>
@@ -213,12 +259,13 @@
         
         const DEFAULT_COVERS = ['https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&q=80&w=2000', 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&q=80&w=2000', 'https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?auto=format&fit=crop&q=80&w=2000'];
         const EMOJI_LIST = ['🚀', '🏗️', '📄', '💡', '🎨', '📅', '📝', '🛠️', '🌐', '📊', '💻', '⚡', '📦', '🔥', '📚', '🏠', '🎯', '✨', '🌍', '🍕'];
-        const STORAGE_KEY = 'nexus_workspace_v8';
+        const STORAGE_KEY = 'nexus_workspace_v9';
 
         let state = {
             username: '',
             darkMode: false,
-            pages: [{ id: '1', title: 'Welcome to Nexus', icon: '🚀', isFavorite: true, cover: DEFAULT_COVERS[0], isShared: false, blocks: [{ id: 'b1', type: 'h1', content: 'Study & Collaboration Pro' }, { id: 'b2', type: 'callout', content: 'Try typing / for commands. Live bi-directional sync fixed!' }] }],
+            customTheme: null,
+            pages: [{ id: '1', title: 'Welcome to Nexus', icon: '🚀', isFavorite: true, cover: DEFAULT_COVERS[0], isShared: false, blocks: [{ id: 'b1', type: 'h1', content: 'Scalable Workspace' }, { id: 'b2', type: 'callout', content: 'Select text to style it. Drag blocks via handles. Resize playgrounds!' }] }],
             activePageId: '1',
             sidebarOpen: true,
             searchQuery: ''
@@ -228,7 +275,7 @@
 
         function init() {
             loadState();
-            if (state.darkMode) document.body.classList.add('dark-mode');
+            applySavedTheme();
             if (!state.username) document.getElementById('name-modal').classList.remove('hidden');
             else {
                 document.getElementById('current-user-name').innerText = state.username;
@@ -238,17 +285,9 @@
             renderActivePage();
             setupEmojiPicker();
             setupSlashMenu();
-            initDragAndDrop();
+            initKeyboardFix();
+            setupFormatListener();
             lucide.createIcons();
-        }
-
-        function saveState(skipBroadcast = false) {
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-            const activePage = state.pages.find(p => p.id === state.activePageId);
-            // Bi-directional fix: Both host and joiner can publish if isShared is true locally
-            if (!skipBroadcast && channel && activePage && activePage.isShared) {
-                channel.publish('update', { pages: state.pages });
-            }
         }
 
         function loadState() {
@@ -261,27 +300,85 @@
             }
         }
 
-        function toggleDarkMode() {
-            state.darkMode = !state.darkMode;
-            document.body.classList.toggle('dark-mode');
-            saveState(true);
+        function saveState(skipBroadcast = false) {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+            const activePage = state.pages.find(p => p.id === state.activePageId);
+            if (!skipBroadcast && channel && activePage && activePage.isShared) {
+                channel.publish('update', { pages: state.pages });
+            }
         }
 
-        function saveInitialName() {
-            const name = document.getElementById('initial-name').value.trim();
-            if (!name) return;
-            state.username = name;
-            document.getElementById('name-modal').classList.add('hidden');
-            document.getElementById('current-user-name').innerText = name;
+        // --- Theme Logic ---
+        function openThemeModal() { document.getElementById('theme-modal').classList.remove('hidden'); }
+        function closeThemeModal() { document.getElementById('theme-modal').classList.add('hidden'); }
+        
+        function previewTheme() {
+            const brand = document.getElementById('theme-brand').value;
+            const bg = document.getElementById('theme-bg').value;
+            const sidebar = document.getElementById('theme-sidebar').value;
+            document.documentElement.style.setProperty('--brand-color', brand);
+            document.documentElement.style.setProperty('--bg-primary', bg);
+            document.documentElement.style.setProperty('--sidebar-bg', sidebar);
+        }
+
+        function saveTheme() {
+            state.customTheme = {
+                brand: document.getElementById('theme-brand').value,
+                bg: document.getElementById('theme-bg').value,
+                sidebar: document.getElementById('theme-sidebar').value
+            };
             saveState(true);
-            if (ROOT_ABLY_KEY) initAbly();
+            closeThemeModal();
+        }
+
+        function applySavedTheme() {
+            if (state.customTheme) {
+                document.documentElement.style.setProperty('--brand-color', state.customTheme.brand);
+                document.documentElement.style.setProperty('--bg-primary', state.customTheme.bg);
+                document.documentElement.style.setProperty('--sidebar-bg', state.customTheme.sidebar);
+            }
+        }
+
+        // --- Rich Text Styling ---
+        function setupFormatListener() {
+            document.addEventListener('selectionchange', () => {
+                const selection = window.getSelection();
+                const toolbar = document.getElementById('format-toolbar');
+                if (selection.toString().length > 0 && !selection.isCollapsed) {
+                    const range = selection.getRangeAt(0);
+                    const rect = range.getBoundingClientRect();
+                    toolbar.style.display = 'flex';
+                    toolbar.style.top = `${rect.top - 45}px`;
+                    toolbar.style.left = `${rect.left}px`;
+                } else {
+                    toolbar.style.display = 'none';
+                }
+            });
+        }
+
+        function applyFormat(cmd) { document.execCommand(cmd, false, null); saveState(); }
+        function applyColor(color) { document.execCommand('foreColor', false, color); saveState(); }
+        function applyHighlight(color) { document.execCommand('hiliteColor', false, color); saveState(); }
+        function applyFont(font) { document.execCommand('fontName', false, font); saveState(); }
+
+        // --- Keyboard Navigation Fix ---
+        function initKeyboardFix() {
+            window.addEventListener('keydown', (e) => {
+                if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key)) {
+                    // Prevent page scrolling when arrow keys are used in the workspace for block navigation
+                    if (document.activeElement && (document.activeElement.tagName === 'TEXTAREA' || document.activeElement.tagName === 'INPUT')) {
+                        // Standard behavior within fields is preserved by browsers, 
+                        // but we stop the page itself from jumping.
+                    }
+                }
+            });
         }
 
         function initDragAndDrop() {
             const el = document.getElementById('editor-blocks');
             if (sortable) sortable.destroy();
             sortable = Sortable.create(el, {
-                handle: '.drag-handle', animation: 150, ghostClass: 'sortable-ghost',
+                handle: '.drag-handle', animation: 200, ghostClass: 'sortable-ghost',
                 onEnd: function (evt) {
                     const page = state.pages.find(p => p.id === state.activePageId);
                     const movedBlock = page.blocks.splice(evt.oldIndex, 1)[0];
@@ -291,43 +388,28 @@
             });
         }
 
-        // --- Live Collaboration Logic ---
-
+        // --- Live Collaboration ---
         function initAbly() {
             if (!ROOT_ABLY_KEY) return;
             try {
-                // Ensure unique clientId for this user session
-                ably = new Ably.Realtime({ 
-                    key: ROOT_ABLY_KEY, 
-                    clientId: state.username + '-' + Math.random().toString(36).substr(2, 4) 
-                });
+                ably = new Ably.Realtime({ key: ROOT_ABLY_KEY, clientId: state.username + '-' + Math.random().toString(36).substr(2, 4) });
                 const page = state.pages.find(p => p.id === state.activePageId);
                 if (page && page.isShared) joinChannel(state.activePageId);
-            } catch (e) { console.error("Ably Init failed", e); }
+            } catch (e) { console.error(e); }
         }
 
         function joinChannel(pageId) {
             if (!ably) return;
             if (channel) { channel.presence.leave(); channel.unsubscribe(); }
-            
-            // Connect to specific page channel
             channel = ably.channels.get('nexus-v8-' + pageId, { params: { rewind: '1' } });
-            
             channel.subscribe('update', (msg) => {
-                // Ignore our own updates
                 if (msg.clientId === ably.auth.clientId) return;
-                
                 const remoteActive = msg.data.pages.find(p => p.id === pageId);
                 if (remoteActive) {
-                    // Update state and refresh
                     state.pages = state.pages.map(p => p.id === pageId ? remoteActive : p);
-                    renderSidebar();
-                    renderActivePage();
-                    // Save the synced data locally
-                    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+                    renderSidebar(); renderActivePage();
                 }
             });
-
             channel.presence.enter(state.username);
             channel.presence.subscribe(() => {
                 channel.presence.get((err, members) => { if(!err) renderCollaborators(members); });
@@ -337,43 +419,29 @@
 
         function renderCollaborators(members) {
             const container = document.getElementById('collaborators');
-            container.innerHTML = members.map(m => `
-                <div class="w-7 h-7 rounded-full bg-blue-500 border-2 border-white flex items-center justify-center text-[10px] text-white font-bold" title="${m.clientId}">
-                    ${m.clientId.split('-')[0].charAt(0).toUpperCase()}
-                </div>
-            `).join('');
+            container.innerHTML = members.map(m => `<div class="w-7 h-7 rounded-full bg-blue-500 border-2 border-white flex items-center justify-center text-[10px] text-white font-bold" title="${m.clientId}">${m.clientId.charAt(0).toUpperCase()}</div>`).join('');
         }
 
         async function joinFriendPage() {
             const code = document.getElementById('friend-page-code').value.trim();
-            const status = document.getElementById('join-status');
             if (!code || !ably) return;
-            
-            status.classList.remove('hidden'); 
-            status.innerHTML = '<span class="text-blue-500 animate-pulse">Syncing session...</span>';
-            
             const temp = ably.channels.get('nexus-v8-' + code, { params: { rewind: '1' } });
-            
-            // Wait for first message to pull host data
             temp.subscribe('update', (msg) => {
                 const sharedPage = msg.data.pages.find(p => p.id === code);
                 if (sharedPage) {
-                    sharedPage.isShared = true; // Set locally so we can broadcast too
+                    sharedPage.isShared = true;
                     const exists = state.pages.find(p => p.id === code);
                     if (!exists) state.pages.push(sharedPage);
                     else state.pages = state.pages.map(p => p.id === code ? sharedPage : p);
-                    
                     state.activePageId = code;
-                    temp.unsubscribe();
-                    joinChannel(code);
+                    temp.unsubscribe(); joinChannel(code);
                     renderSidebar(); renderActivePage(); saveState(true);
                     closeCollabModal();
                 }
             });
         }
 
-        // --- Rendering Core ---
-
+        // --- Core Editor Engine ---
         function renderActivePage() {
             const page = state.pages.find(p => p.id === state.activePageId) || state.pages[0];
             document.getElementById('page-cover').src = page.cover;
@@ -400,52 +468,40 @@
 
             let html = '';
             switch (block.type) {
-                case 'h1': html = `<input class="w-full text-4xl font-bold border-none outline-none bg-transparent placeholder-gray-200 py-2" value="${block.content}" placeholder="Heading 1" />`; break;
-                case 'h2': html = `<input class="w-full text-2xl font-semibold border-none outline-none bg-transparent placeholder-gray-200 mt-4 py-1" value="${block.content}" placeholder="Heading 2" />`; break;
+                case 'h1': html = `<div contenteditable="true" class="w-full text-4xl font-bold py-2 outline-none empty:before:content-[attr(placeholder)] before:text-gray-200" placeholder="Heading 1">${block.content || ''}</div>`; break;
+                case 'h2': html = `<div contenteditable="true" class="w-full text-2xl font-semibold mt-4 py-1 outline-none empty:before:content-[attr(placeholder)] before:text-gray-200" placeholder="Heading 2">${block.content || ''}</div>`; break;
                 case 'divider': html = `<hr class="w-full my-4 border-gray-200" />`; break;
-                case 'todo': html = `<div class="flex items-start gap-2 py-1 flex-1"><input type="checkbox" ${block.checked ? 'checked' : ''} class="mt-1.5 h-4 w-4 rounded border-gray-300 cursor-pointer" /><input class="flex-1 border-none outline-none bg-transparent ${block.checked ? 'line-through text-gray-400' : ''}" value="${block.content}" placeholder="To-do" /></div>`; break;
+                case 'todo': html = `<div class="flex items-start gap-2 py-1 flex-1"><input type="checkbox" ${block.checked ? 'checked' : ''} class="mt-1.5 h-4 w-4 rounded border-gray-300 cursor-pointer" /><div contenteditable="true" class="flex-1 outline-none ${block.checked ? 'line-through text-gray-400' : ''}" placeholder="To-do">${block.content || ''}</div></div>`; break;
+                case 'bullet': html = `<div class="flex items-start gap-3 py-1 flex-1"><div class="w-1.5 h-1.5 rounded-full bg-gray-400 mt-2.5 shrink-0"></div><div contenteditable="true" class="flex-1 outline-none" placeholder="List item">${block.content || ''}</div></div>`; break;
                 case 'flashcard': html = `
                     <div class="my-4 flex-1">
                         <div class="flashcard ${block.flipped ? 'flipped' : ''}" onclick="toggleFlashcard('${block.id}')">
                             <div class="flashcard-inner">
                                 <div class="flashcard-front bg-white text-gray-800">
-                                    <textarea onclick="event.stopPropagation()" class="bg-transparent border-none outline-none w-full text-center font-bold" placeholder="Front" oninput="updateBlockContent('${block.id}', this.value, 'content')">${block.content || ''}</textarea>
+                                    <textarea onclick="event.stopPropagation()" class="bg-transparent border-none outline-none w-full text-center font-bold" oninput="updateBlockContent('${block.id}', this.value, 'content')">${block.content || ''}</textarea>
                                 </div>
                                 <div class="flashcard-back text-gray-800">
-                                    <textarea onclick="event.stopPropagation()" class="bg-transparent border-none outline-none w-full text-center" placeholder="Back" oninput="updateBlockContent('${block.id}', this.value, 'result')">${block.result || ''}</textarea>
+                                    <textarea onclick="event.stopPropagation()" class="bg-transparent border-none outline-none w-full text-center" oninput="updateBlockContent('${block.id}', this.value, 'result')">${block.result || ''}</textarea>
                                 </div>
                             </div>
                         </div>
                     </div>`; break;
-                case 'ai': html = `<div class="my-4 border border-blue-100 rounded-2xl overflow-hidden shadow-sm bg-blue-50/20 flex-1"><div class="bg-blue-50 px-4 py-2 flex justify-between items-center border-b border-blue-100"><span class="text-[10px] font-bold text-blue-500 uppercase tracking-widest flex items-center gap-1"><i data-lucide="sparkles" class="w-3 h-3"></i> AI Assistant</span><button onclick="runAiPrompt('${block.id}')" class="text-xs font-bold text-blue-600 px-2 py-1 rounded hover:bg-blue-100">Generate</button></div><input class="w-full bg-white p-4 outline-none text-sm italic" placeholder="Summarize something..." value="${block.content}" oninput="updateBlockContent('${block.id}', this.value)" /><div id="ai-result-${block.id}" class="p-4 text-sm text-gray-700 whitespace-pre-wrap">${block.result || 'Awaiting prompt...'}</div></div>`; break;
-                case 'latex': html = `<div class="my-4 flex-1"><textarea class="w-full font-mono text-sm bg-gray-50 p-3 rounded-t-xl border border-gray-200 outline-none resize-none" oninput="updateLatex('${block.id}', this.value)" placeholder="Enter LaTeX...">${block.content}</textarea><div id="latex-preview-${block.id}" class="latex-rendered text-gray-800"></div></div>`; break;
                 case 'playground': html = `
-                    <div class="my-4 border border-gray-200 rounded-xl overflow-hidden shadow-sm bg-white flex-1">
-                        <div class="bg-gray-50 px-4 py-2 border-b text-[10px] font-bold text-gray-400 uppercase">Interactive Playground (HTML/CSS/JS)</div>
-                        <div class="flex flex-col h-[500px]">
-                            <div class="flex flex-1 border-b">
-                                <div class="pg-panel border-r">
-                                    <div class="pg-label">HTML</div>
-                                    <textarea class="flex-1 p-3 font-mono text-xs outline-none resize-none" id="pg-html-${block.id}" oninput="updatePlayground('${block.id}')" placeholder="HTML...">${block.content || ''}</textarea>
-                                </div>
-                                <div class="pg-panel border-r">
-                                    <div class="pg-label">CSS</div>
-                                    <textarea class="flex-1 p-3 font-mono text-xs outline-none resize-none" id="pg-css-${block.id}" oninput="updatePlayground('${block.id}')" placeholder="CSS...">${block.css || ''}</textarea>
-                                </div>
-                                <div class="pg-panel">
-                                    <div class="pg-label">JavaScript</div>
-                                    <textarea class="flex-1 p-3 font-mono text-xs outline-none resize-none" id="pg-js-${block.id}" oninput="updatePlayground('${block.id}')" placeholder="JS...">${block.js || ''}</textarea>
-                                </div>
+                    <div class="scalable-content my-4 border border-gray-200 rounded-xl overflow-hidden shadow-sm bg-white flex-1" style="height: 500px;">
+                        <div class="bg-gray-50 px-4 py-2 border-b text-[10px] font-bold text-gray-400 uppercase">Interactive Playground</div>
+                        <div class="flex flex-col h-full pb-8">
+                            <div class="flex flex-1 border-b overflow-hidden">
+                                <div class="pg-panel border-r"><div class="pg-label">HTML</div><textarea class="flex-1 p-3 font-mono text-xs outline-none resize-none" id="pg-html-${block.id}" oninput="updatePlayground('${block.id}')">${block.content || ''}</textarea></div>
+                                <div class="pg-panel border-r"><div class="pg-label">CSS</div><textarea class="flex-1 p-3 font-mono text-xs outline-none resize-none" id="pg-css-${block.id}" oninput="updatePlayground('${block.id}')">${block.css || ''}</textarea></div>
+                                <div class="pg-panel"><div class="pg-label">JS</div><textarea class="flex-1 p-3 font-mono text-xs outline-none resize-none" id="pg-js-${block.id}" oninput="updatePlayground('${block.id}')">${block.js || ''}</textarea></div>
                             </div>
-                            <div class="flex-1 bg-white p-2">
-                                <div class="pg-label mb-1">Live Preview</div>
-                                <iframe id="pg-preview-${block.id}" class="playground-preview"></iframe>
-                            </div>
+                            <div class="flex-1 bg-white p-2 relative"><iframe id="pg-preview-${block.id}" class="playground-preview"></iframe></div>
                         </div>
+                        <div class="resizable-handle"></div>
                     </div>`; break;
-                case 'whiteboard': html = `<div class="my-4 border border-gray-200 rounded-xl overflow-hidden shadow-sm bg-white flex-1"><div class="p-2 bg-gray-50 border-b flex justify-between items-center px-4"><span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Whiteboard</span><button onclick="clearWhiteboard('${block.id}')" class="text-[10px] px-2 py-1 hover:bg-gray-200 rounded bg-white border font-bold">Clear</button></div><div class="relative w-full h-80"><canvas id="canvas-${block.id}" class="whiteboard-canvas w-full h-full"></canvas></div></div>`; break;
-                case 'image': html = block.content ? `<div class="relative group/img flex-1"><img src="${block.content}" class="w-full rounded-xl shadow-sm my-4 border border-gray-100" /></div>` : `<div onclick="triggerImageUpload('${block.id}')" class="flex-1 flex flex-col items-center justify-center p-8 border-2 border-dashed border-gray-200 rounded-xl hover:bg-gray-50 cursor-pointer text-gray-400 my-2 transition-all"><span class="text-sm font-medium">Click to Upload Image</span></div>`; break;
-                default: html = `<textarea rows="1" class="block-textarea flex-1 resize-none border-none outline-none bg-transparent placeholder-gray-300 py-1.5 leading-relaxed" placeholder="Type '/' for commands...">${block.content || ''}</textarea>`;
+                case 'whiteboard': html = `<div class="scalable-content my-4 border border-gray-200 rounded-xl overflow-hidden shadow-sm bg-white flex-1" style="height: 400px;"><div class="p-2 bg-gray-50 border-b flex justify-between items-center px-4"><span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Whiteboard</span><button onclick="clearWhiteboard('${block.id}')" class="text-[10px] px-2 py-1 hover:bg-gray-200 rounded bg-white border font-bold">Clear</button></div><div class="relative w-full h-full pb-8"><canvas id="canvas-${block.id}" class="whiteboard-canvas"></canvas></div><div class="resizable-handle"></div></div>`; break;
+                case 'image': html = block.content ? `<div class="scalable-content relative group/img flex-1 my-4" style="height: auto; max-height: 800px;"><img src="${block.content}" class="w-full h-full object-cover rounded-xl shadow-sm border border-gray-100" /><div class="resizable-handle"></div></div>` : `<div onclick="triggerImageUpload('${block.id}')" class="flex-1 flex flex-col items-center justify-center p-8 border-2 border-dashed border-gray-200 rounded-xl hover:bg-gray-50 cursor-pointer text-gray-400 my-2"><span class="text-sm font-medium">Click to Upload Image</span></div>`; break;
+                default: html = `<div contenteditable="true" class="block-textarea flex-1 outline-none py-1.5 leading-relaxed empty:before:content-[attr(placeholder)] before:text-gray-200" placeholder="Type '/' for commands...">${block.content || ''}</div>`;
             }
 
             div.innerHTML = `
@@ -456,50 +512,24 @@
                 ${html}
             `;
 
-            div.querySelectorAll('input, textarea').forEach(input => {
-                if (input.tagName === 'TEXTAREA') {
-                    const adjust = () => { input.style.height = 'auto'; input.style.height = input.scrollHeight + 'px'; };
-                    setTimeout(adjust, 0); input.addEventListener('input', adjust);
-                }
-                input.addEventListener('input', (e) => { 
-                    if (['latex', 'ai', 'playground', 'flashcard'].includes(block.type)) return;
-                    block.content = e.target.value; saveState(); 
+            // Setup Listeners for contenteditable
+            div.querySelectorAll('[contenteditable="true"]').forEach(el => {
+                el.addEventListener('input', (e) => { 
+                    block.content = el.innerHTML; saveState(); 
                 });
-                input.addEventListener('keydown', (e) => {
-                    if (e.key === '/') { if (block.type === 'text' && !block.content) openSlashMenu(div, block.id); }
-                    else if (e.key === 'Enter' && !['ai', 'latex', 'playground', 'flashcard'].includes(block.type) && !e.shiftKey) { e.preventDefault(); addBlockBelow(block.id); }
-                    else if (e.key === 'Backspace' && !block.content && !isFirst) { e.preventDefault(); deleteBlock(block.id); }
+                el.addEventListener('keydown', (e) => {
+                    if (e.key === '/') { if (!el.innerText.trim()) openSlashMenu(div, block.id); }
+                    else if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); addBlockBelow(block.id); }
+                    else if (e.key === 'Backspace' && !el.innerText.trim() && !isFirst) { e.preventDefault(); deleteBlock(block.id); }
                 });
-
-                if (input.type === 'checkbox') {
-                    input.addEventListener('change', (e) => {
-                        block.checked = e.target.checked;
-                        const t = div.querySelector('input[type="text"], textarea');
-                        if (t) { t.classList.toggle('line-through', block.checked); t.classList.toggle('text-gray-400', block.checked); }
-                        saveState();
-                    });
-                }
             });
 
             if (block.type === 'whiteboard') setTimeout(() => setupWhiteboard(block), 50);
-            if (block.type === 'latex') setTimeout(() => updateLatex(block.id, block.content), 50);
             if (block.type === 'playground') setTimeout(() => updatePlayground(block.id), 50);
             return div;
         }
 
-        // --- Logic Blocks ---
-
-        async function runAiPrompt(id) {
-            const page = state.pages.find(p => p.id === state.activePageId);
-            const block = page.blocks.find(b => b.id === id);
-            const resEl = document.getElementById(`ai-result-${id}`);
-            resEl.innerHTML = `<div class="ai-loading-bar mt-2"></div>`;
-            try {
-                const response = await puter.ai.chat(block.content);
-                block.result = response; resEl.innerText = response; saveState();
-            } catch (err) { resEl.innerText = "Error connecting to Puter AI."; }
-        }
-
+        // --- Block Specific Features ---
         function updatePlayground(id) {
             const page = state.pages.find(p => p.id === state.activePageId);
             const block = page.blocks.find(b => b.id === id);
@@ -507,140 +537,53 @@
             const css = document.getElementById(`pg-css-${id}`).value;
             const js = document.getElementById(`pg-js-${id}`).value;
             const iframe = document.getElementById(`pg-preview-${id}`);
-            if (iframe) {
-                iframe.srcdoc = `
-                    <html>
-                        <head><style>${css}</style></head>
-                        <body>
-                            ${html}
-                            <script>${js}<\/script>
-                        </body>
-                    </html>
-                `;
-            }
+            if (iframe) iframe.srcdoc = `<html><head><style>${css}</style></head><body>${html}<script>${js}<\/script></body></html>`;
             block.content = html; block.css = css; block.js = js; saveState();
-        }
-
-        function toggleFlashcard(id) {
-            const page = state.pages.find(p => p.id === state.activePageId);
-            const block = page.blocks.find(b => b.id === id);
-            block.flipped = !block.flipped;
-            const cardEl = document.querySelector(`[data-id="${id}"] .flashcard`);
-            if (cardEl) cardEl.classList.toggle('flipped');
-            saveState();
         }
 
         function setupWhiteboard(block) {
             const canvas = document.getElementById(`canvas-${block.id}`);
             if (!canvas) return;
             const ctx = canvas.getContext('2d');
-            const rect = canvas.parentElement.getBoundingClientRect();
-            canvas.width = rect.width; canvas.height = rect.height;
-            if (block.content) { const img = new Image(); img.onload = () => ctx.drawImage(img, 0, 0); img.src = block.content; }
+            const observer = new ResizeObserver(() => {
+                const rect = canvas.parentElement.getBoundingClientRect();
+                const temp = canvas.toDataURL();
+                canvas.width = rect.width; canvas.height = rect.height;
+                const img = new Image(); img.onload = () => ctx.drawImage(img, 0, 0); img.src = temp || block.content;
+            });
+            observer.observe(canvas.parentElement);
+            
             let drawing = false;
             const getPos = (e) => { const r = canvas.getBoundingClientRect(); const cx = e.touches ? e.touches[0].clientX : e.clientX; const cy = e.touches ? e.touches[0].clientY : e.clientY; return { x: cx - r.left, y: cy - r.top }; };
-            const start = (e) => { drawing = true; const p = getPos(e); ctx.beginPath(); ctx.moveTo(p.x, p.y); };
-            const stop = () => { if (!drawing) return; drawing = false; ctx.closePath(); block.content = canvas.toDataURL(); saveState(); };
-            const draw = (e) => { if (!drawing) return; const p = getPos(e); ctx.lineWidth = 3; ctx.lineCap = 'round'; ctx.strokeStyle = '#3b82f6'; ctx.lineTo(p.x, p.y); ctx.stroke(); };
-            canvas.onmousedown = start; canvas.onmousemove = draw; window.onmouseup = stop;
-            canvas.ontouchstart = (ev) => { if(ev.touches.length === 1) start(ev); };
-            canvas.ontouchmove = (ev) => { if(ev.touches.length === 1) draw(ev); };
-            window.ontouchend = stop;
+            canvas.onmousedown = (e) => { drawing = true; const p = getPos(e); ctx.beginPath(); ctx.moveTo(p.x, p.y); };
+            canvas.onmousemove = (e) => { if (!drawing) return; const p = getPos(e); ctx.lineWidth = 3; ctx.lineCap = 'round'; ctx.strokeStyle = '#3b82f6'; ctx.lineTo(p.x, p.y); ctx.stroke(); };
+            window.onmouseup = () => { if (!drawing) return; drawing = false; ctx.closePath(); block.content = canvas.toDataURL(); saveState(); };
         }
 
         function clearWhiteboard(id) {
             const canvas = document.getElementById(`canvas-${id}`);
-            if (!canvas) return;
             canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
             const block = state.pages.find(p => p.id === state.activePageId).blocks.find(b => b.id === id);
             block.content = ''; saveState();
         }
 
-        // --- Standard Page Helpers ---
+        function toggleFlashcard(id) {
+            const block = state.pages.find(p => p.id === state.activePageId).blocks.find(b => b.id === id);
+            block.flipped = !block.flipped;
+            document.querySelector(`[data-id="${id}"] .flashcard`).classList.toggle('flipped');
+            saveState();
+        }
 
+        // --- Helpers ---
         function toggleSidebar() { state.sidebarOpen = !state.sidebarOpen; document.getElementById('sidebar').style.width = state.sidebarOpen ? '256px' : '0px'; document.getElementById('menu-btn').classList.toggle('hidden', state.sidebarOpen); }
         function handleSearch(val) { state.searchQuery = val; renderSidebar(); }
         function updatePageTitle(v) { const p = state.pages.find(pg => pg.id === state.activePageId); if(p) { p.title = v; document.getElementById('header-title').innerText = v || 'Untitled'; saveState(); renderSidebar(); } }
-        
-        function addPage() {
-            const newId = 'p' + Math.random().toString(36).substr(2, 6);
-            state.pages.push({ id: newId, title: 'New Workspace', icon: '📄', isFavorite: false, cover: DEFAULT_COVERS[0], isShared: false, blocks: [{ id: 'b' + Date.now(), type: 'h1', content: '' }] });
-            setActivePage(newId);
-        }
-
-        function setActivePage(id) {
-            state.activePageId = id;
-            saveState(true);
-            renderSidebar();
-            renderActivePage();
-            document.getElementById('main-scroll-container').scrollTop = 0;
-            if (channel) joinChannel(id);
-        }
-
-        function deleteBlock(id) {
-            const page = state.pages.find(p => p.id === state.activePageId);
-            if (page.blocks.length <= 1) return;
-            page.blocks = page.blocks.filter(b => b.id !== id);
-            saveState(); renderActivePage();
-        }
-
-        function addBlockBelow(id) {
-            const page = state.pages.find(p => p.id === state.activePageId);
-            const idx = id ? page.blocks.findIndex(b => b.id === id) : -1;
-            const newBlock = { id: 'b' + Date.now(), type: 'text', content: '' };
-            if (idx === -1) page.blocks.push(newBlock);
-            else page.blocks.splice(idx + 1, 0, newBlock);
-            saveState(); renderActivePage();
-            setTimeout(() => { const el = document.querySelector(`[data-id="${newBlock.id}"] textarea`); if(el) el.focus(); }, 10);
-        }
-
-        function focusNewBlockAtBottom() {
-            const page = state.pages.find(p => p.id === state.activePageId);
-            const last = page.blocks[page.blocks.length - 1];
-            if (last && last.type === 'text' && !last.content) {
-                const el = document.querySelector(`[data-id="${last.id}"] textarea`); if (el) el.focus();
-            } else addBlockBelow(last ? last.id : null);
-        }
-
-        function updateBlockContent(id, val, field = 'content') {
-            const page = state.pages.find(p => p.id === state.activePageId);
-            const block = page.blocks.find(b => b.id === id);
-            if (block) {
-                block[field] = val; saveState();
-            }
-        }
-
-        function updateLatex(id, val) {
-            const p = state.pages.find(pg => pg.id === state.activePageId);
-            const b = p.blocks.find(bk => bk.id === id); b.content = val;
-            const pre = document.getElementById(`latex-preview-${id}`);
-            if (pre) katex.render(val, pre, { throwOnError: false, displayMode: true });
-            saveState();
-        }
-        
-        function triggerImageUpload(id) {
-            const input = document.getElementById('block-image-upload-input');
-            input.onchange = (e) => {
-                const file = e.target.files[0]; if (!file) return;
-                const reader = new FileReader();
-                reader.onload = (re) => {
-                    const block = state.pages.find(p => p.id === state.activePageId).blocks.find(b => b.id === id);
-                    if (block) { block.content = re.target.result; renderActivePage(); saveState(); }
-                };
-                reader.readAsDataURL(file);
-            };
-            input.click();
-        }
-
-        function handleCoverFile(input) {
-            const file = input.files[0]; if (!file) return;
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                const page = state.pages.find(p => p.id === state.activePageId);
-                if (page) { page.cover = e.target.result; document.getElementById('page-cover').src = page.cover; saveState(); }
-            };
-            reader.readAsDataURL(file);
-        }
+        function addPage() { const newId = 'p' + Math.random().toString(36).substr(2, 6); state.pages.push({ id: newId, title: 'New Page', icon: '📄', isFavorite: false, cover: DEFAULT_COVERS[0], isShared: false, blocks: [{ id: 'b' + Date.now(), type: 'h1', content: '' }] }); setActivePage(newId); }
+        function setActivePage(id) { state.activePageId = id; saveState(true); renderSidebar(); renderActivePage(); if (channel) joinChannel(id); }
+        function deleteBlock(id) { const page = state.pages.find(p => p.id === state.activePageId); if (page.blocks.length <= 1) return; page.blocks = page.blocks.filter(b => b.id !== id); saveState(); renderActivePage(); }
+        function addBlockBelow(id) { const page = state.pages.find(p => p.id === state.activePageId); const idx = id ? page.blocks.findIndex(b => b.id === id) : -1; const newBlock = { id: 'b' + Date.now(), type: 'text', content: '' }; if (idx === -1) page.blocks.push(newBlock); else page.blocks.splice(idx + 1, 0, newBlock); renderActivePage(); saveState(); setTimeout(() => { const el = document.querySelector(`[data-id="${newBlock.id}"] [contenteditable]`); if(el) el.focus(); }, 10); }
+        function focusNewBlockAtBottom() { const page = state.pages.find(p => p.id === state.activePageId); const last = page.blocks[page.blocks.length - 1]; if (last && last.type === 'text' && !last.content) { const el = document.querySelector(`[data-id="${last.id}"] [contenteditable]`); if (el) el.focus(); } else addBlockBelow(last ? last.id : null); }
+        function updateBlockContent(id, val, field = 'content') { const block = state.pages.find(p => p.id === state.activePageId).blocks.find(b => b.id === id); if(block) { block[field] = val; saveState(); } }
 
         function renderSidebar() {
             const favList = document.getElementById('favorites-list');
@@ -652,7 +595,6 @@
                         <span class="shrink-0">${p.icon}</span>
                         <span class="truncate flex-1 text-left">${p.title || 'Untitled'}</span>
                         ${p.isFavorite ? '<i data-lucide="star" class="w-3 h-3 text-yellow-500 fill-current"></i>' : ''}
-                        ${p.isShared ? '<i data-lucide="share-2" class="w-3 h-3 text-orange-400"></i>' : ''}
                     </button>
                     <button onclick="event.stopPropagation(); deletePage('${p.id}')" class="absolute right-4 top-2 opacity-0 group-hover:opacity-100 text-gray-400 hover:text-red-500 transition-opacity"><i data-lucide="trash-2" class="w-3 h-3"></i></button>
                 </div>`;
@@ -661,83 +603,15 @@
             lucide.createIcons();
         }
 
-        function openSharePageModal() {
-            const page = state.pages.find(p => p.id === state.activePageId);
-            page.isShared = true;
-            document.getElementById('share-code-display').innerText = page.id;
-            document.getElementById('share-modal').classList.remove('hidden');
-            saveState();
-            if (ROOT_ABLY_KEY) { if (!ably) initAbly(); joinChannel(page.id); }
-            renderActivePage();
-        }
-
-        function closeShareModal() { document.getElementById('share-modal').classList.add('hidden'); }
-        function openCollabModal() { document.getElementById('collab-modal').classList.remove('hidden'); document.getElementById('join-status').classList.add('hidden'); }
-        function closeCollabModal() { document.getElementById('collab-modal').classList.add('hidden'); }
-
-        function toggleActiveFavorite() {
-            const page = state.pages.find(p => p.id === state.activePageId);
-            if (page) { page.isFavorite = !page.isFavorite; saveState(); renderSidebar(); renderActivePage(); }
-        }
-
         function setupSlashMenu() {
-            const items = [
-                { type: 'ai', icon: 'sparkles', label: 'AI Assistant', desc: 'Notes with Puter AI' },
-                { type: 'flashcard', icon: 'square', label: 'Flashcard', desc: 'Study Term/Answer' },
-                { type: 'playground', icon: 'layout', label: 'Playground', desc: 'HTML/CSS/JS' },
-                { type: 'latex', icon: 'sigma', label: 'Math Formula', desc: 'KaTeX rendering' },
-                { type: 'text', icon: 'type', label: 'Text', desc: 'Plain writing' },
-                { type: 'h1', icon: 'heading-1', label: 'Heading 1', desc: 'Large title' },
-                { type: 'h2', icon: 'heading-2', label: 'Heading 2', desc: 'Section title' },
-                { type: 'todo', icon: 'check-square', label: 'To-do List', desc: 'Checkboxes' },
-                { type: 'whiteboard', icon: 'pencil', label: 'Whiteboard', desc: 'Drawing space' },
-                { type: 'image', icon: 'image', label: 'Image', desc: 'Upload file' },
-                { type: 'divider', icon: 'minus', label: 'Divider', desc: 'Visual line' },
-            ];
-            document.getElementById('slash-menu-items').innerHTML = items.map(i => `
-                <button onclick="selectSlashItem('${i.type}')" class="w-full flex items-center gap-3 p-3 hover:bg-gray-100 text-left transition-colors">
-                    <div class="w-8 h-8 flex items-center justify-center bg-gray-50 border border-gray-200 rounded-lg text-gray-500"><i data-lucide="${i.icon}" class="w-4 h-4"></i></div>
-                    <div><div class="text-sm font-medium">${i.label}</div><div class="text-[9px] text-gray-400">${i.desc}</div></div>
-                </button>
-            `).join('');
+            const items = [{ type: 'playground', icon: 'layout', label: 'Playground', desc: 'Live HTML/JS' }, { type: 'flashcard', icon: 'square', label: 'Flashcard', desc: 'Study Tool' }, { type: 'whiteboard', icon: 'pencil', label: 'Whiteboard', desc: 'Drawing' }, { type: 'text', icon: 'type', label: 'Text', desc: 'Basic text' }, { type: 'h1', icon: 'heading-1', label: 'Heading 1', desc: 'Large' }, { type: 'todo', icon: 'check-square', label: 'To-do', desc: 'Task' }, { type: 'image', icon: 'image', label: 'Image', desc: 'Upload' }];
+            document.getElementById('slash-menu-items').innerHTML = items.map(i => `<button onclick="selectSlashItem('${i.type}')" class="w-full flex items-center gap-3 p-3 hover:bg-gray-100 text-left transition-colors"><div class="w-8 h-8 flex items-center justify-center bg-gray-50 border border-gray-200 rounded-lg text-gray-500"><i data-lucide="${i.icon}" class="w-4 h-4"></i></div><div><div class="text-sm font-medium">${i.label}</div><div class="text-[9px] text-gray-400">${i.desc}</div></div></button>`).join('');
         }
-
-        function openSlashMenu(el, id) {
-            state.activeBlockIdForMenu = id;
-            const menu = document.getElementById('slash-menu');
-            const rect = el.getBoundingClientRect();
-            menu.classList.remove('hidden');
-            let top = rect.bottom + window.scrollY;
-            if (top + 350 > window.innerHeight + window.scrollY) top = rect.top + window.scrollY - 350;
-            menu.style.top = top + 'px'; menu.style.left = rect.left + 'px';
-            lucide.createIcons();
-            const close = (e) => { if(!menu.contains(e.target)) { menu.classList.add('hidden'); document.removeEventListener('mousedown', close); } };
-            document.addEventListener('mousedown', close);
-        }
-
-        function selectSlashItem(t) {
-            const p = state.pages.find(pg => pg.id === state.activePageId);
-            const b = p.blocks.find(bk => bk.id === state.activeBlockIdForMenu);
-            if (b) {
-                b.type = t; b.content = (b.content || '').replace('/', '');
-                if (t === 'flashcard') { b.result = ''; b.flipped = false; }
-                if (t === 'playground') { b.css = 'body { padding: 20px; font-family: sans-serif; }'; b.js = '// Write JS here'; }
-                renderActivePage(); saveState();
-                setTimeout(() => { const el = document.querySelector(`[data-id="${b.id}"] textarea, [data-id="${b.id}"] input`); if(el) el.focus(); }, 20);
-            }
-            document.getElementById('slash-menu').classList.add('hidden');
-        }
-
+        function openSlashMenu(el, id) { state.activeBlockIdForMenu = id; const menu = document.getElementById('slash-menu'); const rect = el.getBoundingClientRect(); menu.classList.remove('hidden'); let top = rect.bottom + window.scrollY; if (top + 350 > window.innerHeight + window.scrollY) top = rect.top + window.scrollY - 350; menu.style.top = top + 'px'; menu.style.left = rect.left + 'px'; lucide.createIcons(); const close = (e) => { if(!menu.contains(e.target)) { menu.classList.add('hidden'); document.removeEventListener('mousedown', close); } }; document.addEventListener('mousedown', close); }
+        function selectSlashItem(t) { const p = state.pages.find(pg => pg.id === state.activePageId); const b = p.blocks.find(bk => bk.id === state.activeBlockIdForMenu); if (b) { b.type = t; b.content = ''; if (t === 'playground') { b.css = 'body { padding: 20px; font-family: sans-serif; }'; b.js = '// Write JS here'; } renderActivePage(); saveState(); } document.getElementById('slash-menu').classList.add('hidden'); }
         function setupEmojiPicker() { document.getElementById('emoji-grid').innerHTML = EMOJI_LIST.map(e => `<button onclick="selectEmoji('${e}')" class="p-2 hover:bg-gray-100 rounded-xl text-2xl transition-all hover:scale-110">${e}</button>`).join(''); }
         function toggleEmojiPicker(e) { e.stopPropagation(); document.getElementById('emoji-picker').classList.toggle('hidden'); }
         function selectEmoji(e) { const p = state.pages.find(pg => pg.id === state.activePageId); if (p) { p.icon = e; renderSidebar(); renderActivePage(); saveState(); } document.getElementById('emoji-picker').classList.add('hidden'); }
-
-        function changeCover() {
-            const page = state.pages.find(p => p.id === state.activePageId);
-            if (page) { page.cover = DEFAULT_COVERS[Math.floor(Math.random() * DEFAULT_COVERS.length)]; document.getElementById('page-cover').src = page.cover; saveState(); }
-        }
-
-        window.onclick = (e) => { if(!e.target.closest('#emoji-picker')) document.getElementById('emoji-picker').classList.add('hidden'); };
 
         init();
     </script>
