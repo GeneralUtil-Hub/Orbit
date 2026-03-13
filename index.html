@@ -1,60 +1,32 @@
-<!DOCTYPE html>
+<DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Puter Workspace Pro</title>
+    <title>Nexus Cloud Workspace</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
+    <script src="https://cdn.ably.com/lib/ably.min-1.js"></script>
+    
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
-        
-        body {
-            font-family: 'Inter', sans-serif;
-            -webkit-font-smoothing: antialiased;
-            background-color: #fff;
-        }
-
-        .scrollbar-hide::-webkit-scrollbar {
-            display: none;
-        }
-
-        .slash-menu-enter {
-            animation: slideIn 0.1s ease-out;
-        }
-
-        @keyframes slideIn {
-            from { opacity: 0; transform: translateY(4px) scale(0.99); }
-            to { opacity: 1; transform: translateY(0) scale(1); }
-        }
-
-        .block-textarea {
-            transition: height 0.05s ease;
-        }
-        
-        input:focus, textarea:focus {
-            outline: none;
-        }
-
-        .whiteboard-canvas {
-            touch-action: none;
-            cursor: crosshair;
-            background-color: #ffffff;
-            display: block;
-        }
-
-        .playground-preview {
-            background-color: white;
-            border: 1px solid #e5e7eb;
-            border-radius: 0.5rem;
-        }
-
-        .drag-handle {
-            cursor: grab;
-        }
-        .drag-handle:active {
-            cursor: grabbing;
-        }
+        body { font-family: 'Inter', sans-serif; -webkit-font-smoothing: antialiased; background-color: #fff; }
+        .scrollbar-hide::-webkit-scrollbar { display: none; }
+        .slash-menu-enter { animation: slideIn 0.1s ease-out; }
+        @keyframes slideIn { from { opacity: 0; transform: translateY(4px) scale(0.99); } to { opacity: 1; transform: translateY(0) scale(1); } }
+        .block-textarea { transition: height 0.05s ease; }
+        input:focus, textarea:focus { outline: none; }
+        .whiteboard-canvas { touch-action: none; cursor: crosshair; background-color: #ffffff; display: block; }
+        .playground-preview { background-color: white; border: 1px solid #e5e7eb; border-radius: 0.5rem; width: 100%; height: 100%; }
+        .drag-handle { cursor: grab; padding: 4px; }
+        .drag-handle:active { cursor: grabbing; }
+        .sortable-ghost { opacity: 0.3; background: #f3f4f6; }
+        .latex-rendered { padding: 1.5rem; background: #fdfdfd; border: 1px solid #f1f1f1; border-radius: 0.75rem; margin: 0.5rem 0; text-align: center; font-size: 1.25em; }
+        .ai-loading-bar { height: 2px; background: linear-gradient(90deg, #3b82f6, #9333ea, #3b82f6); background-size: 200% 100%; animation: moveGradient 2s linear infinite; }
+        @keyframes moveGradient { 0% { background-position: 0% 0%; } 100% { background-position: -200% 0%; } }
     </style>
 </head>
 <body class="bg-white text-gray-900 overflow-hidden">
@@ -68,8 +40,8 @@
             <div class="p-4 flex flex-col gap-4">
                 <div class="flex items-center justify-between">
                     <div class="flex items-center gap-2 font-bold text-sm text-gray-800">
-                        <div class="w-6 h-6 bg-black rounded flex items-center justify-center text-white text-[10px]">P</div>
-                        Puter Docs
+                        <div class="w-6 h-6 bg-blue-600 rounded flex items-center justify-center text-white text-[10px]">N</div>
+                        Nexus Workspace
                     </div>
                     <button onclick="toggleSidebar()" class="hover:bg-gray-200 p-1 rounded transition-colors">
                         <i data-lucide="chevron-left" class="w-4 h-4"></i>
@@ -78,12 +50,7 @@
 
                 <div class="relative">
                     <i data-lucide="search" class="absolute left-2.5 top-2.5 text-gray-400 w-3.5 h-3.5"></i>
-                    <input 
-                        type="text"
-                        oninput="handleSearch(this.value)"
-                        class="w-full bg-gray-200/50 border-none outline-none rounded-lg py-2 pl-8 pr-3 text-xs focus:bg-white focus:ring-1 focus:ring-gray-200 transition-all"
-                        placeholder="Search pages..."
-                    />
+                    <input type="text" oninput="handleSearch(this.value)" class="w-full bg-gray-200/50 border-none outline-none rounded-lg py-2 pl-8 pr-3 text-xs focus:bg-white focus:ring-1 focus:ring-gray-200 transition-all" placeholder="Search pages..." />
                 </div>
             </div>
 
@@ -92,21 +59,22 @@
                     <div class="px-3 py-1 text-[10px] font-bold text-gray-400 uppercase tracking-widest">Favorites</div>
                     <div id="favorites-list"></div>
                 </div>
-
                 <div>
                     <div class="px-3 py-1 text-[10px] font-bold text-gray-400 uppercase tracking-widest flex justify-between items-center group">
-                        Private
-                        <button onclick="addPage()" class="p-0.5 hover:bg-gray-200 rounded transition-opacity">
-                            <i data-lucide="plus" class="w-3 h-3"></i>
-                        </button>
+                        My Pages
+                        <button onclick="addPage()" class="p-0.5 hover:bg-gray-200 rounded transition-opacity"><i data-lucide="plus" class="w-3 h-3"></i></button>
                     </div>
                     <div id="pages-list"></div>
                 </div>
             </div>
 
             <div class="p-4 border-t border-gray-100 space-y-2">
-                <button class="w-full flex items-center gap-2 px-3 py-2 text-xs text-gray-500 hover:bg-gray-200 rounded transition-colors">
-                    <i data-lucide="settings" class="w-3.5 h-3.5"></i> Settings
+                <div class="px-3 py-2 bg-gray-50 border border-gray-100 rounded-xl text-[10px] font-bold text-gray-500 uppercase flex items-center justify-between">
+                    <span class="flex items-center gap-2"><i data-lucide="user" class="w-3 h-3"></i> <span id="current-user-name">Guest</span></span>
+                    <button onclick="document.getElementById('name-modal').classList.remove('hidden')" class="text-blue-500 hover:underline">Edit</button>
+                </div>
+                <button onclick="openCollabModal()" class="w-full flex items-center gap-2 px-3 py-2 text-xs text-orange-600 hover:bg-orange-50 rounded transition-colors font-semibold">
+                    <i data-lucide="share-2" class="w-3.5 h-3.5"></i> Join with Code
                 </button>
                 <button onclick="addPage()" class="w-full flex items-center gap-2 px-3 py-2 text-xs text-blue-600 hover:bg-blue-50 rounded transition-colors font-medium">
                     <i data-lucide="plus" class="w-3.5 h-3.5"></i> New Page
@@ -116,9 +84,7 @@
 
         <!-- Main Content -->
         <main class="flex-1 flex flex-col h-full bg-white relative overflow-hidden">
-            <button id="menu-btn" onclick="toggleSidebar()" class="hidden absolute top-4 left-4 z-40 p-2 bg-white/50 backdrop-blur rounded shadow-sm border border-gray-100 hover:bg-white transition-all">
-                <i data-lucide="menu" class="w-4 h-4"></i>
-            </button>
+            <button id="menu-btn" onclick="toggleSidebar()" class="hidden absolute top-4 left-4 z-40 p-2 bg-white/50 backdrop-blur rounded shadow-sm border border-gray-100 hover:bg-white transition-all"><i data-lucide="menu" class="w-4 h-4"></i></button>
 
             <!-- Top Header Bar -->
             <div class="h-11 border-b border-gray-50 flex items-center justify-between px-6 shrink-0 z-20 bg-white/80 backdrop-blur-md">
@@ -127,13 +93,12 @@
                     <span id="header-title" class="font-medium text-gray-700 truncate max-w-[200px]">Workspace</span>
                 </div>
                 <div class="flex items-center gap-4">
-                    <button onclick="toggleActiveFavorite()" id="favorite-btn" class="p-1.5 rounded hover:bg-gray-100 transition-colors">
-                        <i data-lucide="star" class="w-4 h-4"></i>
-                    </button>
-                    <button class="text-xs font-semibold text-gray-500 hover:bg-gray-100 px-3 py-1.5 rounded transition-all">Share</button>
-                    <button class="p-1.5 hover:bg-gray-100 rounded text-gray-400">
-                        <i data-lucide="more-horizontal" class="w-4.5 h-4.5"></i>
-                    </button>
+                    <div id="collaborators" class="flex -space-x-2 overflow-hidden mr-2"></div>
+                    <div id="sync-status" class="hidden flex items-center gap-1.5 text-[10px] text-green-600 font-bold uppercase tracking-wider">
+                        <div class="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></div> Live Sync
+                    </div>
+                    <button onclick="toggleActiveFavorite()" id="favorite-btn" class="p-1.5 rounded hover:bg-gray-100 transition-colors"><i data-lucide="star" class="w-4 h-4"></i></button>
+                    <button onclick="openSharePageModal()" class="text-xs font-semibold text-gray-500 hover:bg-gray-100 px-3 py-1.5 rounded transition-all">Share Page</button>
                 </div>
             </div>
 
@@ -143,127 +108,109 @@
                     <img id="page-cover" src="" alt="Cover" class="w-full h-full object-cover transition-all duration-700" />
                     <div class="absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-100 transition-opacity"></div>
                     <div class="absolute bottom-4 right-8 opacity-0 group-hover:opacity-100 transition-opacity flex gap-2">
-                        <button onclick="document.getElementById('cover-upload-input').click()" class="bg-white/90 backdrop-blur px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider rounded border border-gray-200 shadow-sm hover:bg-white transition-all flex items-center gap-2">
-                            <i data-lucide="upload" class="w-3 h-3"></i> Upload Banner
-                        </button>
-                        <button onclick="changeCover()" class="bg-white/90 backdrop-blur px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider rounded border border-gray-200 shadow-sm hover:bg-white transition-all">
-                            Random
-                        </button>
+                        <button onclick="document.getElementById('cover-upload-input').click()" class="bg-white/90 backdrop-blur px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider rounded border border-gray-200 shadow-sm hover:bg-white transition-all flex items-center gap-2"><i data-lucide="upload" class="w-3 h-3"></i> Upload Banner</button>
+                        <button onclick="changeCover()" class="bg-white/90 backdrop-blur px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider rounded border border-gray-200 shadow-sm hover:bg-white transition-all">Random</button>
                     </div>
                 </div>
 
                 <div class="max-w-4xl mx-auto px-12 lg:px-24">
                     <div class="mt-[-45px] mb-12 relative z-10 group">
                         <div class="relative inline-block">
-                            <div id="page-icon" onclick="toggleEmojiPicker(event)" class="text-7xl cursor-pointer hover:bg-gray-100 rounded-2xl p-2 transition-all active:scale-95 select-none bg-white shadow-sm border border-gray-100">
-                                🚀
-                            </div>
+                            <div id="page-icon" onclick="toggleEmojiPicker(event)" class="text-7xl cursor-pointer hover:bg-gray-100 rounded-2xl p-2 transition-all active:scale-95 select-none bg-white shadow-sm border border-gray-100">🚀</div>
                             <div id="emoji-picker" class="hidden absolute top-full left-0 mt-2 p-3 bg-white border border-gray-200 rounded-2xl shadow-2xl z-50 w-72">
-                                <div class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2 px-1">Icons</div>
                                 <div class="grid grid-cols-5 gap-1" id="emoji-grid"></div>
                             </div>
                         </div>
-                        <input 
-                            id="main-title-input"
-                            oninput="updatePageTitle(this.value)"
-                            class="w-full text-5xl font-black border-none outline-none mt-6 placeholder-gray-100 tracking-tight"
-                            placeholder="Untitled"
-                        />
-                        <div class="flex gap-4 mt-6 opacity-0 group-hover:opacity-100 transition-opacity">
-                            <button class="flex items-center gap-1.5 text-xs text-gray-400 hover:text-gray-600 transition-colors">
-                                <i data-lucide="smile" class="w-3.5 h-3.5"></i> Comment
-                            </button>
-                            <button class="flex items-center gap-1.5 text-xs text-gray-400 hover:text-gray-600 transition-colors">
-                                <i data-lucide="clock" class="w-3.5 h-3.5"></i> History
-                            </button>
-                        </div>
+                        <input id="main-title-input" oninput="updatePageTitle(this.value)" class="w-full text-5xl font-black border-none outline-none mt-6 placeholder-gray-100 tracking-tight" placeholder="Untitled" />
                     </div>
 
-                    <!-- Editor Area -->
-                    <div id="editor-blocks" class="space-y-2 pb-24">
-                        <!-- Blocks injected here -->
-                    </div>
-
-                    <!-- Bottom Empty Click Area -->
+                    <div id="editor-blocks" class="space-y-1 pb-24 min-h-[50vh]"></div>
                     <div id="bottom-click-area" class="h-96 cursor-text" onclick="focusNewBlockAtBottom()"></div>
-                </div>
-            </div>
-
-            <!-- Floating Footer -->
-            <div class="fixed bottom-8 left-1/2 -translate-x-1/2 flex gap-4 bg-white/90 backdrop-blur-md px-6 py-3 rounded-2xl border border-gray-200 shadow-2xl z-50">
-                <div class="flex items-center gap-4 text-xs font-semibold text-gray-500">
-                    <div class="flex items-center gap-2 px-2 py-1 rounded bg-blue-50 text-blue-600">
-                        <i data-lucide="monitor" class="w-3.5 h-3.5"></i> Puter Cloud
-                    </div>
-                    <div class="w-px h-4 bg-gray-200"></div>
-                    <button class="hover:text-black flex items-center gap-1" onclick="addPage()">+ New Page</button>
-                    <button class="hover:text-black flex items-center gap-1" onclick="alert('Help: Type / for commands')">Help</button>
                 </div>
             </div>
         </main>
     </div>
 
+    <!-- Modals -->
+    <div id="name-modal" class="hidden fixed inset-0 z-[200] bg-black/60 flex items-center justify-center backdrop-blur-md">
+        <div class="bg-white w-96 rounded-3xl p-8 shadow-2xl">
+            <h3 class="text-xl font-bold mb-4">Identity Setup</h3>
+            <p class="text-sm text-gray-500 mb-6 italic">This name will be visible to your friends when you edit pages together.</p>
+            <input id="initial-name" type="text" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none mb-4" placeholder="Enter your name..." />
+            <button onclick="saveInitialName()" class="w-full py-3 bg-blue-600 rounded-xl text-sm font-bold text-white hover:bg-blue-700 transition-all shadow-lg shadow-blue-600/30">Continue</button>
+        </div>
+    </div>
+
+    <div id="share-modal" class="hidden fixed inset-0 z-[100] bg-black/40 flex items-center justify-center backdrop-blur-sm">
+        <div class="bg-white w-96 rounded-3xl p-8 shadow-2xl">
+            <h3 class="text-xl font-bold mb-2">Share this Page</h3>
+            <p class="text-sm text-gray-500 mb-6 leading-relaxed">Friends can enter this code in their "Join Collaboration" menu to work with you.</p>
+            <div class="bg-gray-100 p-4 rounded-2xl mb-6 text-center border border-gray-200">
+                <span id="share-code-display" class="font-mono text-lg font-bold tracking-widest text-blue-600 select-all"></span>
+            </div>
+            <button onclick="closeShareModal()" class="w-full py-3 bg-gray-100 rounded-xl text-sm font-semibold text-gray-600 hover:bg-gray-200 transition-colors">Done</button>
+        </div>
+    </div>
+
+    <div id="collab-modal" class="hidden fixed inset-0 z-[100] bg-black/40 flex items-center justify-center backdrop-blur-sm">
+        <div class="bg-white w-96 rounded-3xl p-8 shadow-2xl">
+            <h3 class="text-xl font-bold mb-2 flex items-center gap-2"><i data-lucide="share-2" class="text-orange-500"></i> Join Collaboration</h3>
+            <p class="text-sm text-gray-500 mb-6 leading-relaxed">Ask your friend for their page's Share Code to join their session.</p>
+            <input id="friend-page-code" type="text" placeholder="Enter code..." class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none mb-4" />
+            <div class="flex gap-3">
+                <button onclick="closeCollabModal()" class="flex-1 px-4 py-3 bg-gray-100 rounded-xl text-sm font-semibold text-gray-600 hover:bg-gray-200 transition-colors">Cancel</button>
+                <button onclick="joinFriendPage()" class="flex-1 px-4 py-3 bg-orange-500 rounded-xl text-sm font-semibold text-white hover:bg-orange-600 shadow-lg shadow-orange-500/30 transition-all">Join Live</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Slash Menu -->
     <div id="slash-menu" class="hidden fixed z-50 w-72 bg-white border border-gray-200 rounded-xl shadow-2xl overflow-hidden slash-menu-enter">
-        <div class="p-3 text-[10px] font-bold text-gray-400 uppercase tracking-widest border-b border-gray-50">Add Blocks</div>
+        <div class="p-3 text-[10px] font-bold text-gray-400 uppercase tracking-widest border-b border-gray-50">Create Blocks</div>
         <div id="slash-menu-items" class="max-h-96 overflow-y-auto scrollbar-hide"></div>
     </div>
 
     <script>
-        // --- State Management ---
-        const DEFAULT_COVERS = [
-            'https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&q=80&w=2000',
-            'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&q=80&w=2000',
-            'https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?auto=format&fit=crop&q=80&w=2000',
-            'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?auto=format&fit=crop&q=80&w=2000'
-        ];
-
+        // --- ROOT ABLY KEY ---
+        const ROOT_ABLY_KEY = "LJhgHg.rF2whQ:Imz-F_d5gOcMGAiJNWIGjhaAXXba8Hpbefj3LtPaT0s"; // PASTE YOUR KEY HERE
+        
+        const DEFAULT_COVERS = ['https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&q=80&w=2000', 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&q=80&w=2000', 'https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?auto=format&fit=crop&q=80&w=2000'];
         const EMOJI_LIST = ['🚀', '🏗️', '📄', '💡', '🎨', '📅', '📝', '🛠️', '🌐', '📊', '💻', '⚡', '📦', '🔥', '📚', '🏠', '🎯', '✨', '🌍', '🍕'];
-
-        const STORAGE_KEY = 'puter_workspace_v3';
+        const STORAGE_KEY = 'nexus_workspace_v6';
 
         let state = {
-            pages: [
-                {
-                    id: '1',
-                    title: 'Quickstart Guide',
-                    icon: '🚀',
-                    isFavorite: true,
-                    cover: DEFAULT_COVERS[0],
-                    blocks: [
-                        { id: 'b1', type: 'h1', content: 'Notion + Puter Workspace' },
-                        { id: 'b2', type: 'callout', content: 'Welcome to your professional workspace. Combine notes with live code and drawing tools.' },
-                        { id: 'b3', type: 'h2', content: 'Interactive Playground' },
-                        { id: 'b4', type: 'playground', content: '<h1>Hello World</h1>\n<p>Try editing me!</p>', css: 'p { color: #3b82f6; font-weight: bold; }' },
-                        { id: 'b5', type: 'divider' },
-                        { id: 'b6', type: 'h2', content: 'Drawing Board' },
-                        { id: 'b7', type: 'whiteboard', content: '' },
-                    ]
-                }
-            ],
+            username: '',
+            pages: [{ id: '1', title: 'Welcome to Nexus', icon: '🚀', isFavorite: true, cover: DEFAULT_COVERS[0], isShared: false, blocks: [{ id: 'b1', type: 'h1', content: 'The Professional Workspace' }, { id: 'b2', type: 'callout', content: 'Type / for commands. Click Share Page to collab with friends!' }] }],
             activePageId: '1',
             sidebarOpen: true,
-            searchQuery: '',
-            terminalHistory: [
-                { type: 'output', content: 'Puter OS v2.5.0 Connected.' }
-            ]
+            searchQuery: ''
         };
 
-        let currentImageBlockId = null;
-
-        // --- Core Functions ---
+        let ably = null;
+        let channel = null;
+        let sortable = null;
 
         function init() {
             loadState();
+            if (!state.username) document.getElementById('name-modal').classList.remove('hidden');
+            else {
+                document.getElementById('current-user-name').innerText = state.username;
+                if (ROOT_ABLY_KEY) initAbly();
+            }
             renderSidebar();
             renderActivePage();
             setupEmojiPicker();
             setupSlashMenu();
+            initDragAndDrop();
             lucide.createIcons();
         }
 
-        function saveState() {
+        function saveState(skipBroadcast = false) {
             localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+            const activePage = state.pages.find(p => p.id === state.activePageId);
+            if (!skipBroadcast && channel && activePage.isShared) {
+                channel.publish('update', { pages: state.pages });
+            }
         }
 
         function loadState() {
@@ -271,142 +218,103 @@
             if (saved) {
                 try {
                     const parsed = JSON.parse(saved);
-                    state.pages = parsed.pages;
-                    state.activePageId = parsed.activePageId;
-                    state.terminalHistory = parsed.terminalHistory || state.terminalHistory;
+                    state = { ...state, ...parsed };
                 } catch (e) { console.error(e); }
             }
         }
 
-        function toggleSidebar() {
-            state.sidebarOpen = !state.sidebarOpen;
-            const sb = document.getElementById('sidebar');
-            const mb = document.getElementById('menu-btn');
-            sb.style.width = state.sidebarOpen ? '256px' : '0px';
-            mb.classList.toggle('hidden', state.sidebarOpen);
+        function saveInitialName() {
+            const name = document.getElementById('initial-name').value;
+            if (!name) return;
+            state.username = name;
+            document.getElementById('name-modal').classList.add('hidden');
+            document.getElementById('current-user-name').innerText = name;
+            saveState(true);
+            if (ROOT_ABLY_KEY) initAbly();
         }
 
-        function handleSearch(val) {
-            state.searchQuery = val;
-            renderSidebar();
-        }
-
-        function addPage() {
-            const newId = 'p' + Date.now();
-            state.pages.push({
-                id: newId,
-                title: 'New Page',
-                icon: '📄',
-                isFavorite: false,
-                cover: DEFAULT_COVERS[Math.floor(Math.random() * DEFAULT_COVERS.length)],
-                blocks: [{ id: 'b' + Date.now(), type: 'h1', content: '' }]
-            });
-            state.activePageId = newId;
-            saveState();
-            renderSidebar();
-            renderActivePage();
-            document.getElementById('main-title-input').focus();
-        }
-
-        function setActivePage(id) {
-            state.activePageId = id;
-            saveState();
-            renderSidebar();
-            renderActivePage();
-            document.getElementById('main-scroll-container').scrollTop = 0;
-        }
-
-        function toggleActiveFavorite() {
-            const page = state.pages.find(p => p.id === state.activePageId);
-            if (page) {
-                page.isFavorite = !page.isFavorite;
-                saveState();
-                renderSidebar();
-                renderActivePage();
-            }
-        }
-
-        function updatePageTitle(val) {
-            const page = state.pages.find(p => p.id === state.activePageId);
-            if (page) {
-                page.title = val;
-                document.getElementById('header-title').innerText = val || 'Untitled';
-                saveState();
-                clearTimeout(window.sidebarUpdateTimer);
-                window.sidebarUpdateTimer = setTimeout(renderSidebar, 200);
-            }
-        }
-
-        function changeCover() {
-            const page = state.pages.find(p => p.id === state.activePageId);
-            if (page) {
-                page.cover = DEFAULT_COVERS[Math.floor(Math.random() * DEFAULT_COVERS.length)];
-                document.getElementById('page-cover').src = page.cover;
-                saveState();
-            }
-        }
-
-        function handleCoverFile(input) {
-            const file = input.files[0];
-            if (!file) return;
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                const page = state.pages.find(p => p.id === state.activePageId);
-                if (page) {
-                    page.cover = e.target.result;
-                    document.getElementById('page-cover').src = page.cover;
+        function initDragAndDrop() {
+            const el = document.getElementById('editor-blocks');
+            if (sortable) sortable.destroy();
+            sortable = Sortable.create(el, {
+                handle: '.drag-handle', animation: 150, ghostClass: 'sortable-ghost',
+                onEnd: function (evt) {
+                    const page = state.pages.find(p => p.id === state.activePageId);
+                    const movedBlock = page.blocks.splice(evt.oldIndex, 1)[0];
+                    page.blocks.splice(evt.newIndex, 0, movedBlock);
                     saveState();
                 }
-            };
-            reader.readAsDataURL(file);
+            });
         }
 
-        // --- Editor Interactions ---
+        // --- Live Collaboration ---
 
-        function focusNewBlockAtBottom() {
+        function initAbly() {
+            if (!ROOT_ABLY_KEY) return;
+            ably = new Ably.Realtime({ key: ROOT_ABLY_KEY, clientId: state.username });
             const page = state.pages.find(p => p.id === state.activePageId);
-            const lastBlock = page.blocks[page.blocks.length - 1];
-            if (lastBlock && lastBlock.type === 'text' && !lastBlock.content) {
-                const el = document.querySelector(`[data-id="${lastBlock.id}"] textarea`);
-                if (el) el.focus();
-            } else {
-                addBlockBelow(lastBlock ? lastBlock.id : null);
-            }
+            if (page.isShared) joinChannel(state.activePageId);
         }
 
-        // --- Rendering ---
-
-        function renderSidebar() {
-            const favList = document.getElementById('favorites-list');
-            const pageList = document.getElementById('pages-list');
-            const filtered = state.pages.filter(p => p.title.toLowerCase().includes(state.searchQuery.toLowerCase()));
+        function joinChannel(pageId) {
+            if (!ably) return;
+            if (channel) { channel.presence.leave(); channel.unsubscribe(); }
             
-            const itemHtml = (p) => `
-                <div class="group relative px-2">
-                    <button onclick="setActivePage('${p.id}')" class="w-full flex items-center gap-2 px-2 py-1.5 text-sm rounded transition-all ${p.id === state.activePageId ? 'bg-gray-200 text-black font-semibold' : 'text-gray-600 hover:bg-gray-200'}">
-                        <span>${p.icon}</span>
-                        <span class="truncate flex-1 text-left">${p.title || 'Untitled'}</span>
-                        ${p.isFavorite ? '<i data-lucide="star" class="w-3 h-3 text-yellow-500 fill-current"></i>' : ''}
-                    </button>
-                    <button onclick="event.stopPropagation(); deletePage('${p.id}')" class="absolute right-4 top-2 opacity-0 group-hover:opacity-100 text-gray-400 hover:text-red-500 transition-opacity">
-                        <i data-lucide="trash-2" class="w-3 h-3"></i>
-                    </button>
-                </div>
-            `;
-
-            favList.innerHTML = filtered.filter(p => p.isFavorite).map(itemHtml).join('');
-            pageList.innerHTML = filtered.filter(p => !p.isFavorite).map(itemHtml).join('');
-            lucide.createIcons();
+            // Ably Option: 'rewind: 1' ensures late joiners see the latest version
+            channel = ably.channels.get('nexus-v6-' + pageId, { params: { rewind: '1' } });
+            channel.subscribe('update', (msg) => {
+                if (msg.clientId === ably.auth.clientId) return;
+                state.pages = msg.data.pages;
+                renderSidebar();
+                renderActivePage();
+            });
+            channel.presence.enter(state.username);
+            channel.presence.subscribe(() => {
+                channel.presence.get((err, members) => { if(!err) renderCollaborators(members); });
+            });
+            document.getElementById('sync-status').classList.remove('hidden');
         }
 
-        function deletePage(id) {
-            if (state.pages.length <= 1) return;
-            state.pages = state.pages.filter(p => p.id !== id);
-            if (state.activePageId === id) state.activePageId = state.pages[0].id;
+        function renderCollaborators(members) {
+            const container = document.getElementById('collaborators');
+            container.innerHTML = members.map(m => `
+                <div class="w-7 h-7 rounded-full bg-blue-500 border-2 border-white flex items-center justify-center text-[10px] text-white font-bold" title="${m.clientId}">
+                    ${m.clientId.charAt(0).toUpperCase()}
+                </div>
+            `).join('');
+        }
+
+        function openSharePageModal() {
+            const page = state.pages.find(p => p.id === state.activePageId);
+            page.isShared = true;
+            document.getElementById('share-code-display').innerText = page.id;
+            document.getElementById('share-modal').classList.remove('hidden');
             saveState();
-            renderSidebar();
+            if (ROOT_ABLY_KEY && !channel) joinChannel(page.id);
             renderActivePage();
         }
+
+        function closeShareModal() { document.getElementById('share-modal').classList.add('hidden'); }
+        function openCollabModal() { document.getElementById('collab-modal').classList.remove('hidden'); }
+        function closeCollabModal() { document.getElementById('collab-modal').classList.add('hidden'); }
+
+        async function joinFriendPage() {
+            const code = document.getElementById('friend-page-code').value;
+            if (!code || !ably) return;
+            // Temporary subscribe to get initial page state
+            const temp = ably.channels.get('nexus-v6-' + code, { params: { rewind: '1' } });
+            temp.subscribe('update', (msg) => {
+                state.pages = msg.data.pages;
+                state.activePageId = code;
+                temp.unsubscribe();
+                joinChannel(code);
+                renderSidebar();
+                renderActivePage();
+                closeCollabModal();
+            });
+        }
+
+        // --- Core Editor Engine ---
 
         function renderActivePage() {
             const page = state.pages.find(p => p.id === state.activePageId) || state.pages[0];
@@ -415,6 +323,7 @@
             document.getElementById('header-icon').innerText = page.icon;
             document.getElementById('main-title-input').value = page.title;
             document.getElementById('header-title').innerText = page.title || 'Untitled';
+            document.getElementById('sync-status').classList.toggle('hidden', !page.isShared);
             
             const favBtn = document.getElementById('favorite-btn');
             favBtn.innerHTML = `<i data-lucide="star" class="w-4 h-4 ${page.isFavorite ? 'fill-yellow-500 text-yellow-500' : ''}"></i>`;
@@ -427,197 +336,103 @@
 
         function createBlockElement(block, isFirst) {
             const div = document.createElement('div');
-            div.className = 'group relative w-full px-1 min-h-[24px]';
+            div.className = 'group relative w-full px-1 min-h-[28px] flex items-start gap-1';
             div.dataset.id = block.id;
 
             let html = '';
             switch (block.type) {
                 case 'h1': html = `<input class="w-full text-4xl font-bold border-none outline-none bg-transparent placeholder-gray-200 py-2" value="${block.content}" placeholder="Heading 1" />`; break;
                 case 'h2': html = `<input class="w-full text-2xl font-semibold border-none outline-none bg-transparent placeholder-gray-200 mt-4 py-1" value="${block.content}" placeholder="Heading 2" />`; break;
-                case 'divider': html = `<hr class="my-4 border-gray-200" />`; break;
-                case 'todo': html = `<div class="flex items-start gap-2 py-1"><input type="checkbox" ${block.checked ? 'checked' : ''} class="mt-1.5 h-4 w-4 rounded border-gray-300 cursor-pointer" /><input class="flex-1 border-none outline-none bg-transparent ${block.checked ? 'line-through text-gray-400' : ''}" value="${block.content}" placeholder="To-do" /></div>`; break;
-                case 'bullet': html = `<div class="flex items-start gap-3 py-1"><div class="w-1.5 h-1.5 rounded-full bg-gray-400 mt-2.5 shrink-0"></div><input class="flex-1 border-none outline-none bg-transparent" value="${block.content}" placeholder="List item" /></div>`; break;
-                case 'callout': html = `<div class="flex gap-3 p-4 bg-gray-50 border border-gray-100 rounded-lg my-2"><div class="text-xl">💡</div><textarea rows="1" class="block-textarea w-full resize-none border-none outline-none bg-transparent leading-relaxed">${block.content}</textarea></div>`; break;
-                case 'image': html = block.content ? `<div class="relative group/img"><img src="${block.content}" class="w-full rounded-xl shadow-sm my-4 border border-gray-100" /><button onclick="triggerImageUpload('${block.id}')" class="absolute top-6 right-2 opacity-0 group-hover/img:opacity-100 bg-white/90 p-1.5 rounded-lg shadow-sm border border-gray-200 hover:bg-white transition-all"><i data-lucide="edit-3" class="w-4 h-4 text-gray-600"></i></button></div>` : `<div onclick="triggerImageUpload('${block.id}')" class="flex flex-col items-center justify-center p-8 border-2 border-dashed border-gray-200 rounded-xl hover:bg-gray-50 cursor-pointer text-gray-400 transition-colors my-2"><i data-lucide="image" class="w-8 h-8 mb-2"></i><span class="text-sm">Click to upload image</span></div>`; break;
-                case 'whiteboard': html = `<div class="my-4 border border-gray-200 rounded-xl overflow-hidden shadow-sm bg-white"><div class="p-2 bg-gray-50 border-b flex justify-between items-center"><span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest px-2">Whiteboard</span><button onclick="clearWhiteboard('${block.id}')" class="text-[10px] px-2 py-1 hover:bg-gray-200 rounded bg-white border font-bold">Clear</button></div><div class="relative w-full h-80"><canvas id="canvas-${block.id}" class="whiteboard-canvas w-full h-full"></canvas></div></div>`; break;
-                case 'playground': html = `
-                    <div class="my-4 border border-gray-200 rounded-xl overflow-hidden shadow-sm bg-white">
-                        <div class="bg-gray-50 px-4 py-2 border-b flex justify-between items-center">
-                            <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Code Playground</span>
-                            <div class="flex gap-2">
-                                <button onclick="togglePlaygroundView('${block.id}')" class="text-[10px] font-bold text-blue-600 hover:bg-blue-50 px-2 py-1 rounded">Toggle View</button>
-                            </div>
-                        </div>
-                        <div class="flex flex-col md:flex-row h-96" id="playground-container-${block.id}">
-                            <div class="flex-1 flex flex-col border-r border-gray-100">
-                                <div class="bg-gray-100/50 px-2 py-0.5 text-[9px] font-bold text-gray-400 uppercase">HTML / Content</div>
-                                <textarea class="flex-1 p-3 font-mono text-xs resize-none outline-none" id="pg-html-${block.id}" oninput="updatePlayground('${block.id}')" placeholder="HTML...">${block.content || ''}</textarea>
-                                <div class="bg-gray-100/50 px-2 py-0.5 text-[9px] font-bold text-gray-400 uppercase border-t border-gray-100">CSS / Styles</div>
-                                <textarea class="flex-1 p-3 font-mono text-xs resize-none outline-none" id="pg-css-${block.id}" oninput="updatePlayground('${block.id}')" placeholder="CSS...">${block.css || ''}</textarea>
-                            </div>
-                            <div class="flex-1 bg-white p-2">
-                                <iframe id="pg-preview-${block.id}" class="w-full h-full playground-preview"></iframe>
-                            </div>
-                        </div>
-                    </div>`; break;
-                case 'code': html = `
-                    <div class="my-4 rounded-xl overflow-hidden border border-gray-200 shadow-sm bg-white">
-                        <div class="bg-gray-50 px-4 py-2 flex justify-between items-center border-b">
-                            <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Puter Script</span>
-                            <button onclick="runCodeBlock('${block.id}')" class="text-xs font-bold text-blue-600 flex items-center gap-1 hover:bg-blue-50 px-2 py-1 rounded transition-colors"><i data-lucide="play" class="w-3 h-3"></i> Run</button>
-                        </div>
-                        <textarea class="w-full font-mono text-sm bg-white p-4 resize-none min-h-[120px] outline-none" placeholder="// Puter.js code...">${block.content || ''}</textarea>
-                        <div id="output-${block.id}" class="hidden p-4 bg-[#1a1a1a] text-green-400 font-mono text-[10px] border-t border-black max-h-32 overflow-y-auto"></div>
-                    </div>`; break;
-                case 'puter': html = createTerminalHtml(); break;
-                default: html = `<textarea rows="1" class="block-textarea w-full resize-none border-none outline-none bg-transparent placeholder-gray-300 py-1.5 leading-relaxed" placeholder="Type '/' for commands...">${block.content || ''}</textarea>`;
+                case 'divider': html = `<hr class="w-full my-4 border-gray-200" />`; break;
+                case 'todo': html = `<div class="flex items-start gap-2 py-1 flex-1"><input type="checkbox" ${block.checked ? 'checked' : ''} class="mt-1.5 h-4 w-4 rounded border-gray-300 cursor-pointer" /><input class="flex-1 border-none outline-none bg-transparent ${block.checked ? 'line-through text-gray-400' : ''}" value="${block.content}" placeholder="To-do" /></div>`; break;
+                case 'bullet': html = `<div class="flex items-start gap-3 py-1 flex-1"><div class="w-1.5 h-1.5 rounded-full bg-gray-400 mt-2.5 shrink-0"></div><input class="flex-1 border-none outline-none bg-transparent" value="${block.content}" placeholder="List item" /></div>`; break;
+                case 'callout': html = `<div class="flex gap-3 p-4 bg-gray-50 border border-gray-100 rounded-lg my-2 flex-1"><div class="text-xl">💡</div><textarea rows="1" class="block-textarea w-full resize-none border-none outline-none bg-transparent leading-relaxed">${block.content}</textarea></div>`; break;
+                case 'ai': html = `<div class="my-4 border border-blue-100 rounded-2xl overflow-hidden shadow-sm bg-blue-50/20 flex-1"><div class="bg-blue-50 px-4 py-2 flex justify-between items-center border-b border-blue-100"><span class="text-[10px] font-bold text-blue-500 uppercase tracking-widest flex items-center gap-1"><i data-lucide="sparkles" class="w-3 h-3"></i> AI Assistant</span><button onclick="runAiPrompt('${block.id}')" class="text-xs font-bold text-blue-600 px-2 py-1 rounded">Generate</button></div><input class="w-full bg-white p-4 outline-none text-sm italic" placeholder="Prompt (e.g. Summarize photosynthesis)..." value="${block.content}" oninput="updateBlockContent('${block.id}', this.value)" /><div id="ai-result-${block.id}" class="p-4 text-sm text-gray-700 whitespace-pre-wrap">${block.result || 'Thinking...'}</div></div>`; break;
+                case 'latex': html = `<div class="my-4 flex-1"><textarea class="w-full font-mono text-sm bg-gray-50 p-3 rounded-t-xl border border-gray-200 outline-none resize-none" oninput="updateLatex('${block.id}', this.value)" placeholder="Enter LaTeX...">${block.content}</textarea><div id="latex-preview-${block.id}" class="latex-rendered"></div></div>`; break;
+                case 'playground': html = `<div class="my-4 border border-gray-200 rounded-xl overflow-hidden shadow-sm bg-white flex-1"><div class="bg-gray-50 px-4 py-2 border-b text-[10px] font-bold text-gray-400 uppercase tracking-widest">Code Playground</div><div class="flex flex-col md:flex-row h-96"><div class="flex-1 flex flex-col border-r border-gray-100"><textarea class="flex-1 p-3 font-mono text-xs outline-none resize-none" id="pg-html-${block.id}" oninput="updatePlayground('${block.id}')" placeholder="HTML...">${block.content || ''}</textarea><textarea class="flex-1 p-3 font-mono text-xs border-t border-gray-100 outline-none resize-none" id="pg-css-${block.id}" oninput="updatePlayground('${block.id}')" placeholder="CSS...">${block.css || ''}</textarea></div><div class="flex-1 bg-white p-2"><iframe id="pg-preview-${block.id}" class="playground-preview"></iframe></div></div></div>`; break;
+                case 'whiteboard': html = `<div class="my-4 border border-gray-200 rounded-xl overflow-hidden shadow-sm bg-white flex-1"><div class="p-2 bg-gray-50 border-b flex justify-between items-center px-4"><span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Whiteboard</span><button onclick="clearWhiteboard('${block.id}')" class="text-[10px] px-2 py-1 hover:bg-gray-200 rounded bg-white border font-bold">Clear</button></div><div class="relative w-full h-80"><canvas id="canvas-${block.id}" class="whiteboard-canvas w-full h-full"></canvas></div></div>`; break;
+                case 'image': html = block.content ? `<div class="relative group/img flex-1"><img src="${block.content}" class="w-full rounded-xl shadow-sm my-4 border border-gray-100" /></div>` : `<div onclick="triggerImageUpload('${block.id}')" class="flex-1 flex flex-col items-center justify-center p-8 border-2 border-dashed border-gray-200 rounded-xl hover:bg-gray-50 cursor-pointer text-gray-400 my-2"><span class="text-sm font-medium">Click to upload image</span></div>`; break;
+                default: html = `<textarea rows="1" class="block-textarea flex-1 resize-none border-none outline-none bg-transparent placeholder-gray-300 py-1.5 leading-relaxed" placeholder="Type '/' for commands...">${block.content || ''}</textarea>`;
             }
 
             div.innerHTML = `
-                <div class="absolute -left-10 top-1 opacity-0 group-hover:opacity-100 transition-all flex items-center gap-0.5 z-10 p-1">
+                <div class="flex flex-col items-center opacity-0 group-hover:opacity-100 transition-all py-1 shrink-0">
+                    <div class="drag-handle p-1 text-gray-300 hover:text-gray-500 transition-colors"><i data-lucide="grip-vertical" class="w-3.5 h-3.5"></i></div>
                     <button onclick="deleteBlock('${block.id}')" class="p-1 hover:bg-red-50 rounded text-gray-300 hover:text-red-500 transition-colors"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>
-                    <div class="p-1 drag-handle text-gray-200 hover:text-gray-400 transition-colors"><i data-lucide="grip-vertical" class="w-3.5 h-3.5"></i></div>
                 </div>
                 ${html}
             `;
 
-            // Setup Events for Inputs
+            // Setup Events
             div.querySelectorAll('input, textarea').forEach(input => {
                 if (input.tagName === 'TEXTAREA') {
-                    const adjustHeight = () => { input.style.height = 'auto'; input.style.height = input.scrollHeight + 'px'; };
-                    setTimeout(adjustHeight, 0);
-                    input.addEventListener('input', adjustHeight);
+                    const adjust = () => { input.style.height = 'auto'; input.style.height = input.scrollHeight + 'px'; };
+                    setTimeout(adjust, 0); input.addEventListener('input', adjust);
                 }
-
                 input.addEventListener('input', (e) => { 
-                    block.content = e.target.value; 
-                    if (input.id && input.id.startsWith('pg-css-')) block.css = e.target.value;
-                    saveState(); 
+                    if (['latex', 'ai', 'playground'].includes(block.type)) return;
+                    block.content = e.target.value; saveState(); 
                 });
-
                 input.addEventListener('keydown', (e) => {
-                    if (e.key === '/') {
-                        if (block.type === 'text' && !block.content) openSlashMenu(div, block.id);
-                    }
-                    else if (e.key === 'Enter' && block.type !== 'code' && block.type !== 'playground' && !e.shiftKey) { 
-                        e.preventDefault(); addBlockBelow(block.id); 
-                    }
-                    else if (e.key === 'Backspace' && (block.content === '' || !block.content) && !isFirst) { 
-                        e.preventDefault(); deleteBlock(block.id); 
-                    }
+                    if (e.key === '/') { if (block.type === 'text' && !block.content) openSlashMenu(div, block.id); }
+                    else if (e.key === 'Enter' && !['ai', 'latex', 'playground'].includes(block.type) && !e.shiftKey) { e.preventDefault(); addBlockBelow(block.id); }
+                    else if (e.key === 'Backspace' && !block.content && !isFirst) { e.preventDefault(); deleteBlock(block.id); }
                 });
 
                 if (input.type === 'checkbox') {
                     input.addEventListener('change', (e) => {
                         block.checked = e.target.checked;
                         const t = div.querySelector('input[type="text"], textarea');
-                        if (t) t.classList.toggle('line-through', block.checked);
-                        if (t) t.classList.toggle('text-gray-400', block.checked);
+                        if (t) { t.classList.toggle('line-through', block.checked); t.classList.toggle('text-gray-400', block.checked); }
                         saveState();
                     });
                 }
             });
 
-            if (block.type === 'whiteboard') setTimeout(() => setupWhiteboard(block), 30);
-            if (block.type === 'playground') setTimeout(() => updatePlayground(block.id), 30);
-            if (block.type === 'puter') setupTerminalLogic(div);
-
+            if (block.type === 'whiteboard') setTimeout(() => setupWhiteboard(block), 50);
+            if (block.type === 'latex') setTimeout(() => updateLatex(block.id, block.content), 50);
+            if (block.type === 'playground') setTimeout(() => updatePlayground(block.id), 50);
             return div;
         }
 
-        // --- Block Logic: Playground ---
+        // --- Logic: AI, Playground, & Whiteboard ---
+
+        async function runAiPrompt(id) {
+            const page = state.pages.find(p => p.id === state.activePageId);
+            const block = page.blocks.find(b => b.id === id);
+            const resEl = document.getElementById(`ai-result-${id}`);
+            resEl.innerHTML = `<div class="ai-loading-bar mt-2"></div>`;
+            try {
+                const response = await puter.ai.chat(block.content);
+                block.result = response; resEl.innerText = response; saveState();
+            } catch (err) { resEl.innerText = "Error: Ensure Puter cloud environment is active."; }
+        }
 
         function updatePlayground(id) {
             const page = state.pages.find(p => p.id === state.activePageId);
             const block = page.blocks.find(b => b.id === id);
-            const htmlInput = document.getElementById(`pg-html-${id}`);
-            const cssInput = document.getElementById(`pg-css-${id}`);
-            const preview = document.getElementById(`pg-preview-${id}`);
-            
-            if (!preview || !htmlInput) return;
-
-            const content = htmlInput.value;
-            const style = cssInput ? cssInput.value : '';
-            
-            const doc = `
-                <html>
-                    <head><style>${style}</style></head>
-                    <body>${content}</body>
-                </html>
-            `;
-            preview.srcdoc = doc;
-
-            block.content = content;
-            block.css = style;
-            saveState();
+            const html = document.getElementById(`pg-html-${id}`).value;
+            const css = document.getElementById(`pg-css-${id}`).value;
+            document.getElementById(`pg-preview-${id}`).srcdoc = `<html><head><style>${css}</style></head><body>${html}</body></html>`;
+            block.content = html; block.css = css; saveState();
         }
-
-        function togglePlaygroundView(id) {
-            const container = document.getElementById(`playground-container-${id}`);
-            container.classList.toggle('flex-col');
-            container.classList.toggle('md:flex-row');
-        }
-
-        // --- Block Logic: Whiteboard ---
 
         function setupWhiteboard(block) {
             const canvas = document.getElementById(`canvas-${block.id}`);
             if (!canvas) return;
             const ctx = canvas.getContext('2d');
             const rect = canvas.parentElement.getBoundingClientRect();
-            canvas.width = rect.width;
-            canvas.height = rect.height;
-            
-            if (block.content) {
-                const img = new Image();
-                img.onload = () => ctx.drawImage(img, 0, 0);
-                img.src = block.content;
-            }
-
+            canvas.width = rect.width; canvas.height = rect.height;
+            if (block.content) { const img = new Image(); img.onload = () => ctx.drawImage(img, 0, 0); img.src = block.content; }
             let drawing = false;
-            let lastX = 0, lastY = 0;
-
-            const getPos = (e) => {
-                const r = canvas.getBoundingClientRect();
-                const cx = e.touches ? e.touches[0].clientX : e.clientX;
-                const cy = e.touches ? e.touches[0].clientY : e.clientY;
-                return { x: cx - r.left, y: cy - r.top };
-            };
-
-            const start = (e) => {
-                drawing = true;
-                const p = getPos(e);
-                lastX = p.x; lastY = p.y;
-                ctx.beginPath();
-                ctx.moveTo(lastX, lastY);
-            };
-
-            const stop = () => {
-                if (!drawing) return;
-                drawing = false;
-                ctx.closePath();
-                block.content = canvas.toDataURL();
-                saveState();
-            };
-
-            const draw = (e) => {
-                if (!drawing) return;
-                const p = getPos(e);
-                ctx.lineWidth = 3;
-                ctx.lineCap = 'round';
-                ctx.lineJoin = 'round';
-                ctx.strokeStyle = '#3b82f6';
-                ctx.lineTo(p.x, p.y);
-                ctx.stroke();
-                lastX = p.x; lastY = p.y;
-            };
-
-            canvas.addEventListener('mousedown', start);
-            canvas.addEventListener('mousemove', draw);
-            window.addEventListener('mouseup', stop);
-            canvas.addEventListener('touchstart', (ev) => { if(ev.touches.length === 1) start(ev); });
-            canvas.addEventListener('touchmove', (ev) => { if(ev.touches.length === 1) draw(ev); });
-            window.addEventListener('touchend', stop);
+            const getPos = (e) => { const r = canvas.getBoundingClientRect(); const cx = e.touches ? e.touches[0].clientX : e.clientX; const cy = e.touches ? e.touches[0].clientY : e.clientY; return { x: cx - r.left, y: cy - r.top }; };
+            const start = (e) => { drawing = true; const p = getPos(e); ctx.beginPath(); ctx.moveTo(p.x, p.y); };
+            const stop = () => { if (!drawing) return; drawing = false; ctx.closePath(); block.content = canvas.toDataURL(); saveState(); };
+            const draw = (e) => { if (!drawing) return; const p = getPos(e); ctx.lineWidth = 3; ctx.lineCap = 'round'; ctx.strokeStyle = '#3b82f6'; ctx.lineTo(p.x, p.y); ctx.stroke(); };
+            canvas.onmousedown = start; canvas.onmousemove = draw; window.onmouseup = stop;
+            canvas.ontouchstart = (ev) => { if(ev.touches.length === 1) start(ev); };
+            canvas.ontouchmove = (ev) => { if(ev.touches.length === 1) draw(ev); };
+            window.ontouchend = stop;
         }
 
         function clearWhiteboard(id) {
@@ -626,126 +441,93 @@
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             const page = state.pages.find(p => p.id === state.activePageId);
             const block = page.blocks.find(b => b.id === id);
-            block.content = '';
-            saveState();
+            block.content = ''; saveState();
         }
 
-        // --- Block Logic: Images & Code ---
+        // --- Helpers ---
 
-        function triggerImageUpload(blockId) {
-            currentImageBlockId = blockId;
-            document.getElementById('block-image-upload-input').click();
+        function toggleSidebar() { state.sidebarOpen = !state.sidebarOpen; document.getElementById('sidebar').style.width = state.sidebarOpen ? '256px' : '0px'; document.getElementById('menu-btn').classList.toggle('hidden', state.sidebarOpen); }
+        function handleSearch(val) { state.searchQuery = val; renderSidebar(); }
+        function updatePageTitle(v) { const p = state.pages.find(pg => pg.id === state.activePageId); if(p) { p.title = v; document.getElementById('header-title').innerText = v || 'Untitled'; saveState(); renderSidebar(); } }
+        function addPage() { const newId = 'p' + Math.random().toString(36).substr(2, 6); state.pages.push({ id: newId, title: 'New Page', icon: '📄', isFavorite: false, cover: DEFAULT_COVERS[0], isShared: false, blocks: [{ id: 'b' + Date.now(), type: 'h1', content: '' }] }); state.activePageId = newId; saveState(); renderSidebar(); renderActivePage(); }
+        function setActivePage(id) { state.activePageId = id; saveState(); renderSidebar(); renderActivePage(); if (channel) joinChannel(id); }
+        function deleteBlock(id) { const page = state.pages.find(p => p.id === state.activePageId); if (page.blocks.length <= 1) return; page.blocks = page.blocks.filter(b => b.id !== id); saveState(); renderActivePage(); }
+        function addBlockBelow(id) { const page = state.pages.find(p => p.id === state.activePageId); const idx = id ? page.blocks.findIndex(b => b.id === id) : -1; const newBlock = { id: 'b' + Date.now(), type: 'text', content: '' }; if (idx === -1) page.blocks.push(newBlock); else page.blocks.splice(idx + 1, 0, newBlock); saveState(); renderActivePage(); }
+        function focusNewBlockAtBottom() { const page = state.pages.find(p => p.id === state.activePageId); const last = page.blocks[page.blocks.length - 1]; if (last && last.type === 'text' && !last.content) { const el = document.querySelector(`[data-id="${last.id}"] textarea`); if (el) el.focus(); } else addBlockBelow(last ? last.id : null); }
+        function updateBlockContent(id, val) { const page = state.pages.find(p => p.id === state.activePageId); const block = page.blocks.find(b => b.id === id); block.content = val; saveState(); }
+        function updateLatex(id, val) { const p = state.pages.find(pg => pg.id === state.activePageId); const b = p.blocks.find(bk => bk.id === id); b.content = val; const pre = document.getElementById(`latex-preview-${id}`); if (pre) katex.render(val, pre, { throwOnError: false, displayMode: true }); saveState(); }
+        
+        function triggerImageUpload(id) {
+            const input = document.getElementById('block-image-upload-input');
+            input.onchange = (e) => {
+                const file = e.target.files[0]; if (!file) return;
+                const reader = new FileReader();
+                reader.onload = (re) => {
+                    const page = state.pages.find(p => p.id === state.activePageId);
+                    const block = page.blocks.find(b => b.id === id);
+                    if (block) { block.content = re.target.result; renderActivePage(); saveState(); }
+                };
+                reader.readAsDataURL(file);
+            };
+            input.click();
         }
 
-        function handleBlockImageFile(input) {
-            const file = input.files[0];
-            if (!file || !currentImageBlockId) return;
+        function handleCoverFile(input) {
+            const file = input.files[0]; if (!file) return;
             const reader = new FileReader();
             reader.onload = (e) => {
                 const page = state.pages.find(p => p.id === state.activePageId);
-                const block = page.blocks.find(b => b.id === currentImageBlockId);
-                if (block) { block.content = e.target.result; renderActivePage(); saveState(); }
+                if (page) { page.cover = e.target.result; document.getElementById('page-cover').src = page.cover; saveState(); }
             };
             reader.readAsDataURL(file);
         }
 
-        function runCodeBlock(id) {
-            const out = document.getElementById(`output-${id}`);
-            out.classList.remove('hidden');
-            out.innerHTML = `<span class="text-gray-500 animate-pulse">Running Puter.js Script...</span>`;
-            setTimeout(() => {
-                out.innerHTML = `
-                    <div class="text-blue-400 font-bold mb-1">Execution Log</div>
-                    <div class="text-gray-400">[0.0ms] Puter context initialized.</div>
-                    <div class="text-green-500">[12.4ms] Puter.fs.write: success.</div>
-                    <div class="text-green-500">[21.1ms] Puter.ui.notify: success.</div>
-                `;
-            }, 500);
-        }
+        // --- Sidebar & Search ---
 
-        // --- Terminal ---
-
-        function createTerminalHtml() {
-            return `
-                <div class="bg-[#191919] text-[#e0e0e0] font-mono p-4 rounded-xl h-80 flex flex-col shadow-xl border border-white/10 my-4 overflow-hidden">
-                    <div class="flex items-center gap-2 mb-3 border-b border-white/5 pb-2 text-[10px] text-gray-500 uppercase tracking-widest"><i data-lucide="terminal" class="w-3 h-3"></i> Puter Terminal</div>
-                    <div class="terminal-history flex-1 overflow-y-auto space-y-1 text-sm scrollbar-hide">
-                        ${state.terminalHistory.map(h => `<div class="${h.type === 'input' ? 'flex gap-2 text-blue-400' : 'opacity-80'}">${h.type === 'input' ? '<span>$</span>' : ''}<span class="whitespace-pre-wrap">${h.content}</span></div>`).join('')}
-                        <div class="flex gap-2"><span class="text-blue-400">$</span><input class="terminal-input bg-transparent border-none outline-none flex-1 p-0 focus:ring-0" /></div>
-                    </div>
+        function renderSidebar() {
+            const favList = document.getElementById('favorites-list');
+            const pageList = document.getElementById('pages-list');
+            const filtered = state.pages.filter(p => p.title.toLowerCase().includes(state.searchQuery.toLowerCase()));
+            const html = (p) => `
+                <div class="group relative px-2">
+                    <button onclick="setActivePage('${p.id}')" class="w-full flex items-center gap-2 px-2 py-1.5 text-sm rounded transition-all ${p.id === state.activePageId ? 'bg-gray-200 text-black font-semibold' : 'text-gray-600 hover:bg-gray-200'}">
+                        <span class="shrink-0">${p.icon}</span>
+                        <span class="truncate flex-1 text-left">${p.title || 'Untitled'}</span>
+                        ${p.isFavorite ? '<i data-lucide="star" class="w-3 h-3 text-yellow-500 fill-current"></i>' : ''}
+                        ${p.isShared ? '<i data-lucide="share-2" class="w-3 h-3 text-orange-400"></i>' : ''}
+                    </button>
+                    <button onclick="event.stopPropagation(); deletePage('${p.id}')" class="absolute right-4 top-2 opacity-0 group-hover:opacity-100 text-gray-400 hover:text-red-500 transition-opacity"><i data-lucide="trash-2" class="w-3 h-3"></i></button>
                 </div>`;
+            favList.innerHTML = filtered.filter(p => p.isFavorite).map(html).join('');
+            pageList.innerHTML = filtered.filter(p => !p.isFavorite).map(html).join('');
+            lucide.createIcons();
         }
 
-        function setupTerminalLogic(div) {
-            const input = div.querySelector('.terminal-input');
-            const history = div.querySelector('.terminal-history');
-            if (history) history.scrollTop = history.scrollHeight;
-            input.addEventListener('keydown', (e) => {
-                if (e.key === 'Enter') {
-                    const val = input.value.trim().toLowerCase();
-                    state.terminalHistory.push({ type: 'input', content: input.value });
-                    if (val === 'help') state.terminalHistory.push({ type: 'output', content: 'help, clear, date, sysinfo, status, whoami' });
-                    else if (val === 'clear') state.terminalHistory = [];
-                    else if (val === 'sysinfo') state.terminalHistory.push({ type: 'output', content: 'Node: Puter-Cloud-VNode-9\nUptime: 24d 11h' });
-                    else if (val !== '') state.terminalHistory.push({ type: 'output', content: `sh: command not found: ${val}` });
-                    input.value = '';
-                    renderActivePage(); saveState();
-                }
-            });
-        }
-
-        // --- Editor Core Helpers ---
-
-        function deleteBlock(id) {
+        function changeCover() {
             const page = state.pages.find(p => p.id === state.activePageId);
-            if (page.blocks.length <= 1) return;
-            const index = page.blocks.findIndex(b => b.id === id);
-            page.blocks = page.blocks.filter(b => b.id !== id);
-            saveState();
-            renderActivePage();
-            if (index > 0) {
-                const prev = page.blocks[index-1];
-                setTimeout(() => { const el = document.querySelector(`[data-id="${prev.id}"] textarea, [data-id="${prev.id}"] input`); if(el) el.focus(); }, 10);
-            }
+            if (page) { page.cover = DEFAULT_COVERS[Math.floor(Math.random() * DEFAULT_COVERS.length)]; document.getElementById('page-cover').src = page.cover; saveState(); }
         }
 
-        function addBlockBelow(id) {
+        function toggleActiveFavorite() {
             const page = state.pages.find(p => p.id === state.activePageId);
-            const index = id ? page.blocks.findIndex(b => b.id === id) : -1;
-            const newBlock = { id: 'b' + Date.now(), type: 'text', content: '' };
-            if (index === -1) page.blocks.push(newBlock);
-            else page.blocks.splice(index + 1, 0, newBlock);
-            saveState();
-            renderActivePage();
-            setTimeout(() => { const el = document.querySelector(`[data-id="${newBlock.id}"] textarea`); if(el) el.focus(); }, 10);
+            if (page) { page.isFavorite = !page.isFavorite; saveState(); renderSidebar(); renderActivePage(); }
         }
 
-        // --- UI Utils ---
-
-        function setupEmojiPicker() {
-            const grid = document.getElementById('emoji-grid');
-            grid.innerHTML = EMOJI_LIST.map(e => `<button onclick="selectEmoji('${e}')" class="p-2 hover:bg-gray-100 rounded-xl text-2xl transition-all hover:scale-110">${e}</button>`).join('');
-        }
-
-        function toggleEmojiPicker(e) { e.stopPropagation(); document.getElementById('emoji-picker').classList.toggle('hidden'); }
-        function selectEmoji(e) { 
-            const page = state.pages.find(p => p.id === state.activePageId);
-            if (page) { page.icon = e; renderSidebar(); renderActivePage(); saveState(); }
-            document.getElementById('emoji-picker').classList.add('hidden');
-        }
+        // --- Slash Menu & Pickers ---
 
         function setupSlashMenu() {
             const items = [
-                { type: 'text', icon: 'type', label: 'Text', desc: 'Basic text block' },
-                { type: 'h1', icon: 'heading-1', label: 'Heading 1', desc: 'Big title' },
-                { type: 'h2', icon: 'heading-2', label: 'Heading 2', desc: 'Section header' },
-                { type: 'todo', icon: 'check-square', label: 'To-do List', desc: 'Task with checkbox' },
-                { type: 'playground', icon: 'layout', label: 'Code Playground', desc: 'HTML/CSS Preview' },
+                { type: 'ai', icon: 'sparkles', label: 'AI Assistant', desc: 'Notes with Puter AI' },
+                { type: 'playground', icon: 'layout', label: 'Playground', desc: 'HTML/CSS/JS Preview' },
+                { type: 'latex', icon: 'sigma', label: 'Math Formula', desc: 'KaTeX rendering' },
+                { type: 'text', icon: 'type', label: 'Text', desc: 'Plain writing' },
+                { type: 'h1', icon: 'heading-1', label: 'Heading 1', desc: 'Large title' },
+                { type: 'h2', icon: 'heading-2', label: 'Heading 2', desc: 'Section title' },
+                { type: 'todo', icon: 'check-square', label: 'To-do List', desc: 'Checkboxes' },
+                { type: 'bullet', icon: 'list', label: 'Bullet List', desc: 'Bulleted items' },
                 { type: 'whiteboard', icon: 'pencil', label: 'Whiteboard', desc: 'Drawing space' },
-                { type: 'divider', icon: 'minus', label: 'Divider', desc: 'Separator line' },
-                { type: 'callout', icon: 'info', label: 'Callout', desc: 'Important note' },
                 { type: 'image', icon: 'image', label: 'Image', desc: 'Upload file' },
-                { type: 'code', icon: 'terminal', label: 'Puter Script', desc: 'Cloud script' },
+                { type: 'divider', icon: 'minus', label: 'Divider', desc: 'Visual separator' },
             ];
             document.getElementById('slash-menu-items').innerHTML = items.map(i => `
                 <button onclick="selectSlashItem('${i.type}')" class="w-full flex items-center gap-3 p-3 hover:bg-gray-100 text-left transition-colors">
@@ -755,34 +537,34 @@
             `).join('');
         }
 
-        function openSlashMenu(el, blockId) {
-            state.activeBlockIdForMenu = blockId;
+        function openSlashMenu(el, id) {
+            state.activeBlockIdForMenu = id;
             const menu = document.getElementById('slash-menu');
             const rect = el.getBoundingClientRect();
             menu.classList.remove('hidden');
             let top = rect.bottom + window.scrollY;
             if (top + 350 > window.innerHeight + window.scrollY) top = rect.top + window.scrollY - 350;
-            menu.style.top = top + 'px';
-            menu.style.left = rect.left + 'px';
+            menu.style.top = top + 'px'; menu.style.left = rect.left + 'px';
             lucide.createIcons();
             const close = (e) => { if(!menu.contains(e.target)) { menu.classList.add('hidden'); document.removeEventListener('mousedown', close); } };
             document.addEventListener('mousedown', close);
         }
 
-        function selectSlashItem(type) {
-            const page = state.pages.find(p => p.id === state.activePageId);
-            const block = page.blocks.find(b => b.id === state.activeBlockIdForMenu);
-            if (block) {
-                block.type = type;
-                block.content = (block.content || '').replace('/', '');
+        function selectSlashItem(t) {
+            const p = state.pages.find(pg => pg.id === state.activePageId);
+            const b = p.blocks.find(bk => bk.id === state.activeBlockIdForMenu);
+            if (b) {
+                b.type = t; b.content = (b.content || '').replace('/', '');
+                if (t === 'playground') b.css = 'body { padding: 20px; font-family: sans-serif; }';
                 renderActivePage(); saveState();
-                setTimeout(() => { 
-                    const sel = `[data-id="${block.id}"] textarea, [data-id="${block.id}"] input`;
-                    const el = document.querySelector(sel); if(el) el.focus(); 
-                }, 20);
+                setTimeout(() => { const el = document.querySelector(`[data-id="${b.id}"] textarea, [data-id="${b.id}"] input`); if(el) el.focus(); }, 20);
             }
             document.getElementById('slash-menu').classList.add('hidden');
         }
+
+        function setupEmojiPicker() { document.getElementById('emoji-grid').innerHTML = EMOJI_LIST.map(e => `<button onclick="selectEmoji('${e}')" class="p-2 hover:bg-gray-100 rounded-xl text-2xl transition-all hover:scale-110">${e}</button>`).join(''); }
+        function toggleEmojiPicker(e) { e.stopPropagation(); document.getElementById('emoji-picker').classList.toggle('hidden'); }
+        function selectEmoji(e) { const p = state.pages.find(pg => pg.id === state.activePageId); if (p) { p.icon = e; renderSidebar(); renderActivePage(); saveState(); } document.getElementById('emoji-picker').classList.add('hidden'); }
 
         window.onclick = (e) => { if(!e.target.closest('#emoji-picker')) document.getElementById('emoji-picker').classList.add('hidden'); };
 
