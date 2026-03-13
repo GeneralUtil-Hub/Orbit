@@ -163,6 +163,9 @@
                 <button onclick="openThemeModal()" class="w-full flex items-center gap-2 px-3 py-2 text-xs text-[var(--text-secondary)] hover:bg-gray-500/10 rounded transition-colors font-semibold">
                     <i data-lucide="palette" class="w-3.5 h-3.5"></i> Theme Creator
                 </button>
+                <button onclick="openCollabModal()" class="w-full flex items-center gap-2 px-3 py-2 text-xs text-orange-600 hover:bg-orange-500/10 rounded transition-colors font-semibold">
+                    <i data-lucide="share-2" class="w-3.5 h-3.5"></i> Join Live
+                </button>
                 <button onclick="addPage()" class="w-full flex items-center gap-2 px-3 py-2 text-xs text-blue-500 hover:bg-blue-500/10 rounded transition-colors font-bold">
                     <i data-lucide="plus" class="w-3.5 h-3.5"></i> New Page
                 </button>
@@ -254,6 +257,19 @@
         </div>
     </div>
 
+    <!-- Join Collaboration Modal -->
+    <div id="collab-modal" class="hidden fixed inset-0 z-[100] bg-black/40 flex items-center justify-center backdrop-blur-sm">
+        <div class="bg-white dark:bg-[#1e1e1e] w-96 rounded-3xl p-8 shadow-2xl">
+            <h3 class="text-xl font-bold mb-2 flex items-center gap-2 dark:text-white"><i data-lucide="share-2"></i> Join Workspace</h3>
+            <p class="text-xs text-gray-500 mb-4">Enter a share code to join a live workspace.</p>
+            <input id="friend-page-code" type="text" placeholder="Workspace Code..." class="w-full bg-gray-50 dark:bg-[#2a2a2a] dark:text-white border border-gray-200 dark:border-[#333] rounded-xl px-4 py-3 text-sm outline-none mb-4" />
+            <div class="flex gap-3">
+                <button onclick="closeCollabModal()" class="flex-1 px-4 py-3 bg-gray-100 dark:bg-gray-800 rounded-xl text-sm font-semibold text-gray-600 dark:text-gray-300">Cancel</button>
+                <button id="join-btn" onclick="joinFriendPage()" class="flex-1 px-4 py-3 bg-blue-600 rounded-xl text-sm font-semibold text-white shadow-lg">Join</button>
+            </div>
+        </div>
+    </div>
+
     <div id="name-modal" class="hidden fixed inset-0 z-[200] bg-black/60 flex items-center justify-center backdrop-blur-md text-gray-900">
         <div class="bg-white dark:bg-[#1e1e1e] w-96 rounded-3xl p-8 shadow-2xl">
             <h3 class="text-xl font-bold mb-4 dark:text-white">Welcome to Orbit</h3>
@@ -272,7 +288,7 @@
 
     <!-- Slash Menu -->
     <div id="slash-menu" class="hidden fixed z-50 w-72 bg-[var(--bg-primary)] border border-[var(--border-color)] rounded-xl shadow-2xl overflow-hidden slash-menu-enter">
-        <div class="p-3 text-[10px] font-bold text-gray-500 uppercase tracking-widest border-b border-[var(--border-color)]">Create Blocks</div>
+        <div class="p-3 text-[10px] font-bold text-gray-400 uppercase tracking-widest border-b border-[var(--border-color)]">Create Blocks</div>
         <div id="slash-menu-items" class="max-h-96 overflow-y-auto scrollbar-hide"></div>
     </div>
 
@@ -524,7 +540,6 @@
 
         function onDragEnd(evt) {
             const page = state.pages.find(p => p.id === state.activePageId);
-            // Logic to move between blocks and clipboard array
             saveState(); renderSidebar(); renderActivePage();
         }
 
@@ -562,13 +577,92 @@
             const items = [{ type: 'text', icon: 'type', label: 'Text' }, { type: 'h1', icon: 'heading-1', label: 'Heading 1' }, { type: 'h2', icon: 'heading-2', label: 'Heading 2' }, { type: 'todo', icon: 'check-square', label: 'To-do' }, { type: 'bullet', icon: 'list', label: 'List' }, { type: 'image', icon: 'image', label: 'Image' }, { type: 'divider', icon: 'minus', label: 'Divider' }];
             document.getElementById('slash-menu-items').innerHTML = items.map(i => `<button onclick="selectSlashItem('${i.type}')" class="w-full flex items-center gap-3 p-3 hover:bg-gray-500/5 text-left transition-colors"><div class="w-8 h-8 flex items-center justify-center bg-gray-500/5 border border-[var(--border-color)] rounded-lg text-gray-400"><i data-lucide="${i.icon}" class="w-4 h-4"></i></div><div class="text-sm font-medium text-[var(--text-main)]">${i.label}</div></button>`).join('');
         }
-        function openSlashMenu(el, id) { state.activeBlockIdForMenu = id; const menu = document.getElementById('slash-menu'); const rect = el.getBoundingClientRect(); menu.classList.remove('hidden'); menu.style.top = rect.bottom + window.scrollY + 'px'; menu.style.left = rect.left + 'px'; lucide.createIcons(); }
+        
+        function openSlashMenu(el, id) { 
+            state.activeBlockIdForMenu = id; 
+            const menu = document.getElementById('slash-menu'); 
+            const rect = el.getBoundingClientRect(); 
+            menu.classList.remove('hidden'); 
+            menu.style.top = rect.bottom + window.scrollY + 'px'; 
+            menu.style.left = rect.left + 'px'; 
+            lucide.createIcons(); 
+
+            // Fix: Close on outside click
+            const closeMenu = (e) => { 
+                if(!menu.contains(e.target) && !el.contains(e.target)) { 
+                    menu.classList.add('hidden'); 
+                    document.removeEventListener('mousedown', closeMenu); 
+                } 
+            }; 
+            document.addEventListener('mousedown', closeMenu);
+        }
+
         function selectSlashItem(t) { 
             const p = state.pages.find(pg => pg.id === state.activePageId); 
             const b = p.blocks.find(bk => bk.id === state.activeBlockIdForMenu); 
             if (b) { b.type = t; b.content = ''; renderActivePage(); saveState(); }
             document.getElementById('slash-menu').classList.add('hidden'); 
         }
+
+        function openSharePageModal() {
+            const page = state.pages.find(p => p.id === state.activePageId);
+            if (!page) return;
+            page.isShared = true;
+            document.getElementById('share-code-display').innerText = page.id;
+            document.getElementById('share-modal').classList.remove('hidden');
+            saveState();
+            if (ROOT_ABLY_KEY) { if (!ably) initAbly(); joinChannel(page.id); }
+            renderActivePage();
+        }
+
+        function initAbly() {
+            if (!ROOT_ABLY_KEY) return;
+            ably = new Ably.Realtime({ key: ROOT_ABLY_KEY, clientId: state.username + '-' + Math.random().toString(36).substr(2, 4) });
+            const page = state.pages.find(p => p.id === state.activePageId);
+            if (page && page.isShared) joinChannel(state.activePageId);
+        }
+
+        function joinChannel(pageId) {
+            if (!ably) return;
+            if (channel) { channel.presence.leave(); channel.unsubscribe(); }
+            channel = ably.channels.get('orbit-v1-' + pageId, { params: { rewind: '1' } });
+            channel.subscribe('update', (msg) => {
+                if (msg.clientId === ably.auth.clientId) return;
+                const remoteActive = msg.data.pages.find(p => p.id === pageId);
+                if (remoteActive) {
+                    state.pages = state.pages.map(p => p.id === pageId ? remoteActive : p);
+                    renderSidebar(); renderActivePage();
+                }
+            });
+            channel.presence.enter(state.username);
+            channel.presence.subscribe(() => {
+                channel.presence.get((err, members) => { if(!err) renderCollaborators(members); });
+            });
+            document.getElementById('sync-status').classList.remove('hidden');
+        }
+
+        async function joinFriendPage() {
+            const code = document.getElementById('friend-page-code').value.trim();
+            if (!code || !ably) return;
+            const temp = ably.channels.get('orbit-v1-' + code, { params: { rewind: '1' } });
+            temp.subscribe('update', (msg) => {
+                const sharedPage = msg.data.pages.find(p => p.id === code);
+                if (sharedPage) {
+                    sharedPage.isShared = true;
+                    const exists = state.pages.find(p => p.id === code);
+                    if (!exists) state.pages.push(sharedPage);
+                    else state.pages = state.pages.map(p => p.id === code ? sharedPage : p);
+                    state.activePageId = code;
+                    temp.unsubscribe(); joinChannel(code);
+                    renderSidebar(); renderActivePage(); saveState(true);
+                    closeCollabModal();
+                }
+            });
+        }
+
+        function closeShareModal() { document.getElementById('share-modal').classList.add('hidden'); }
+        function openCollabModal() { document.getElementById('collab-modal').classList.remove('hidden'); }
+        function closeCollabModal() { document.getElementById('collab-modal').classList.add('hidden'); }
 
         function setupEmojiPicker() { document.getElementById('emoji-grid').innerHTML = EMOJI_LIST.map(e => `<button onclick="selectEmoji('${e}')" class="p-2 hover:bg-gray-500/10 rounded-xl text-2xl transition-all hover:scale-110">${e}</button>`).join(''); }
         function toggleEmojiPicker(e) { e.stopPropagation(); document.getElementById('emoji-picker').classList.toggle('hidden'); }
