@@ -57,7 +57,7 @@
             to { opacity: 1; transform: scale(1) translateY(0); } 
         }
 
-        .block-container { transition: background-color 0.2s ease; border-radius: 4px; padding: 2px 4px; }
+        .block-container { transition: background-color 0.2s ease; border-radius: 4px; padding: 2px 4px; position: relative; }
         .block-container:hover { background-color: var(--block-hover); }
 
         input:focus, textarea:focus { outline: none; }
@@ -67,7 +67,7 @@
 
         .whiteboard-canvas { touch-action: none; cursor: crosshair; background-color: var(--bg-primary); display: block; width: 100%; height: 100%; }
         
-        .drag-handle { cursor: grab; padding: 4px; border-radius: 4px; color: var(--text-secondary); opacity: 0; transition: opacity 0.2s; }
+        .drag-handle { cursor: grab; padding: 4px; border-radius: 4px; color: var(--text-secondary); opacity: 0; transition: opacity 0.2s; position: absolute; left: -28px; top: 4px; }
         .block-container:hover .drag-handle { opacity: 0.5; }
         .drag-handle:active { cursor: grabbing; }
         .sortable-ghost { opacity: 0.15; background: var(--brand-color) !important; }
@@ -215,7 +215,7 @@
                     </button>
                     
                     <div id="collaborators" class="flex -space-x-2 overflow-hidden mr-1"></div>
-                    <div id="sync-status" class="hidden flex items-center gap-2 text-[10px] text-green-500 font-bold uppercase tracking-wider">
+                    <div id="sync-status" class="hidden flex items-center gap-2 text-[10px] text-green-600 font-bold uppercase tracking-wider">
                         <div class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div> Live
                     </div>
                     <button onclick="toggleActiveFavorite()" id="favorite-btn" class="p-2 rounded-lg hover:bg-gray-500/10 transition-colors text-gray-400"><i data-lucide="star" class="w-4 h-4"></i></button>
@@ -307,7 +307,7 @@
         const ROOT_ABLY_KEY = "LJhgHg.rF2whQ:Imz-F_d5gOcMGAiJNWIGjhaAXXba8Hpbefj3LtPaT0s"; 
         const DEFAULT_COVERS = ['https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&q=80&w=2000', 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&q=80&w=2000', 'https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?auto=format&fit=crop&q=80&w=2000'];
         const EMOJI_LIST = ['🚀', '🪐', '🌑', '✨', '🛸', '🛰️', '🌍', '☄️', '🔭', '🎨', '📝', '🛠️', '🌐', '📊', '💻', '⚡', '📦', '🎯'];
-        const STORAGE_KEY = 'orbit_workspace_v5_final';
+        const STORAGE_KEY = 'orbit_workspace_v6_refined';
 
         let state = {
             username: '',
@@ -318,7 +318,7 @@
                 id: '1', title: 'Welcome to Orbit', icon: '🚀', isFavorite: true, cover: DEFAULT_COVERS[1], isShared: false, 
                 blocks: [
                     { id: 'b1', type: 'h1', content: 'Orbit Workspace' }, 
-                    { id: 'b2', type: 'text', content: 'Type <b>/</b> to open the command menu. Click away or keep typing to hide it.' },
+                    { id: 'b2', type: 'text', content: 'Type <b>/</b> to open the command menu. Select a command or keep typing text to hide it.' },
                     { id: 'b3', type: 'callout', content: 'Click the Microphone icon in the header to join a Voice Orbit!' }
                 ] 
             }],
@@ -351,7 +351,17 @@
             setupFormatListener();
             setupMenuDragging();
             lucide.createIcons();
-            
+
+            // Global hide logic
+            document.addEventListener('mousedown', (e) => {
+                const menu = document.getElementById('slash-menu');
+                if (!menu.contains(e.target) && !e.target.closest('[contenteditable]')) {
+                    hideSlashMenu();
+                }
+            });
+
+            document.getElementById('main-scroll-container').addEventListener('scroll', hideSlashMenu);
+
             document.getElementById('block-image-upload-input').onchange = (e) => {
                 const file = e.target.files[0];
                 if (!file || !state.pendingImageBlockId) return;
@@ -363,6 +373,12 @@
                 };
                 reader.readAsDataURL(file);
             };
+        }
+
+        function hideSlashMenu() {
+            const menu = document.getElementById('slash-menu');
+            menu.classList.add('hidden');
+            state.activeBlockIdForMenu = null;
         }
 
         function loadState() {
@@ -445,20 +461,39 @@
                 el.addEventListener('input', () => { 
                     block.content = el.innerHTML; 
                     saveState(); 
-                    // Hide menu if user keeps typing regular characters
-                    if (!document.getElementById('slash-menu').classList.contains('hidden') && el.innerText.length > 1) {
-                        document.getElementById('slash-menu').classList.add('hidden');
+                    
+                    // Kill menu if text changes
+                    const text = el.innerText;
+                    if (text !== "/" && text !== "") {
+                        hideSlashMenu();
                     }
                 });
+                
                 el.addEventListener('keydown', (e) => {
-                    if (e.key === '/') { if (!el.innerText.trim()) { e.preventDefault(); openSlashMenu(div, block.id); } }
+                    if (e.key === '/') { 
+                        if (!el.innerText.trim()) { 
+                            e.preventDefault(); 
+                            openSlashMenu(div, block.id); 
+                        } 
+                    }
                     else if (e.key === 'Enter' && !e.shiftKey) { 
                         e.preventDefault(); 
                         const nextType = (block.type === 'todo' || block.type === 'bullet') ? block.type : 'text';
                         addBlockBelow(block.id, nextType); 
+                        hideSlashMenu();
                     }
-                    else if (e.key === 'Backspace' && !el.innerText.trim() && !isFirst) { e.preventDefault(); deleteBlock(block.id); }
-                    else if (e.key === 'Escape') { document.getElementById('slash-menu').classList.add('hidden'); }
+                    else if (e.key === 'Backspace') {
+                        if (el.innerText === "/" || el.innerText.trim() === "") {
+                            hideSlashMenu();
+                        }
+                        if (!el.innerText.trim() && !isFirst) {
+                            e.preventDefault(); 
+                            deleteBlock(block.id); 
+                        }
+                    }
+                    else if (e.key === 'Escape' || e.key === 'ArrowUp' || e.key === 'ArrowDown') { 
+                        if (e.key === 'Escape') hideSlashMenu(); 
+                    }
                 });
             });
 
@@ -475,11 +510,19 @@
             const menu = document.getElementById('slash-menu'); 
             const container = document.getElementById('main-scroll-container');
             const selection = window.getSelection();
-            let rect = selection.rangeCount > 0 ? selection.getRangeAt(0).getBoundingClientRect() : el.getBoundingClientRect();
-            const containerRect = container.getBoundingClientRect();
             
+            let rect;
+            if (selection.rangeCount > 0) {
+                const range = selection.getRangeAt(0);
+                rect = range.getBoundingClientRect();
+            } else {
+                rect = el.getBoundingClientRect();
+            }
+            
+            const containerRect = container.getBoundingClientRect();
             menu.classList.remove('hidden'); 
-            // Better positioning: Right next to cursor without the extra down gap
+            
+            // Fixed anchor positioning
             let top = (rect.top - containerRect.top + container.scrollTop);
             let left = (rect.left - containerRect.left);
             
@@ -489,14 +532,6 @@
             menu.style.top = top + 'px'; 
             menu.style.left = left + 'px'; 
             lucide.createIcons(); 
-            
-            const closeMenu = (e) => { 
-                if(!menu.contains(e.target) && !el.contains(e.target)) { 
-                    menu.classList.add('hidden'); 
-                    document.removeEventListener('mousedown', closeMenu); 
-                } 
-            }; 
-            document.addEventListener('mousedown', closeMenu);
         }
 
         function setupSlashMenu() {
@@ -524,8 +559,12 @@
                 b.type = t; b.content = ''; 
                 if (t === 'math') b.content = 'e^{i\\pi} + 1 = 0';
                 renderActivePage(); saveState(); 
+                setTimeout(() => {
+                    const blockEl = document.querySelector(`[data-id="${b.id}"] [contenteditable="true"]`);
+                    if (blockEl) blockEl.focus();
+                }, 50);
             }
-            document.getElementById('slash-menu').classList.add('hidden'); 
+            hideSlashMenu();
         }
 
         function renderActivePage() {
@@ -598,7 +637,7 @@
         }
         function joinChannel(id) {
             if (!ably) return; if(channel) { channel.unsubscribe(); }
-            channel = ably.channels.get('orbit-v5-' + id, { params: { rewind: '1' } });
+            channel = ably.channels.get('orbit-v6-' + id, { params: { rewind: '1' } });
             channel.subscribe('update', (m) => {
                 if (m.clientId === ably.auth.clientId) return;
                 const remote = m.data.pages.find(p => p.id === id);
@@ -620,7 +659,7 @@
         async function joinFriendPage() {
             const code = document.getElementById('friend-page-code').value.trim();
             if (!code || !ably) return;
-            const temp = ably.channels.get('orbit-v5-' + code, { params: { rewind: '1' } });
+            const temp = ably.channels.get('orbit-v6-' + code, { params: { rewind: '1' } });
             temp.subscribe('update', (msg) => {
                 const shared = msg.data.pages.find(p => p.id === code);
                 if (shared) {
@@ -640,7 +679,7 @@
         function closeShareModal() { document.getElementById('share-modal').classList.add('hidden'); }
         function openSharePageModal() {
             const p = state.pages.find(p => p.id === state.activePageId); if(!p) return;
-            p.isShared = true; document.getElementById('share-code-display').innerText = page.id;
+            p.isShared = true; document.getElementById('share-code-display').innerText = p.id;
             document.getElementById('share-modal').classList.remove('hidden'); saveState(); initAbly();
         }
 
@@ -679,9 +718,9 @@
         function toggleTodo(id) { const p = state.pages.find(pg => pg.id === state.activePageId); const b = p.blocks.find(bk => bk.id === id); if(b) { b.checked = !b.checked; saveState(); renderActivePage(); } }
         function setupFormatListener() {
             document.addEventListener('selectionchange', () => {
-                const s = window.getSelection(); const tb = document.getElementById('format-toolbar');
-                if (s.toString().length > 0 && !selection.isCollapsed) {
-                    const r = s.getRangeAt(0); const rect = r.getBoundingClientRect();
+                const selection = window.getSelection(); const tb = document.getElementById('format-toolbar');
+                if (selection && selection.toString().length > 0 && !selection.isCollapsed) {
+                    const r = selection.getRangeAt(0); const rect = r.getBoundingClientRect();
                     tb.style.display = 'flex'; tb.style.top = `${rect.top - 45}px`; tb.style.left = `${rect.left}px`;
                 } else tb.style.display = 'none';
             });
