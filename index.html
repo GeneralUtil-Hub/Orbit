@@ -52,18 +52,18 @@
         .drag-handle { cursor: grab; padding: 4px; border-radius: 4px; color: var(--text-secondary); opacity: 0; transition: opacity 0.2s; position: absolute; left: -32px; top: 4px; }
         .block-container:hover .drag-handle { opacity: 0.5; }
         
-        .sidebar-item-active { background-color: var(--block-hover); color: var(--text-main); font-weight: 600; border-left: 3px solid var(--brand-color); }
-        [contenteditable]:empty:before { content: attr(placeholder); color: var(--text-secondary); opacity: 0.4; pointer-events: none; }
-
-        #editor-blocks:empty::after {
-            content: 'Click here to start writing...';
-            display: block;
-            padding: 1.5rem 0;
+        .sidebar-item-active { background-color: var(--block-hover); color: var(--text-main); font-weight: 600; border-left: 2px solid var(--brand-color); }
+        
+        /* Empty State Prompt */
+        .empty-prompt {
+            padding: 3rem 0;
             color: var(--text-secondary);
-            opacity: 0.3;
+            opacity: 0.5;
             font-style: italic;
-            cursor: text;
-            font-size: 14px;
+            cursor: pointer;
+            font-size: 16px;
+            text-align: left;
+            width: 100%;
         }
 
         #slash-menu { 
@@ -81,8 +81,10 @@
             color: var(--text-main);
         }
 
+        .slash-item { transition: all 0.15s ease; color: var(--text-main); }
         .slash-item:hover { background-color: var(--brand-color) !important; color: #ffffff !important; }
-        .slash-item:hover .icon-box { background-color: rgba(255, 255, 255, 0.3) !important; color: #ffffff !important; border-color: transparent !important; }
+        .slash-item:hover .icon-box { background-color: rgba(255, 255, 255, 0.2) !important; color: #ffffff !important; border-color: transparent !important; }
+        .slash-item:hover i { color: #ffffff !important; }
 
         .playground-block { background: var(--input-bg); border-radius: 12px; overflow: hidden; border: 1px solid var(--border-color); margin: 1rem 0; }
         .playground-header { background: rgba(0,0,0,0.05); padding: 8px 12px; display: flex; justify-content: space-between; align-items: center; }
@@ -123,39 +125,55 @@
         .stat-pill { display: flex; align-items: center; gap: 6px; padding: 6px 10px; border-radius: 8px; background: var(--block-hover); color: var(--text-secondary); font-size: 10px; font-weight: 700; cursor: default; }
 
         .math-block { cursor: pointer; transition: background 0.2s; padding: 12px; border-radius: 8px; }
-        .math-block:hover { background: var(--block-hover); }
-        .math-editor { width: 100%; font-family: 'Roboto Mono', monospace; font-size: 13px; background: var(--input-bg); border-radius: 8px; padding: 10px; border: 1px solid var(--border-color); margin-top: 8px; }
+        .math-editor { width: 100%; font-family: 'Roboto Mono', monospace; font-size: 13px; background: var(--input-bg); border-radius: 8px; padding: 10px; border: 1px solid var(--border-color); margin-top: 8px; color: var(--text-main); }
 
-        .media-block { border-radius: 12px; overflow: hidden; margin: 1rem 0; border: 1px solid var(--border-color); }
+        .media-block { border-radius: 12px; overflow: hidden; margin: 1rem 0; border: 1px solid var(--border-color); position: relative; background: #000; }
         .media-block iframe { width: 100%; aspect-ratio: 16/9; }
-        .media-block img { width: 100%; height: auto; display: block; }
+        .media-block img { width: 100%; height: auto; display: block; max-height: 600px; margin: 0 auto; }
+        .media-overlay { position: absolute; top: 8px; right: 8px; display: none; gap: 4px; }
+        .media-block:hover .media-overlay { display: flex; }
+        
+        .media-input-box { padding: 32px; text-align: center; background: var(--input-bg); border-radius: 16px; border: 2px dashed var(--border-color); }
+        .media-url-input {
+            color: var(--text-main) !important;
+            background: var(--bg-primary);
+            width: 100%;
+            padding: 14px 18px;
+            border-radius: 10px;
+            border: 1px solid var(--border-color);
+            outline: none;
+            transition: all 0.2s;
+            font-size: 14px;
+        }
 
-        .toc-item { font-size: 11px; padding: 4px 12px; color: var(--text-secondary); cursor: pointer; border-radius: 6px; transition: all 0.2s; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .toc-item:hover { color: var(--brand-color); background: var(--block-hover); }
-        .toc-h2 { margin-left: 12px; }
+        .whiteboard-block { width: 100%; height: 350px; background: #fefefe; border: 1px solid var(--border-color); border-radius: 12px; position: relative; cursor: crosshair; touch-action: none; }
+        .whiteboard-controls { position: absolute; bottom: 10px; right: 10px; display: flex; gap: 6px; }
 
-        .bg-highlight-blue { background-color: rgba(37, 99, 235, 0.12) !important; border-left: 3px solid #2563eb; }
-        .bg-highlight-green { background-color: rgba(34, 197, 94, 0.12) !important; border-left: 3px solid #22c55e; }
-        .bg-highlight-yellow { background-color: rgba(234, 179, 8, 0.12) !important; border-left: 3px solid #eab308; }
-        .bg-highlight-red { background-color: rgba(239, 68, 68, 0.12) !important; border-left: 3px solid #ef4444; }
+        #exit-focus-btn { 
+            position: fixed; top: 20px; right: 20px; z-index: 200; display: none; 
+            background: var(--bg-primary); border: 1px solid var(--border-color); 
+            padding: 8px 16px; border-radius: 12px; font-size: 11px; font-weight: 700; 
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1); transition: all 0.2s;
+        }
+        .focus-mode #sidebar, .focus-mode #header, .focus-mode #editor-stats { display: none !important; }
+        .focus-mode #exit-focus-btn { display: flex !important; }
+
+        .present-mode .drag-handle, .present-mode .hover\:text-red-500 { display: none !important; }
     </style>
 </head>
 <body class="overflow-hidden">
     <div id="progress-bar"></div>
-    <button id="exit-focus-btn" onclick="toggleFocusMode()" class="items-center gap-2 text-[var(--text-main)] transition-all">
+    <button id="exit-focus-btn" onclick="toggleFocusMode()" class="items-center gap-2 text-[var(--text-main)] hover:scale-105">
         <i data-lucide="minimize-2" class="w-3.5 h-3.5"></i> Exit Focus
     </button>
     <button id="reopen-sidebar-btn" onclick="toggleSidebar()"><i data-lucide="chevron-right" class="w-4 h-4 text-gray-400"></i></button>
 
     <div id="app" class="flex h-screen w-full relative z-10">
-        <input type="file" id="cover-upload-input" class="hidden" accept="image/*" onchange="handleCoverFile(this)" />
-        <input type="file" id="import-md-input" class="hidden" accept=".md,.txt" onchange="handleImportFile(this)" />
-        
         <aside id="sidebar" class="w-64 flex flex-col bg-[var(--sidebar-bg)] border-r border-[var(--border-color)] transition-all duration-300 shrink-0 z-20 overflow-hidden">
             <div class="p-4 flex flex-col gap-5 min-w-[256px]">
                 <div class="flex items-center justify-between font-bold text-sm">
                     <div class="flex items-center gap-2 text-[var(--text-main)]">
-                         <svg class="orbit-logo text-blue-600" viewBox="0 0 24 24">
+                         <svg class="orbit-logo text-blue-600" viewBox="0 0 24 24" width="22" height="22">
                             <ellipse cx="12" cy="12" rx="10" ry="3.5" transform="rotate(-20 12 12)" stroke="currentColor" stroke-width="1.8" fill="none" />
                             <circle cx="12" cy="12" r="7" fill="var(--sidebar-bg)" style="transition: fill 0.4s" />
                             <circle cx="12" cy="12" r="5" fill="currentColor" />
@@ -179,9 +197,9 @@
                     <div id="pages-list" class="space-y-0.5 mt-2"></div>
                 </div>
 
-                <div id="toc-container" class="hidden">
-                    <div class="px-3 py-1 text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">Navigation</div>
-                    <div id="toc-list" class="space-y-1 px-1"></div>
+                <div id="toc-container" class="hidden px-1">
+                    <div class="px-2 py-1 text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">Navigation</div>
+                    <div id="toc-list" class="space-y-1"></div>
                 </div>
 
                 <div class="px-3">
@@ -192,15 +210,18 @@
 
             <div class="p-4 border-t border-[var(--border-color)] space-y-1 min-w-[256px]">
                 <div class="flex gap-1 mb-2">
-                    <button onclick="exportToMarkdown()" class="flex-1 flex items-center justify-center gap-2 py-2 text-[10px] text-blue-600 bg-blue-50 dark:bg-blue-900/10 rounded-lg font-bold">
+                    <button onclick="exportToMarkdown()" class="flex-1 flex items-center justify-center gap-2 py-2 text-[10px] text-blue-600 bg-blue-50 dark:bg-blue-900/10 rounded-lg font-bold hover:bg-blue-100 transition-all">
                         <i data-lucide="download" class="w-3 h-3"></i> Export
                     </button>
-                    <button onclick="document.getElementById('import-md-input').click()" class="flex-1 flex items-center justify-center gap-2 py-2 text-[10px] text-indigo-600 bg-indigo-50 dark:bg-indigo-900/10 rounded-lg font-bold">
+                    <button onclick="document.getElementById('import-md-input').click()" class="flex-1 flex items-center justify-center gap-2 py-2 text-[10px] text-indigo-600 bg-indigo-50 dark:bg-indigo-900/10 rounded-lg font-bold hover:bg-indigo-100 transition-all">
                         <i data-lucide="file-up" class="w-3 h-3"></i> Import
                     </button>
                 </div>
                 <button onclick="openCollabModal()" class="w-full flex items-center gap-3 px-3 py-2 text-xs text-orange-600 hover:bg-orange-50 dark:hover:bg-orange-900/10 rounded-xl transition-colors font-semibold">
                     <i data-lucide="users" class="w-4 h-4"></i> Join Workspace
+                </button>
+                <button onclick="togglePresentMode()" class="w-full flex items-center gap-3 px-3 py-2 text-xs text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-900/10 rounded-xl transition-colors font-semibold">
+                    <i data-lucide="monitor" class="w-4 h-4"></i> Present View
                 </button>
                 <button onclick="toggleDarkModeUI()" class="w-full flex items-center gap-3 px-3 py-2 text-xs text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-xl transition-colors font-medium">
                     <i data-lucide="moon" class="w-4 h-4"></i> Dark Mode
@@ -215,7 +236,7 @@
                     <i data-lucide="chevron-right" class="w-3 h-3"></i>
                     <span id="header-title" class="text-[var(--text-main)] font-bold truncate max-w-[150px]">Home</span>
                     <div id="save-status" class="ml-4 opacity-0 transition-opacity flex items-center gap-1.5 text-emerald-500 font-bold">
-                        <i data-lucide="check-circle" class="w-3 h-3"></i> Sync
+                        <i data-lucide="check-circle" class="w-3 h-3"></i> Syncing
                     </div>
                 </div>
                 <div class="flex items-center gap-3">
@@ -226,7 +247,7 @@
                 </div>
             </div>
 
-            <div class="flex-1 overflow-y-auto scrollbar-hide relative" id="main-scroll-container" onscroll="updateProgressBar()">
+            <div class="flex-1 overflow-y-auto scrollbar-hide relative" id="main-scroll-container" onscroll="updateProgressBar()" style="min-height: 100%;">
                 <div class="relative h-64 group overflow-hidden">
                     <img id="page-cover" src="" alt="Cover" class="w-full h-full object-cover transition-all duration-700" />
                     <div class="absolute bottom-4 right-4 flex gap-2 opacity-0 group-hover:opacity-100 transition-all transform translate-y-2 group-hover:translate-y-0">
@@ -241,14 +262,13 @@
                         <input id="main-title-input" oninput="updatePageTitle(this.value)" class="w-full text-5xl font-black border-none outline-none mt-8 bg-transparent text-[var(--text-main)] placeholder-gray-400/20" placeholder="Untitled Workspace" />
                     </div>
                     
-                    <div id="editor-blocks" class="space-y-0.5 min-h-[100px]"></div>
-                    <div id="bottom-click-trigger" class="h-64 w-full cursor-text"></div>
+                    <div id="editor-blocks" class="space-y-0.5" style="min-height: 200px;"></div>
+                    <div id="bottom-click-trigger" class="h-64 w-full cursor-text" style="min-height: 40vh;"></div>
                     
-                    <!-- Slash Menu -->
                     <div id="slash-menu">
                         <div class="slash-drag-handle" id="slash-menu-drag"></div>
-                        <div class="px-4 py-3 text-[10px] font-bold text-gray-400 uppercase tracking-widest border-b border-[var(--border-color)]">Insert Blocks</div>
-                        <div id="slash-menu-items" class="py-1"></div>
+                        <div class="px-4 py-3 text-[10px] font-bold text-gray-400 uppercase tracking-widest border-b border-[var(--border-color)] text-center">Orbit Blocks</div>
+                        <div id="slash-menu-items" class="py-1 overflow-y-auto scrollbar-hide"></div>
                     </div>
                 </div>
 
@@ -261,9 +281,9 @@
         </main>
     </div>
 
-    <!-- Voice Room -->
+    <!-- Voice Room UI -->
     <div id="voice-overlay" class="bg-[var(--bg-primary)] border border-[var(--border-color)] rounded-2xl p-4 shadow-2xl w-64 fade-in" style="position: fixed; bottom: 24px; right: 24px; z-index: 100; display: none;">
-        <div class="flex items-center justify-between mb-4"><div class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Voice Orbit</div><div class="w-1.5 h-1.5 bg-orange-500 rounded-full animate-ping"></div></div>
+        <div class="flex items-center justify-between mb-4"><div class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Voice Room</div><div class="w-1.5 h-1.5 bg-orange-500 rounded-full animate-ping"></div></div>
         <div id="voice-participants" class="space-y-3 mb-4"></div>
         <div class="space-y-4 pt-4 border-t border-[var(--border-color)]">
             <div class="space-y-2"><div class="flex justify-between text-[9px] font-bold text-gray-500 uppercase"><span>Gain Control</span><span id="vol-value">100%</span></div><input type="range" min="0" max="200" value="100" class="w-full accent-blue-600" oninput="updateMicVolume(this.value)"></div>
@@ -277,15 +297,18 @@
     <!-- Modals -->
     <div id="collab-modal" class="hidden fixed inset-0 z-[100] bg-black/50 flex items-center justify-center backdrop-blur-sm">
         <div class="bg-white dark:bg-[#1e1e1e] w-80 rounded-2xl p-6 shadow-2xl text-center">
-            <h3 class="font-bold mb-4 dark:text-white">Join Space</h3>
-            <input id="friend-page-code" type="text" placeholder="Space Code" class="w-full bg-white dark:bg-gray-800 dark:text-white border border-gray-200 dark:border-gray-700 rounded-xl px-4 py-3 text-sm outline-none mb-4 font-mono" />
-            <button onclick="joinFriendPage()" class="w-full py-3 bg-blue-600 rounded-xl text-sm font-bold text-white shadow-lg">Connect</button>
+            <h3 class="font-bold mb-4 dark:text-white text-lg">Join Space</h3>
+            <input id="friend-page-code" type="text" placeholder="Workspace Code" class="w-full bg-white dark:bg-gray-800 dark:text-white border border-gray-200 dark:border-gray-700 rounded-xl px-4 py-3 text-sm outline-none mb-4 font-mono" />
+            <div class="flex gap-2">
+                <button onclick="document.getElementById('collab-modal').classList.add('hidden')" class="flex-1 py-3 bg-gray-100 dark:bg-gray-800 rounded-xl text-sm font-bold text-gray-500">Cancel</button>
+                <button onclick="joinFriendPage()" class="flex-1 py-3 bg-blue-600 rounded-xl text-sm font-bold text-white shadow-lg">Connect</button>
+            </div>
         </div>
     </div>
 
     <div id="name-modal" class="hidden fixed inset-0 z-[200] bg-black/60 flex items-center justify-center backdrop-blur-md">
-        <div class="bg-white dark:bg-gray-900 w-72 rounded-2xl p-6 shadow-2xl">
-            <h3 class="font-bold mb-4 dark:text-white text-center">Orbit Identity</h3>
+        <div class="bg-white dark:bg-gray-900 w-72 rounded-2xl p-6 shadow-2xl text-center">
+            <h3 class="font-bold mb-4 dark:text-white">Orbit Login</h3>
             <input id="initial-name" type="text" class="w-full bg-gray-50 dark:bg-gray-800 dark:text-white border rounded-xl px-4 py-3 text-sm outline-none mb-4" placeholder="Your name" />
             <button onclick="window.saveInitialName()" class="w-full py-3 bg-blue-600 rounded-xl text-sm font-bold text-white shadow-xl">Launch</button>
         </div>
@@ -306,11 +329,11 @@
         const ROOT_ABLY_KEY = "LJhgHg.rF2whQ:Imz-F_d5gOcMGAiJNWIGjhaAXXba8Hpbefj3LtPaT0s"; 
         const DEFAULT_COVERS = ['https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&q=80&w=2000', 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&q=80&w=2000', 'https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?auto=format&fit=crop&q=80&w=2000'];
         const EMOJI_LIST = ['🚀', '🪐', '✨', '🛸', '🌍', '☄️', '🔭', '🎨', '📝', '🛠️', '🎯', '💡'];
-        const STORAGE_KEY = 'orbit_v22_interactive_pro';
+        const STORAGE_KEY = 'orbit_v28_final_media';
 
         let state = {
-            username: '', darkMode: false, onCall: false, activePageId: '1', searchQuery: '', focusMode: false,
-            pages: [{ id: '1', title: 'Workspace Home', icon: '🚀', cover: DEFAULT_COVERS[0], isShared: false, blocks: [{ id: 'b1', type: 'h1', content: 'Orbit Workspace' }, { id: 'b2', type: 'text', content: 'Welcome. Click math blocks to edit them live.' }] }],
+            username: '', darkMode: false, onCall: false, activePageId: '1', searchQuery: '', focusMode: false, presentMode: false,
+            pages: [{ id: '1', title: 'Home', icon: '🚀', cover: DEFAULT_COVERS[0], isShared: false, blocks: [{ id: 'b1', type: 'h1', content: 'Orbit Workspace' }, { id: 'b2', type: 'text', content: 'Sync active. Paste Image/Video URLs below.' }] }],
             clipboard: [], sidebarOpen: true
         };
 
@@ -318,10 +341,10 @@
         let localStream = null, peerConnections = {}, audioCtx = null, gainNode = null, isAudioTesting = false;
         let saveTimeout = null;
 
-        // Early defined for global sidebar access
-        const setActivePage = (id) => { 
+        // Global functions
+        function setActivePage(id) { 
             state.activePageId = id; saveState(true); renderSidebar(); renderActivePage(); if(ably) joinChannel(id); 
-        };
+        }
 
         window.saveInitialName = function() {
             const name = document.getElementById('initial-name').value.trim();
@@ -338,6 +361,11 @@
             document.addEventListener('mousedown', (e) => {
                 const menu = document.getElementById('slash-menu');
                 if (menu && menu.style.display === 'flex' && !menu.contains(e.target)) hideSlashMenu();
+            });
+            document.addEventListener('keydown', (e) => {
+                if (e.ctrlKey && e.key === '/') { e.preventDefault(); document.getElementById('search-input').focus(); }
+                if (e.ctrlKey && e.key === 's') { e.preventDefault(); saveState(); }
+                if (e.key === 'Escape') hideSlashMenu();
             });
             initAbly(); lucide.createIcons();
         }
@@ -360,15 +388,17 @@
         function applyTheme() {
             document.body.classList.toggle('dark-mode', state.darkMode);
             document.body.classList.toggle('focus-mode', state.focusMode);
+            document.body.classList.toggle('present-mode', state.presentMode);
         }
 
         function toggleDarkModeUI() { state.darkMode = !state.darkMode; applyTheme(); saveState(true); }
         function toggleFocusMode() { state.focusMode = !state.focusMode; applyTheme(); saveState(true); }
+        function togglePresentMode() { state.presentMode = !state.presentMode; applyTheme(); renderActivePage(); }
 
         function updateProgressBar() {
             const container = document.getElementById('main-scroll-container');
             const scrolled = (container.scrollTop / (container.scrollHeight - container.clientHeight)) * 100;
-            document.getElementById('progress-bar').style.width = scrolled + "%";
+            document.getElementById('progress-bar').style.width = (scrolled || 0) + "%";
         }
 
         function updateEditorStats() {
@@ -427,13 +457,13 @@
                     return { id: 'b' + Math.random().toString(36).substr(2, 6), type, content };
                 });
                 const p = state.pages.find(pg => pg.id === state.activePageId);
-                p.blocks = newBlocks.length > 0 ? newBlocks : [{ id: 'b' + Date.now(), type: 'text', content: 'Empty import.' }];
+                p.blocks = newBlocks.length > 0 ? newBlocks : [{ id: 'b' + Date.now(), type: 'text', content: '' }];
                 renderActivePage(); saveState();
             };
             reader.readAsText(file);
         }
 
-        // --- Voice Logic ---
+        // --- Audio Logic ---
         async function toggleVoiceOrbit() {
             state.onCall = !state.onCall;
             const btn = document.getElementById('voice-btn');
@@ -460,7 +490,6 @@
 
         function updateMicVolume(val) { if (gainNode) gainNode.gain.value = val / 100; document.getElementById('vol-value').innerText = val + "%"; }
         async function toggleIsolation() { if (!localStream) return; const track = localStream.getAudioTracks()[0]; await track.applyConstraints({ noiseSuppression: document.getElementById('iso-toggle').checked }); }
-        
         function toggleAudioTest() {
             const testBtn = document.getElementById('test-mic-btn'); const testAudio = document.getElementById('self-test-audio'); const indicator = document.getElementById('self-test-indicator');
             isAudioTesting = !isAudioTesting;
@@ -493,28 +522,40 @@
             else if (type === 'hello' && state.onCall) { const offer = await pc.createOffer(); await pc.setLocalDescription(offer); channel.publish('signal', { to: from, from: ably.auth.clientId, type: 'offer', data: offer }); }
         }
 
-        // --- Core Block Logic ---
+        // --- Block Logic ---
         function createBlockElement(block, isFirst) {
             const div = document.createElement('div');
             div.className = `group relative w-full block-container fade-in ${block.highlight || ''}`;
             div.dataset.id = block.id; div.dataset.type = block.type;
             let html = '';
             switch (block.type) {
-                case 'h1': html = `<div contenteditable="true" class="w-full text-4xl font-extrabold py-2 outline-none text-[var(--text-main)]" placeholder="Heading 1">${block.content || ''}</div>`; break;
-                case 'h2': html = `<div contenteditable="true" class="w-full text-2xl font-bold py-1 outline-none text-[var(--text-main)]" placeholder="Heading 2">${block.content || ''}</div>`; break;
-                case 'todo': html = `<div class="flex items-start gap-3 py-1 flex-1"><input type="checkbox" onchange="toggleTodoState('${block.id}')" ${block.checked ? 'checked' : ''} class="mt-1.5 h-4 w-4 rounded border-gray-300 cursor-pointer" /><div contenteditable="true" class="flex-1 outline-none text-[var(--text-main)] ${block.checked ? 'line-through opacity-50' : ''}" placeholder="To-do">${block.content || ''}</div></div>`; break;
-                case 'quote': html = `<div contenteditable="true" class="quote-block flex-1 outline-none text-[var(--text-main)]" placeholder="Quote">${block.content || ''}</div>`; break;
-                case 'callout': html = `<div class="callout-block flex-1"><div class="text-xl">💡</div><div contenteditable="true" class="flex-1 outline-none text-[var(--text-main)]" placeholder="Callout">${block.content || ''}</div></div>`; break;
+                case 'h1': html = `<div contenteditable="${!state.presentMode}" class="w-full text-4xl font-extrabold py-2 outline-none text-[var(--text-main)]" placeholder="Heading 1">${block.content || ''}</div>`; break;
+                case 'h2': html = `<div contenteditable="${!state.presentMode}" class="w-full text-2xl font-bold py-1 outline-none text-[var(--text-main)]" placeholder="Heading 2">${block.content || ''}</div>`; break;
+                case 'todo': html = `<div class="flex items-start gap-3 py-1 flex-1"><input type="checkbox" onchange="toggleTodoState('${block.id}')" ${block.checked ? 'checked' : ''} class="mt-1.5 h-4 w-4 rounded border-gray-300 cursor-pointer" /><div contenteditable="${!state.presentMode}" class="flex-1 outline-none text-[var(--text-main)] ${block.checked ? 'line-through opacity-50' : ''}" placeholder="To-do">${block.content || ''}</div></div>`; break;
+                case 'quote': html = `<div contenteditable="${!state.presentMode}" class="quote-block flex-1 outline-none text-[var(--text-main)]" placeholder="Quote">${block.content || ''}</div>`; break;
+                case 'callout': html = `<div class="callout-block flex-1"><div class="text-xl">💡</div><div contenteditable="${!state.presentMode}" class="flex-1 outline-none text-[var(--text-main)]" placeholder="Callout">${block.content || ''}</div></div>`; break;
                 case 'playground': html = `<div class="playground-block flex-1"><div class="playground-header"><span class="text-[9px] font-bold text-gray-500 uppercase">Sandbox</span><button onclick="runPlayground('${block.id}')" class="bg-blue-600 text-white text-[9px] font-bold px-3 py-1 rounded-md hover:bg-blue-700">RUN</button></div><textarea class="playground-code outline-none" oninput="updatePlaygroundCode('${block.id}', this.value)">${block.content || ''}</textarea><iframe id="pg-preview-${block.id}" class="playground-preview"></iframe></div>`; break;
                 case 'divider': html = `<hr class="w-full my-6 border-[var(--border-color)]" />`; break;
                 case 'math': html = `<div class="w-full my-2"><div class="math-block" id="math-render-${block.id}" onclick="editMath('${block.id}')"></div><textarea class="math-editor hidden" id="math-editor-${block.id}" oninput="syncMath('${block.id}', this.value)" onblur="finishEditMath('${block.id}')">${block.content || 'e=mc^2'}</textarea></div>`; break;
-                case 'image': html = `<div class="media-block"><img src="${block.content}" onerror="this.src='https://via.placeholder.com/800x400?text=Invalid+Image+URL'" /></div>`; break;
+                case 'image': 
+                    html = block.content ? `<div class="media-block"><img src="${block.content}" onerror="this.src='https://via.placeholder.com/800x400?text=Invalid+Image+URL'" /><div class="media-overlay"><button onclick="clearMedia('${block.id}')" class="bg-black/50 text-white p-2 rounded-lg hover:bg-black/80 transition-all"><i data-lucide="edit-3" class="w-3.5 h-3.5"></i></button></div></div>` : 
+                    `<div class="media-input-box"><input type="text" placeholder="Paste direct image link..." class="media-url-input" onkeydown="handleMediaInput(event, '${block.id}')"></div>`;
+                    break;
                 case 'video': 
-                    const videoId = block.content.includes('v=') ? block.content.split('v=')[1].split('&')[0] : block.content.split('/').pop();
-                    html = `<div class="media-block"><iframe src="https://www.youtube.com/embed/${videoId}" frameborder="0" allowfullscreen></iframe></div>`; break;
-                default: html = `<div contenteditable="true" class="flex-1 outline-none py-1.5 leading-relaxed text-[var(--text-main)]" placeholder="Type '/' for commands...">${block.content || ''}</div>`;
+                    if(block.content) {
+                        const videoId = block.content.includes('v=') ? block.content.split('v=')[1].split('&')[0] : (block.content.includes('youtu.be') ? block.content.split('/').pop() : block.content);
+                        html = `<div class="media-block"><iframe src="https://www.youtube.com/embed/${videoId}?enablejsapi=1&origin=${window.location.origin}" frameborder="0" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe><div class="media-overlay"><button onclick="clearMedia('${block.id}')" class="bg-black/50 text-white p-2 rounded-lg hover:bg-black/80 transition-all"><i data-lucide="edit-3" class="w-3.5 h-3.5"></i></button></div></div>`;
+                    } else {
+                        html = `<div class="media-input-box"><input type="text" placeholder="Paste YouTube link..." class="media-url-input" onkeydown="handleMediaInput(event, '${block.id}')"></div>`;
+                    }
+                    break;
+                case 'draw': 
+                    html = `<div class="whiteboard-block" id="draw-container-${block.id}"><canvas id="canvas-${block.id}" class="w-full h-full"></canvas><div class="whiteboard-controls"><button onclick="clearCanvas('${block.id}')" class="p-2 bg-white border rounded shadow hover:bg-gray-50"><i data-lucide="refresh-cw" class="w-3 h-3 text-gray-400"></i></button></div></div>`;
+                    break;
+                default: html = `<div contenteditable="${!state.presentMode}" class="flex-1 outline-none py-1.5 leading-relaxed text-[var(--text-main)]" placeholder="Type '/' for commands...">${block.content || ''}</div>`;
             }
             div.innerHTML = `<div class="drag-handle opacity-0 group-hover:opacity-100 transition-opacity absolute -left-10 top-1 flex flex-col gap-1"><i data-lucide="grip-vertical" class="w-4 h-4"></i><button onclick="deleteBlock('${block.id}')" class="hover:text-red-500"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button></div>${html}`;
+            
             const edit = div.querySelector('[contenteditable="true"]');
             if (edit) {
                 edit.addEventListener('input', () => { 
@@ -532,35 +573,68 @@
             }
             if(block.type === 'playground') setTimeout(() => runPlayground(block.id), 50);
             if(block.type === 'math') setTimeout(() => renderMath(block.id, block.content), 50);
+            if(block.type === 'draw') setTimeout(() => initCanvas(block.id, block.content), 50);
             return div;
         }
 
-        // --- Math Logic ---
-        function renderMath(id, content) {
-            const el = document.getElementById(`math-render-${id}`);
-            if(el) katex.render(content || 'e^{i\\pi} + 1 = 0', el, { throwOnError: false, displayMode: true });
+        // --- Smart URL Logic ---
+        function handleMediaInput(e, id) {
+            if(e.key === 'Enter') {
+                let url = e.target.value;
+                try {
+                    const parsedUrl = new URL(url);
+                    const params = new URLSearchParams(parsedUrl.search);
+                    const direct = params.get('mediaurl') || params.get('imgurl');
+                    if(direct) url = decodeURIComponent(direct);
+                } catch(err) {}
+                setMediaURL(id, url);
+            }
         }
-        function editMath(id) {
-            document.getElementById(`math-render-${id}`).classList.add('hidden');
-            const ed = document.getElementById(`math-editor-${id}`);
-            ed.classList.remove('hidden'); ed.focus();
-        }
-        function syncMath(id, val) {
+        function clearMedia(id) { setMediaURL(id, ''); }
+        function setMediaURL(id, url) {
             const p = state.pages.find(pg => pg.id === state.activePageId);
             const b = p.blocks.find(bk => bk.id === id);
-            if(b) { b.content = val; renderMath(id, val); saveState(); }
+            if(b) { 
+                b.content = url; 
+                // Force a re-render for this block specifically to update from input box to media view
+                renderActivePage(); 
+                saveState(); 
+                // Always add a text block below for continuity
+                addBlockBelow(id);
+            }
         }
-        function finishEditMath(id) {
-            document.getElementById(`math-render-${id}`).classList.remove('hidden');
-            document.getElementById(`math-editor-${id}`).classList.add('hidden');
+
+        function renderMath(id, content) { const el = document.getElementById(`math-render-${id}`); if(el) katex.render(content || 'e^{i\\pi} + 1 = 0', el, { throwOnError: false, displayMode: true }); }
+        function editMath(id) { document.getElementById(`math-render-${id}`).classList.add('hidden'); const ed = document.getElementById(`math-editor-${id}`); ed.classList.remove('hidden'); ed.focus(); }
+        function syncMath(id, val) { const p = state.pages.find(pg => pg.id === state.activePageId); const b = p.blocks.find(bk => bk.id === id); if(b) { b.content = val; renderMath(id, val); saveState(); } }
+        function finishEditMath(id) { document.getElementById(`math-render-${id}`).classList.remove('hidden'); document.getElementById(`math-editor-${id}`).classList.add('hidden'); }
+
+        // --- Whiteboard ---
+        function initCanvas(id, savedData) {
+            const canvas = document.getElementById(`canvas-${id}`); if(!canvas) return;
+            const ctx = canvas.getContext('2d'); const container = document.getElementById(`draw-container-${id}`);
+            canvas.width = container.offsetWidth; canvas.height = container.offsetHeight;
+            if(savedData) { const img = new Image(); img.onload = () => ctx.drawImage(img, 0, 0); img.src = savedData; }
+            let drawing = false;
+            canvas.onmousedown = (e) => { drawing = true; draw(e); };
+            canvas.onmousemove = draw;
+            canvas.onmouseup = () => { drawing = false; ctx.beginPath(); syncCanvas(id); };
+            function draw(e) {
+                if(!drawing) return; ctx.lineWidth = 3; ctx.lineCap = 'round'; ctx.strokeStyle = state.darkMode ? '#fff' : '#000';
+                const rect = canvas.getBoundingClientRect();
+                ctx.lineTo(e.clientX - rect.left, e.clientY - rect.top);
+                ctx.stroke(); ctx.beginPath(); ctx.moveTo(e.clientX - rect.left, e.clientY - rect.top);
+            }
         }
+        function syncCanvas(id) { const canvas = document.getElementById(`canvas-${id}`); if(!canvas) return; const p = state.pages.find(pg => pg.id === state.activePageId); const b = p.blocks.find(bk => bk.id === id); if(b) { b.content = canvas.toDataURL(); saveState(); } }
+        function clearCanvas(id) { const canvas = document.getElementById(`canvas-${id}`); const ctx = canvas.getContext('2d'); ctx.clearRect(0, 0, canvas.width, canvas.height); syncCanvas(id); }
 
         // --- Slash Menu ---
         function openSlashMenu(el, id) { 
             state.activeBlockIdForMenu = id; const menu = document.getElementById('slash-menu'), container = document.getElementById('main-scroll-container');
             const selection = window.getSelection(); let rect = (selection.rangeCount > 0) ? selection.getRangeAt(0).getBoundingClientRect() : el.getBoundingClientRect();
             const cRect = container.getBoundingClientRect(); menu.style.display = 'flex'; menu.style.top = (rect.top - cRect.top + container.scrollTop) + 'px'; 
-            let rightOffset = state.sidebarOpen ? 420 : 240; 
+            let rightOffset = state.sidebarOpen ? 450 : 240; 
             menu.style.left = (rect.left - cRect.left + rightOffset) + 'px'; 
             if (parseInt(menu.style.left) + 240 > cRect.width) menu.style.left = (cRect.width - 250) + 'px';
             lucide.createIcons(); 
@@ -568,9 +642,10 @@
 
         function setupSlashMenu() {
             const items = [
-                { type: 'text', icon: 'type', label: 'Plain Text' }, { type: 'h1', icon: 'heading-1', label: 'H1' }, { type: 'h2', icon: 'heading-2', label: 'H2' }, { type: 'todo', icon: 'check-square', label: 'To-do' }, 
-                { type: 'quote', icon: 'quote', label: 'Quote' }, { type: 'highlight', icon: 'highlighter', label: 'Highlight' }, { type: 'playground', icon: 'code', label: 'Sandbox' }, { type: 'math', icon: 'sigma', label: 'LaTeX' }, 
-                { type: 'image', icon: 'image', label: 'Image URL' }, { type: 'video', icon: 'youtube', label: 'Video URL' }, { type: 'divider', icon: 'minus', label: 'Divider' }
+                { type: 'text', icon: 'type', label: 'Plain Text' }, { type: 'h1', icon: 'heading-1', label: 'Heading 1' }, { type: 'todo', icon: 'check-square', label: 'To-do List' }, 
+                { type: 'quote', icon: 'quote', label: 'Blockquote' }, { type: 'draw', icon: 'pen-tool', label: 'Whiteboard' }, { type: 'highlight', icon: 'highlighter', label: 'Highlight' }, 
+                { type: 'playground', icon: 'code', label: 'Sandbox' }, { type: 'math', icon: 'sigma', label: 'LaTeX Math' }, 
+                { type: 'image', icon: 'image', label: 'Image URL' }, { type: 'video', icon: 'youtube', label: 'YouTube Embed' }, { type: 'divider', icon: 'minus', label: 'Divider' }
             ];
             document.getElementById('slash-menu-items').innerHTML = items.map(i => `
                 <button onclick="handleSlashAction('${i.type}')" class="slash-item w-full flex items-center gap-3 px-3 py-2.5 transition-all text-left group">
@@ -585,20 +660,21 @@
                 const colors = ['', 'bg-highlight-blue', 'bg-highlight-green', 'bg-highlight-yellow', 'bg-highlight-red'];
                 b.highlight = colors[(colors.indexOf(b.highlight || '') + 1) % colors.length];
                 renderActivePage(); saveState(); hideSlashMenu();
-            } else if (type === 'image' || type === 'video') {
-                const url = prompt(`Enter ${type} URL:`);
-                if(url) {
-                    const p = state.pages.find(pg => pg.id === state.activePageId);
-                    const b = p.blocks.find(bk => bk.id === state.activeBlockIdForMenu);
-                    b.type = type; b.content = url; renderActivePage(); saveState();
-                }
-                hideSlashMenu();
             } else selectSlashItem(type);
         }
 
         function selectSlashItem(t, targetId = null) { 
             const p = state.pages.find(pg => pg.id === state.activePageId); const b = p.blocks.find(bk => bk.id === (targetId || state.activeBlockIdForMenu)); 
-            if (b) { b.type = t; b.content = (t === 'playground' ? '<h1>Hi</h1>' : t === 'math' ? 'e^{i\\pi} + 1 = 0' : ''); renderActivePage(); saveState(); setTimeout(() => { const el = document.querySelector(`[data-id="${b.id}"] [contenteditable="true"]`); if (el) el.focus(); }, 50); }
+            if (b) { 
+                b.type = t; b.content = ''; renderActivePage(); saveState(); 
+                // For non-text blocks, auto-add a text block below so typing can continue
+                if(t !== 'text') addBlockBelow(b.id);
+                
+                setTimeout(() => { 
+                    const el = document.querySelector(`[data-id="${b.id}"] [contenteditable="true"]`) || document.querySelector(`[data-id="${b.id}"] input`);
+                    if (el) el.focus(); 
+                }, 50); 
+            }
             hideSlashMenu();
         }
 
@@ -610,16 +686,23 @@
             document.getElementById('header-title').innerText = page.title || 'Untitled'; document.getElementById('main-title-input').value = page.title;
             const container = document.getElementById('editor-blocks'); const currentFocusedId = document.activeElement?.closest('.block-container')?.dataset.id;
             const domMap = new Map(); container.querySelectorAll('.block-container').forEach(el => domMap.set(el.dataset.id, el));
-            page.blocks.forEach((b, i) => {
-                let el = domMap.get(b.id);
-                if (el && el.dataset.type === b.type) {
-                    const edit = el.querySelector('[contenteditable="true"]'); if (edit && b.id !== currentFocusedId && edit.innerHTML !== b.content) edit.innerHTML = b.content || '';
-                    if (b.highlight) el.classList.add(b.highlight); else el.classList.remove('bg-highlight-blue', 'bg-highlight-green', 'bg-highlight-yellow', 'bg-highlight-red');
-                    domMap.delete(b.id);
-                } else {
-                    if (el) el.remove(); const newEl = createBlockElement(b, i === 0); container.insertBefore(newEl, container.children[i]);
-                }
-            });
+            
+            if (page.blocks.length === 0) {
+                container.innerHTML = `<div class="empty-prompt" onclick="addBlockBelow()">Click here to start writing...</div>`;
+            } else {
+                page.blocks.forEach((b, i) => {
+                    let el = domMap.get(b.id);
+                    const needsForcedUpdate = (b.type === 'image' || b.type === 'video' || b.type === 'draw');
+                    
+                    if (el && el.dataset.type === b.type && !needsForcedUpdate) {
+                        const edit = el.querySelector('[contenteditable="true"]'); if (edit && b.id !== currentFocusedId && edit.innerHTML !== b.content) edit.innerHTML = b.content || '';
+                        if (b.highlight) el.className = `group relative w-full block-container fade-in ${b.highlight}`; else el.className = `group relative w-full block-container fade-in`;
+                        domMap.delete(b.id);
+                    } else {
+                        if (el) el.remove(); const newEl = createBlockElement(b, i === 0); container.insertBefore(newEl, container.children[i]);
+                    }
+                });
+            }
             domMap.forEach(el => el.remove());
             const clip = document.getElementById('block-clipboard'); clip.innerHTML = state.clipboard.map(b => `<div class="p-2 bg-[var(--bg-primary)] border border-[var(--border-color)] rounded-lg text-[10px] truncate shadow-sm cursor-grab" data-id="${b.id}">${(b.content || b.type).replace(/<[^>]*>?/gm, '')}</div>`).join('');
             lucide.createIcons(); initDragAndDrop(); updateEditorStats(); updateProgressBar(); renderTOC();
@@ -641,7 +724,7 @@
 
         function joinChannel(id) {
             if (channel) { channel.presence.leave(); channel.unsubscribe(); }
-            channel = ably.channels.get('orbit-v22-' + id, { params: { rewind: '1' } });
+            channel = ably.channels.get('orbit-sync-' + id, { params: { rewind: '1' } });
             channel.subscribe('update', (m) => { if (m.clientId === ably.auth.clientId) return; const remote = m.data.pages.find(p => p.id === id); if (remote) { state.pages = state.pages.map(p => p.id === id ? remote : p); renderActivePage(); } });
             channel.subscribe('signal', handleSignal);
             channel.presence.enter({ onCall: state.onCall });
@@ -662,27 +745,31 @@
         function deletePage(id) { if(state.pages.length > 1) { state.pages = state.pages.filter(p => p.id !== id); if(state.activePageId === id) setActivePage(state.pages[0].id); else renderSidebar(); saveState(true); } }
         function addBlockBelow(id) { const p = state.pages.find(pg => pg.id === state.activePageId); const idx = p.blocks.findIndex(b => b.id === id); const nb = { id: 'b' + Math.random().toString(36).substr(2, 6), type: 'text', content: '' }; p.blocks.splice(idx + 1, 0, nb); renderActivePage(); saveState(); setTimeout(() => { const el = document.querySelector(`[data-id="${nb.id}"] [contenteditable]`); if(el) el.focus(); }, 10); }
         function deleteBlock(id) { const p = state.pages.find(pg => pg.id === state.activePageId); if (p.blocks.length > 1) p.blocks = p.blocks.filter(b => b.id !== id); saveState(); renderActivePage(); }
-        
+        function toggleTodoState(id) { const p = state.pages.find(pg => pg.id === state.activePageId); const b = p.blocks.find(bk => bk.id === id); if (b) { b.checked = !b.checked; renderActivePage(); saveState(); } }
+
         function handleWorkspaceClick(e) { 
             const p = state.pages.find(pg => pg.id === state.activePageId);
-            if (e.target.id === 'main-scroll-container' || e.target.id === 'bottom-click-trigger' || e.target.id === 'editor-blocks') {
+            // Check if clicking main area, trigger area, or the prompt itself
+            if (e.target.id === 'main-scroll-container' || e.target.id === 'bottom-click-trigger' || e.target.id === 'editor-blocks' || e.target.classList.contains('empty-prompt')) {
                 if (p.blocks.length === 0 || (p.blocks[p.blocks.length-1].content.trim() !== '' && p.blocks[p.blocks.length-1].type === 'text')) {
                     addBlockBelow(p.blocks[p.blocks.length - 1]?.id);
+                } else if (p.blocks.length > 0) {
+                    const lastEl = document.querySelector(`[data-id="${p.blocks[p.blocks.length-1].id}"] [contenteditable="true"]`);
+                    if (lastEl) lastEl.focus();
                 }
             }
         }
 
         function initDragAndDrop() {
             if (sortableMain) sortableMain.destroy(); if (sortableClipboard) sortableClipboard.destroy();
-            sortableMain = Sortable.create(document.getElementById('editor-blocks'), { 
-                group: 'blocks', handle: '.drag-handle', animation: 150, onEnd: (e) => {
+            sortableMain = Sortable.create(document.getElementById('editor-blocks'), { group: 'blocks', handle: '.drag-handle', animation: 150, onEnd: (e) => {
                 const p = state.pages.find(x => x.id === state.activePageId);
-                const b = p.blocks.splice(e.oldIndex, 1)[0]; p.blocks.splice(e.newIndex, 0, b);
-                saveState(); renderActivePage();
+                const b = p.blocks.splice(e.oldIndex, 1)[0]; p.blocks.splice(e.newIndex, 0, b); saveState();
             }});
             sortableClipboard = Sortable.create(document.getElementById('block-clipboard'), { group: 'blocks', animation: 150 });
         }
 
+        function updatePageTitle(v) { const p = state.pages.find(pg => pg.id === state.activePageId); if(p) { p.title = v; document.getElementById('header-title').innerText = v || 'Untitled'; saveState(); renderSidebar(); } }
         function toggleSidebar() { state.sidebarOpen = !state.sidebarOpen; const sb = document.getElementById('sidebar'); const reopenBtn = document.getElementById('reopen-sidebar-btn'); sb.style.width = state.sidebarOpen ? '256px' : '0px'; sb.style.opacity = state.sidebarOpen ? '1' : '0'; reopenBtn.style.display = state.sidebarOpen ? 'none' : 'block'; updateEditorStats(); }
         function openCollabModal() { document.getElementById('collab-modal').classList.remove('hidden'); }
         function toggleEmojiPicker(e) { e.stopPropagation(); document.getElementById('emoji-picker').classList.toggle('hidden'); }
@@ -691,6 +778,7 @@
         function setupMenuDragging() { const m = document.getElementById('slash-menu'), h = document.getElementById('slash-menu-drag'); if(!h) return; let x, y, d = false; h.onmousedown = (e) => { d = true; x = e.clientX - m.offsetLeft; y = e.clientY - m.offsetTop; e.preventDefault(); e.stopPropagation(); }; document.onmousemove = (e) => { if (d) { m.style.left = (e.clientX - x) + 'px'; m.style.top = (e.clientY - y) + 'px'; } }; document.onmouseup = () => d = false; }
         function handleCoverFile(i) { const f = i.files[0]; if(!f) return; const r = new FileReader(); r.onload = (e) => { const p = state.pages.find(x => x.id === state.activePageId); if(p) { p.cover = e.target.result; document.getElementById('page-cover').src = p.cover; saveState(); } }; r.readAsDataURL(f); }
 
+        runPlayground = (id) => { const b = state.pages.find(pg => pg.id === state.activePageId).blocks.find(bk => bk.id === id); const preview = document.getElementById(`pg-preview-${id}`); if(!preview) return; const doc = preview.contentWindow.document; doc.open(); doc.write(b.content || ''); doc.close(); };
         init();
     </script>
 </body>
