@@ -47,35 +47,17 @@
         }
 
         .scrollbar-hide::-webkit-scrollbar { display: none; }
-        
         .fade-in { animation: fadeIn 0.3s ease-out; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
-        
-        .slash-menu-enter { animation: menuPop 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.2); }
-        @keyframes menuPop { 
-            from { opacity: 0; transform: scale(0.98) translateY(5px); } 
-            to { opacity: 1; transform: scale(1) translateY(0); } 
-        }
 
         .block-container { transition: background-color 0.2s ease; border-radius: 4px; padding: 2px 4px; position: relative; }
         .block-container:hover { background-color: var(--block-hover); }
-
         input:focus, textarea:focus { outline: none; }
         
-        .scalable-content { position: relative; overflow: hidden; resize: vertical; min-height: 100px; max-width: 100%; border-radius: 0.75rem; border: 1px solid var(--border-color); }
-        .resizable-handle { position: absolute; bottom: 0; right: 0; width: 20px; height: 20px; cursor: nwse-resize; background: linear-gradient(135deg, transparent 50%, rgba(120,120,120,0.2) 50%); z-index: 10; }
-
         .drag-handle { cursor: grab; padding: 4px; border-radius: 4px; color: var(--text-secondary); opacity: 0; transition: opacity 0.2s; position: absolute; left: -28px; top: 4px; }
         .block-container:hover .drag-handle { opacity: 0.5; }
-        .drag-handle:active { cursor: grabbing; }
-        .sortable-ghost { opacity: 0.15; background: var(--brand-color) !important; }
         
-        #format-toolbar { position: fixed; z-index: 1000; background: var(--bg-primary); border: 1px solid var(--border-color); border-radius: 8px; box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15); padding: 4px; display: none; align-items: center; gap: 2px; backdrop-filter: blur(12px); }
-        .toolbar-btn { padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: 700; color: var(--text-main); transition: background 0.2s; }
-        .toolbar-btn:hover { background: var(--block-hover); }
-
         .sidebar-item-active { background-color: var(--block-hover); color: var(--text-main); font-weight: 600; border-left: 2px solid var(--brand-color); }
-        
         [contenteditable]:empty:before { content: attr(placeholder); color: var(--text-secondary); opacity: 0.4; pointer-events: none; }
         
         .switch { position: relative; display: inline-block; width: 34px; height: 20px; }
@@ -88,232 +70,144 @@
         #slash-menu { 
             position: absolute; 
             max-height: 400px; 
-            width: 280px;
+            width: 260px;
             overflow: hidden;
             z-index: 1000;
             background: var(--bg-primary);
             border: 1px solid var(--border-color);
             border-radius: 12px;
-            box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.2);
             backdrop-filter: blur(20px);
             display: none;
             flex-direction: column;
         }
 
-        .slash-drag-handle { height: 16px; background: var(--input-bg); cursor: move; display: flex; align-items: center; justify-content: center; border-bottom: 1px solid var(--border-color); }
-        .quote-block { border-left: 3px solid var(--brand-color); padding-left: 1.25rem; font-style: italic; color: var(--text-secondary); margin: 0.75rem 0; }
-        .callout-block { background: var(--accent-glow); border-radius: 8px; padding: 1rem; display: flex; gap: 0.75rem; align-items: flex-start; margin: 0.75rem 0; }
-        
+        .slash-drag-handle { height: 12px; background: var(--input-bg); cursor: move; border-bottom: 1px solid var(--border-color); }
+        .quote-block { border-left: 3px solid var(--brand-color); padding-left: 1.25rem; font-style: italic; color: var(--text-secondary); margin: 0.5rem 0; }
+        .callout-block { background: var(--accent-glow); border-radius: 8px; padding: 1rem; display: flex; gap: 0.75rem; align-items: flex-start; margin: 0.5rem 0; }
         .orbit-table { width: 100%; border-collapse: collapse; margin: 1rem 0; border: 1px solid var(--border-color); }
-        .orbit-table td { border: 1px solid var(--border-color); padding: 8px 12px; font-size: 14px; min-width: 100px; }
-
+        .orbit-table td { border: 1px solid var(--border-color); padding: 8px 12px; font-size: 14px; }
         .voice-active { color: #f97316 !important; filter: drop-shadow(0 0 8px rgba(249, 115, 22, 0.4)); animation: pulse-voice 2s infinite; }
-        @keyframes pulse-voice { 0% { opacity: 1; } 50% { opacity: 0.6; } 100% { opacity: 1; } }
-
+        @keyframes pulse-voice { 0%, 100% { opacity: 1; } 50% { opacity: 0.7; } }
         #voice-overlay { position: fixed; bottom: 24px; right: 24px; z-index: 50; display: none; }
     </style>
 </head>
 <body class="overflow-hidden">
     <div id="app" class="flex h-screen w-full relative z-10">
         <input type="file" id="cover-upload-input" class="hidden" accept="image/*" onchange="handleCoverFile(this)" />
-        <input type="file" id="block-image-upload-input" class="hidden" accept="image/*" />
-
-        <!-- Floating Format Toolbar -->
-        <div id="format-toolbar">
-            <button class="toolbar-btn" onmousedown="applyFormat('bold'); event.preventDefault();">B</button>
-            <button class="toolbar-btn" onmousedown="applyFormat('italic'); event.preventDefault();">I</button>
-            <button class="toolbar-btn" onmousedown="applyFormat('underline'); event.preventDefault();">U</button>
-            <div class="h-4 w-px bg-gray-500/20 mx-1"></div>
-            <button class="toolbar-btn text-red-500" onmousedown="applyColor('#ef4444'); event.preventDefault();">Red</button>
-            <button class="toolbar-btn text-blue-500" onmousedown="applyColor('#3b82f6'); event.preventDefault();">Blue</button>
-            <button class="toolbar-btn bg-yellow-400/20" onmousedown="applyHighlight('#fef08a'); event.preventDefault();">High</button>
-            <div class="h-4 w-px bg-gray-500/20 mx-1"></div>
-            <button class="toolbar-btn" title="Clear Styles" onmousedown="applyFormat('removeFormat'); event.preventDefault();">
-                <i data-lucide="eraser" class="w-3.5 h-3.5"></i>
-            </button>
+        <div id="format-toolbar" class="bg-[var(--bg-primary)] border border-[var(--border-color)] rounded-lg shadow-xl p-1 flex items-center gap-1">
+            <button class="toolbar-btn p-1 px-2 hover:bg-gray-100 rounded text-xs font-bold" onmousedown="applyFormat('bold'); event.preventDefault();">B</button>
+            <button class="toolbar-btn p-1 px-2 hover:bg-gray-100 rounded text-xs italic" onmousedown="applyFormat('italic'); event.preventDefault();">I</button>
+            <div class="h-4 w-px bg-gray-200 mx-1"></div>
+            <button class="toolbar-btn p-1 px-2 text-red-500 hover:bg-red-50 rounded text-[10px] font-bold" onmousedown="applyColor('#ef4444'); event.preventDefault();">Red</button>
+            <button class="toolbar-btn p-1 px-2 text-blue-500 hover:bg-blue-50 rounded text-[10px] font-bold" onmousedown="applyColor('#3b82f6'); event.preventDefault();">Blue</button>
         </div>
 
-        <!-- Sidebar -->
         <aside id="sidebar" class="w-64 flex flex-col bg-[var(--sidebar-bg)] border-r border-[var(--border-color)] transition-all duration-300 shrink-0 z-20">
             <div class="p-4 flex flex-col gap-5">
-                <div class="flex items-center justify-between">
-                    <div class="flex items-center gap-2 font-bold text-sm tracking-tight">
-                        <svg class="orbit-logo" viewBox="0 0 24 24">
-                            <ellipse cx="12" cy="12" rx="10" ry="3.5" transform="rotate(-20 12 12)" stroke="currentColor" stroke-width="1.8" fill="none" />
-                            <circle cx="12" cy="12" r="7" fill="var(--sidebar-bg)" style="transition: fill 0.4s" />
-                            <circle cx="12" cy="12" r="5" fill="currentColor" />
-                        </svg>
-                        Orbit
-                    </div>
-                    <button onclick="toggleSidebar()" class="hover:bg-gray-500/10 p-1.5 rounded-lg transition-colors text-gray-400">
-                        <i data-lucide="chevron-left" class="w-4 h-4"></i>
-                    </button>
+                <div class="flex items-center justify-between font-bold text-sm">
+                    <div class="flex items-center gap-2">Orbit</div>
+                    <button onclick="toggleSidebar()" class="text-gray-400"><i data-lucide="chevron-left" class="w-4 h-4"></i></button>
                 </div>
-
-                <div class="relative">
-                    <i data-lucide="search" class="absolute left-3 top-2.5 text-gray-400 w-3.5 h-3.5"></i>
-                    <input type="text" oninput="handleSearch(this.value)" class="w-full bg-[var(--input-bg)] border-none outline-none rounded-xl py-2 pl-9 pr-3 text-xs focus:ring-1 focus:ring-blue-500/30 transition-all text-[var(--text-main)]" placeholder="Quick Search" />
+                <input type="text" oninput="handleSearch(this.value)" class="w-full bg-[var(--input-bg)] rounded-xl py-2 px-3 text-xs outline-none" placeholder="Search" />
+            </div>
+            <div class="flex-1 overflow-y-auto px-2 space-y-4 scrollbar-hide">
+                <div>
+                    <div class="px-3 py-1 text-[10px] font-bold text-gray-400 uppercase tracking-widest">Workspace</div>
+                    <div id="pages-list" class="space-y-0.5 mt-2"></div>
                 </div>
             </div>
-
-            <div class="flex-1 overflow-y-auto px-2 space-y-6 scrollbar-hide">
-                <div>
-                    <div class="px-3 py-1 text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Favorites</div>
-                    <div id="favorites-list"></div>
-                </div>
-                <div>
-                    <div class="px-3 py-1 text-[10px] font-bold text-gray-400 uppercase tracking-widest flex justify-between items-center group mb-1">
-                        Workspace
-                        <button onclick="addPage()" class="p-0.5 hover:bg-gray-500/10 rounded transition-opacity"><i data-lucide="plus" class="w-3 h-3 text-gray-400"></i></button>
-                    </div>
-                    <div id="pages-list" class="space-y-0.5"></div>
-                </div>
-            </div>
-
             <div class="p-4 border-t border-[var(--border-color)] space-y-2">
-                <button onclick="openThemeModal()" class="w-full flex items-center gap-3 px-3 py-2 text-xs text-[var(--text-secondary)] hover:bg-gray-500/10 rounded-xl transition-colors font-medium">
-                    <i data-lucide="palette" class="w-4 h-4"></i> Customize Theme
-                </button>
-                <button onclick="openCollabModal()" class="w-full flex items-center gap-3 px-3 py-2 text-xs text-orange-500 hover:bg-orange-500/5 rounded-xl transition-colors font-medium">
+                <button onclick="openCollabModal()" class="w-full flex items-center gap-3 px-3 py-2 text-xs text-orange-500 hover:bg-orange-50 rounded-xl transition-colors font-medium">
                     <i data-lucide="users" class="w-4 h-4"></i> Join Workspace
+                </button>
+                <button onclick="addPage()" class="w-full flex items-center gap-3 px-3 py-2 text-xs text-gray-500 hover:bg-gray-100 rounded-xl transition-colors font-medium">
+                    <i data-lucide="plus" class="w-4 h-4"></i> New Page
                 </button>
             </div>
         </aside>
 
-        <!-- Main Content -->
         <main id="main-content" class="flex-1 flex flex-col h-full bg-[var(--bg-primary)] relative overflow-hidden" onclick="handleWorkspaceClick(event)">
-            <button id="menu-btn" onclick="toggleSidebar()" class="hidden absolute top-4 left-4 z-40 p-2 bg-[var(--bg-primary)]/80 backdrop-blur rounded-lg shadow-sm border border-[var(--border-color)] hover:bg-[var(--bg-primary)] transition-all"><i data-lucide="menu" class="w-4 h-4"></i></button>
-
             <div class="h-14 border-b border-[var(--border-color)] flex items-center justify-between px-6 shrink-0 z-20 bg-[var(--bg-primary)]/80 backdrop-blur-md">
-                <div class="flex items-center gap-3 text-xs text-gray-400 font-medium">
-                    <span>Orbit</span>
-                    <i data-lucide="chevron-right" class="w-3 h-3"></i>
-                    <span id="header-title" class="text-[var(--text-main)] font-bold truncate max-w-[200px]">Workspace</span>
-                </div>
+                <div id="header-title" class="text-xs font-bold text-[var(--text-main)]">Workspace</div>
                 <div class="flex items-center gap-3">
-                    <button onclick="toggleVoiceOrbit()" id="voice-btn" class="p-2 rounded-lg hover:bg-gray-500/10 transition-all text-gray-400 relative group" title="Voice Room">
-                        <i data-lucide="mic" class="w-4 h-4"></i>
-                    </button>
-                    
-                    <div id="collaborators" class="flex -space-x-2 overflow-hidden mr-1"></div>
-                    <div id="sync-status" class="hidden flex items-center gap-2 text-[10px] text-green-600 font-bold uppercase tracking-wider">
-                        <div id="sync-dot" class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div> Live
-                    </div>
-                    <button onclick="toggleActiveFavorite()" id="favorite-btn" class="p-2 rounded-lg hover:bg-gray-500/10 transition-colors text-gray-400"><i data-lucide="star" class="w-4 h-4"></i></button>
-                    <button onclick="openSharePageModal()" class="text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-xl transition-all shadow-lg active:scale-95">Share</button>
+                    <button onclick="toggleVoiceOrbit()" id="voice-btn" class="p-2 rounded-lg hover:bg-gray-100 text-gray-400"><i data-lucide="mic" class="w-4 h-4"></i></button>
+                    <div id="collaborators" class="flex -space-x-2"></div>
+                    <div id="sync-status" class="hidden flex items-center gap-2 text-[10px] text-green-600 font-bold uppercase"><div class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div> Live</div>
+                    <button onclick="openSharePageModal()" class="text-[10px] font-bold text-white bg-blue-600 px-3 py-1.5 rounded-lg">Share</button>
                 </div>
             </div>
 
             <div class="flex-1 overflow-y-auto scrollbar-hide relative" id="main-scroll-container">
-                <div class="relative h-72 group overflow-hidden">
-                    <img id="page-cover" src="" alt="Cover" class="w-full h-full object-cover transition-all duration-1000" />
-                    <div class="absolute bottom-6 right-10 opacity-0 group-hover:opacity-100 transition-all transform translate-y-2 group-hover:translate-y-0 flex gap-2">
-                        <button onclick="document.getElementById('cover-upload-input').click()" class="bg-white/90 dark:bg-black/90 backdrop-blur px-4 py-2 text-[10px] font-bold uppercase tracking-wider rounded-xl border border-gray-200 dark:border-gray-800 shadow-xl transition-all text-gray-700 dark:text-gray-200">Change Cover</button>
-                    </div>
+                <div class="relative h-64 group overflow-hidden">
+                    <img id="page-cover" src="" alt="Cover" class="w-full h-full object-cover" />
+                    <button onclick="document.getElementById('cover-upload-input').click()" class="absolute bottom-4 right-4 bg-white/90 px-3 py-1.5 text-[10px] font-bold rounded-lg border shadow-sm opacity-0 group-hover:opacity-100 transition-opacity">Change Cover</button>
                 </div>
-
-                <div class="max-w-4xl mx-auto px-12 lg:px-32 pb-64 relative">
-                    <div class="mt-[-55px] mb-12 relative z-10 group fade-in">
-                        <div class="relative inline-block">
-                            <div id="page-icon" onclick="toggleEmojiPicker(event)" class="text-8xl cursor-pointer hover:scale-105 rounded-3xl p-3 transition-all select-none bg-[var(--bg-primary)] shadow-2xl border border-[var(--border-color)]">🚀</div>
-                            <div id="emoji-picker" class="hidden absolute top-full left-0 mt-3 p-4 bg-[var(--bg-primary)] border border-[var(--border-color)] rounded-3xl shadow-2xl z-50 w-80 backdrop-filter blur-xl bg-opacity-90">
-                                <div class="grid grid-cols-5 gap-2" id="emoji-grid"></div>
-                            </div>
-                        </div>
-                        <input id="main-title-input" oninput="updatePageTitle(this.value)" class="w-full text-6xl font-black border-none outline-none mt-10 placeholder-gray-500/20 tracking-tighter bg-transparent text-[var(--text-main)]" placeholder="Untitled Workspace" />
+                <div class="max-w-3xl mx-auto px-8 lg:px-20 pb-64 relative">
+                    <div class="mt-[-40px] mb-8 relative z-10">
+                        <div id="page-icon" onclick="toggleEmojiPicker(event)" class="text-7xl cursor-pointer hover:scale-105 transition-transform select-none">🚀</div>
+                        <div id="emoji-picker" class="hidden absolute top-full left-0 mt-2 p-4 bg-white border rounded-2xl shadow-2xl z-50 w-64"><div class="grid grid-cols-5 gap-2" id="emoji-grid"></div></div>
+                        <input id="main-title-input" oninput="updatePageTitle(this.value)" class="w-full text-5xl font-black border-none outline-none mt-8 bg-transparent text-[var(--text-main)]" placeholder="Untitled" />
                     </div>
-
-                    <div id="editor-blocks" class="space-y-0.5 pb-8 min-h-[100px] relative"></div>
-                    <div id="bottom-click-trigger" class="h-[50vh] w-full cursor-text"></div>
-                    
-                    <!-- Slash Menu -->
+                    <div id="editor-blocks" class="space-y-0.5 min-h-[100px]"></div>
+                    <div id="bottom-click-trigger" class="h-64 w-full cursor-text"></div>
                     <div id="slash-menu" class="slash-menu-enter">
                         <div class="slash-drag-handle" id="slash-menu-drag"></div>
-                        <div class="px-4 py-2 text-[9px] font-bold text-gray-400 uppercase tracking-widest border-b border-[var(--border-color)]">Basic Blocks</div>
-                        <div id="slash-menu-items" class="max-h-80 overflow-y-auto scrollbar-hide py-1"></div>
+                        <div id="slash-menu-items" class="py-1"></div>
                     </div>
                 </div>
             </div>
         </main>
     </div>
 
-    <!-- Voice Room UI -->
-    <div id="voice-overlay" class="bg-white dark:bg-[#1e1e1e] border border-[var(--border-color)] rounded-2xl p-4 shadow-2xl w-64 fade-in">
-        <div class="flex items-center justify-between mb-4">
-            <div class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Voice Room</div>
-            <div class="flex gap-2">
-                <div class="w-2 h-2 rounded-full bg-orange-500 animate-pulse"></div>
-            </div>
-        </div>
-        <div id="voice-participants" class="space-y-3"></div>
-        <button onclick="toggleVoiceOrbit()" class="w-full mt-4 py-2 bg-red-500/10 text-red-500 text-[10px] font-bold uppercase rounded-lg hover:bg-red-500/20 transition-all">Leave Room</button>
-    </div>
-
-    <!-- Modals -->
-    <div id="theme-modal" class="hidden fixed inset-0 z-[200] bg-black/60 flex items-center justify-center backdrop-blur-md">
-        <div class="bg-white dark:bg-[#1e1e1e] w-96 rounded-3xl p-8 shadow-2xl fade-in text-center">
-            <h3 class="text-xl font-bold mb-8 dark:text-white">Workspace Design</h3>
-            <div class="space-y-4 mb-8">
-                <div class="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-2xl">
-                    <span class="text-xs font-bold text-gray-500">Dark Mode</span>
-                    <label class="switch"><input type="checkbox" id="modal-dark-toggle" onchange="toggleDarkMode()"><span class="slider"></span></label>
-                </div>
-            </div>
-            <button onclick="closeThemeModal()" class="w-full py-4 bg-blue-600 rounded-2xl text-sm font-bold text-white">Save Changes</button>
-        </div>
+    <div id="voice-overlay" class="bg-white dark:bg-[#1e1e1e] border border-[var(--border-color)] rounded-2xl p-4 shadow-2xl w-56 fade-in">
+        <div class="text-[10px] font-bold text-gray-400 uppercase mb-3">In Voice Room</div>
+        <div id="voice-participants" class="space-y-2"></div>
+        <button onclick="toggleVoiceOrbit()" class="w-full mt-4 py-2 bg-red-500/10 text-red-500 text-[10px] font-bold uppercase rounded-lg">Leave</button>
     </div>
 
     <div id="collab-modal" class="hidden fixed inset-0 z-[100] bg-black/40 flex items-center justify-center backdrop-blur-sm">
-        <div class="bg-white dark:bg-[#1e1e1e] w-96 rounded-3xl p-8 shadow-2xl fade-in text-center">
-            <h3 class="text-xl font-bold mb-2 dark:text-white">Join Workspace</h3>
-            <p class="text-xs text-gray-500 mb-6">Enter code to join a collaborative room.</p>
-            <input id="friend-page-code" type="text" placeholder="Workspace Code..." class="w-full bg-gray-50 dark:bg-[#2a2a2a] border border-gray-200 dark:border-[#333] rounded-2xl px-5 py-4 text-sm font-mono outline-none mb-6" />
-            <button id="join-btn" onclick="joinFriendPage()" class="w-full py-4 bg-blue-600 rounded-2xl text-sm font-semibold text-white">Connect</button>
+        <div class="bg-white dark:bg-[#1e1e1e] w-80 rounded-2xl p-6 shadow-2xl text-center">
+            <h3 class="font-bold mb-4">Join Workspace</h3>
+            <input id="friend-page-code" type="text" placeholder="Workspace Code" class="w-full bg-gray-50 border rounded-xl px-4 py-3 text-sm outline-none mb-4" />
+            <button onclick="joinFriendPage()" class="w-full py-3 bg-blue-600 rounded-xl text-sm font-bold text-white">Connect</button>
         </div>
     </div>
 
     <div id="name-modal" class="hidden fixed inset-0 z-[200] bg-black/60 flex items-center justify-center backdrop-blur-md">
-        <div class="bg-white dark:bg-[#1e1e1e] w-80 rounded-3xl p-8 shadow-2xl">
-            <h3 class="text-xl font-bold mb-4 dark:text-white">Orbit Hello</h3>
-            <input id="initial-name" type="text" class="w-full bg-gray-50 dark:bg-[#2a2a2a] border border-gray-200 dark:border-[#333] dark:text-white rounded-2xl px-5 py-3 text-sm outline-none mb-4" placeholder="Your name..." />
-            <button onclick="window.saveInitialName()" class="w-full py-3 bg-blue-600 rounded-2xl text-sm font-bold text-white">Get Started</button>
+        <div class="bg-white w-72 rounded-2xl p-6 shadow-2xl">
+            <h3 class="font-bold mb-4">Orbit Identity</h3>
+            <input id="initial-name" type="text" class="w-full bg-gray-50 border rounded-xl px-4 py-3 text-sm outline-none mb-4" placeholder="Your name" />
+            <button onclick="window.saveInitialName()" class="w-full py-3 bg-blue-600 rounded-xl text-sm font-bold text-white">Enter</button>
         </div>
     </div>
 
     <div id="share-modal" class="hidden fixed inset-0 z-[100] bg-black/40 flex items-center justify-center backdrop-blur-sm">
-        <div class="bg-white dark:bg-[#1e1e1e] w-80 rounded-3xl p-8 shadow-2xl text-center">
-            <h3 class="text-lg font-bold mb-4 dark:text-white">Share Workspace</h3>
-            <div class="bg-gray-100 dark:bg-[#2a2a2a] p-4 rounded-xl mb-6 font-mono text-sm font-bold tracking-widest text-blue-600 select-all border border-[var(--border-color)]" id="share-code-display"></div>
-            <button onclick="closeShareModal()" class="w-full py-3 bg-gray-100 dark:bg-gray-800 rounded-xl text-sm font-bold text-gray-600 dark:text-gray-300">Close</button>
+        <div class="bg-white w-72 rounded-2xl p-6 shadow-2xl text-center">
+            <h3 class="font-bold mb-4">Share Code</h3>
+            <div class="bg-gray-100 p-4 rounded-xl mb-4 font-mono text-xs font-bold text-blue-600" id="share-code-display"></div>
+            <button onclick="closeShareModal()" class="w-full py-2 text-xs font-bold text-gray-500">Close</button>
         </div>
     </div>
 
+    <div id="remote-audio-container" class="hidden"></div>
+
     <script>
         const ROOT_ABLY_KEY = "LJhgHg.rF2whQ:Imz-F_d5gOcMGAiJNWIGjhaAXXba8Hpbefj3LtPaT0s"; 
-        const DEFAULT_COVERS = ['https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&q=80&w=2000', 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&q=80&w=2000', 'https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?auto=format&fit=crop&q=80&w=2000'];
-        const EMOJI_LIST = ['🚀', '🪐', '🌑', '✨', '🛸', '🛰️', '🌍', '☄️', '🔭', '🎨', '📝', '🛠️', '🌐', '📊', '💻', '⚡', '📦', '🎯'];
-        const STORAGE_KEY = 'orbit_workspace_v9_ultimate';
+        const DEFAULT_COVERS = ['https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&q=80&w=2000', 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&q=80&w=2000'];
+        const EMOJI_LIST = ['🚀', '🪐', '🌑', '✨', '🛸', '🛰️', '🌍', '☄️', '🔭', '🎨', '📝', '🛠️', '🎯'];
+        const STORAGE_KEY = 'orbit_workspace_v10_sync';
 
         let state = {
-            username: '',
-            darkMode: false,
-            onCall: false,
-            activePageId: '1',
-            sidebarOpen: true,
-            searchQuery: '',
+            username: '', darkMode: false, onCall: false, activePageId: '1',
             pages: [{ 
-                id: '1', title: 'Welcome to Orbit', icon: '🚀', isFavorite: true, cover: DEFAULT_COVERS[1], isShared: false, 
-                blocks: [
-                    { id: 'b1', type: 'h1', content: 'Orbit Workspace' }, 
-                    { id: 'b2', type: 'text', content: 'Type <b>/</b> for commands.' },
-                    { id: 'b3', type: 'callout', content: 'Voice rooms are now active! Click the mic to start a Discord-style call.' }
-                ] 
+                id: '1', title: 'Home', icon: '🚀', cover: DEFAULT_COVERS[1], isShared: false, 
+                blocks: [{ id: 'b1', type: 'h1', content: 'Welcome' }, { id: 'b2', type: 'text', content: 'Start typing...' }] 
             }],
         };
 
         let ably = null, channel = null, sortableMain = null;
-        let localStream = null;
-        let peerConnections = {}; // Map of clientId -> RTCPeerConnection
+        let localStream = null, peerConnections = {};
 
         window.saveInitialName = function() {
             const name = document.getElementById('initial-name').value.trim();
@@ -326,257 +220,139 @@
 
         function init() {
             loadState();
-            applyTheme();
-            if (!state.username) { 
-                document.getElementById('name-modal').classList.remove('hidden'); 
-                return; 
-            }
-            renderSidebar();
-            renderActivePage();
-            setupEmojiPicker();
-            setupSlashMenu();
-            initDragAndDrop();
-            setupFormatListener();
-            setupMenuDragging();
-            
+            if (!state.username) { document.getElementById('name-modal').classList.remove('hidden'); return; }
+            renderSidebar(); renderActivePage(); setupEmojiPicker(); setupSlashMenu();
+            initDragAndDrop(); setupFormatListener(); setupMenuDragging();
             document.addEventListener('mousedown', (e) => {
                 const menu = document.getElementById('slash-menu');
-                if (menu && menu.style.display === 'flex' && !menu.contains(e.target)) {
-                    setTimeout(() => hideSlashMenu(), 50);
-                }
+                if (menu && menu.style.display === 'flex' && !menu.contains(e.target)) hideSlashMenu();
             });
-
             initAbly();
             lucide.createIcons();
         }
 
         function hideSlashMenu() {
             const menu = document.getElementById('slash-menu');
-            if (menu) {
-                menu.style.display = 'none';
-                state.activeBlockIdForMenu = null;
-            }
+            if (menu) { menu.style.display = 'none'; state.activeBlockIdForMenu = null; }
         }
 
         function loadState() {
             const saved = localStorage.getItem(STORAGE_KEY);
-            if (saved) { try { Object.assign(state, JSON.parse(saved)); } catch (e) { console.error(e); } }
+            if (saved) { try { Object.assign(state, JSON.parse(saved)); } catch (e) {} }
         }
 
         function saveState(skipBroadcast = false) {
             localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
             const activePage = state.pages.find(p => p.id === state.activePageId);
-            if (!skipBroadcast && channel && activePage && activePage.isShared) {
+            if (!skipBroadcast && channel && activePage?.isShared) {
                 channel.publish('update', { pages: state.pages });
             }
-        }
-
-        function applyTheme() {
-            document.body.classList.toggle('dark-mode', state.darkMode);
-            lucide.createIcons();
-        }
-
-        function toggleDarkMode() { 
-            state.darkMode = document.getElementById('modal-dark-toggle').checked; 
-            applyTheme(); 
-            saveState(true); 
         }
 
         async function toggleVoiceOrbit() {
             state.onCall = !state.onCall;
             const btn = document.getElementById('voice-btn');
             const overlay = document.getElementById('voice-overlay');
-            
             if (state.onCall) {
                 try {
                     localStream = await navigator.mediaDevices.getUserMedia({ audio: true });
                     btn.classList.add('voice-active');
                     overlay.style.display = 'block';
-                } catch (e) {
-                    console.error("Mic access denied", e);
-                    state.onCall = false;
-                    return;
-                }
+                } catch (e) { state.onCall = false; return; }
             } else {
                 btn.classList.remove('voice-active');
                 overlay.style.display = 'none';
-                if (localStream) {
-                    localStream.getTracks().forEach(track => track.stop());
-                    localStream = null;
+                if (localStream) { localStream.getTracks().forEach(t => t.stop()); localStream = null; }
+                Object.values(peerConnections).forEach(pc => pc.close());
+                peerConnections = {};
+                document.getElementById('remote-audio-container').innerHTML = '';
+            }
+            if (channel) {
+                channel.presence.update({ onCall: state.onCall });
+                channel.publish('signal', { type: 'hello' }); // Inform others to start calling
+            }
+        }
+
+        function createPeerConnection(remoteId) {
+            const pc = new RTCPeerConnection({ iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] });
+            if (localStream) localStream.getTracks().forEach(track => pc.addTrack(track, localStream));
+            pc.onicecandidate = (e) => { if (e.candidate) channel.publish('signal', { to: remoteId, type: 'ice', data: e.candidate }); };
+            pc.ontrack = (e) => {
+                let audio = document.getElementById(`audio-${remoteId}`);
+                if (!audio) {
+                    audio = document.createElement('audio');
+                    audio.id = `audio-${remoteId}`;
+                    audio.autoplay = true;
+                    document.getElementById('remote-audio-container').appendChild(audio);
                 }
-                // Cleanup peer connections
-                Object.keys(peerConnections).forEach(id => {
-                    peerConnections[id].close();
-                    delete peerConnections[id];
-                });
-            }
-            
-            if (channel) channel.presence.update({ onCall: state.onCall });
-            lucide.createIcons();
-        }
-
-        function setupMenuDragging() {
-            const menu = document.getElementById('slash-menu');
-            const handle = document.getElementById('slash-menu-drag');
-            let x = 0, y = 0, isDown = false;
-            handle.addEventListener('mousedown', (e) => { 
-                isDown = true; 
-                x = e.clientX - menu.offsetLeft; 
-                y = e.clientY - menu.offsetTop; 
-                e.preventDefault(); 
-                e.stopPropagation();
-            });
-            document.addEventListener('mousemove', (e) => { if (!isDown) return; menu.style.left = (e.clientX - x) + 'px'; menu.style.top = (e.clientY - y) + 'px'; });
-            document.addEventListener('mouseup', () => { isDown = false; });
-        }
-
-        // WebRTC Signaling Handlers
-        async function handleSignal(m) {
-            const { from, type, data } = m.data;
-            if (m.clientId === ably.auth.clientId) return;
-
-            let pc = peerConnections[from];
-            if (!pc) pc = createPeerConnection(from);
-
-            if (type === 'offer') {
-                await pc.setRemoteDescription(new RTCSessionDescription(data));
-                const answer = await pc.createAnswer();
-                await pc.setLocalDescription(answer);
-                channel.publish('signal', { to: from, type: 'answer', data: answer });
-            } else if (type === 'answer') {
-                await pc.setRemoteDescription(new RTCSessionDescription(data));
-            } else if (type === 'ice') {
-                await pc.addIceCandidate(new RTCIceCandidate(data));
-            }
-        }
-
-        function createPeerConnection(remoteClientId) {
-            const pc = new RTCPeerConnection({
-                iceServers: [{ urls: 'stun:stun.l.google.com:19302' }]
-            });
-
-            if (localStream) {
-                localStream.getTracks().forEach(track => pc.addTrack(track, localStream));
-            }
-
-            pc.onicecandidate = (event) => {
-                if (event.candidate) {
-                    channel.publish('signal', { to: remoteClientId, type: 'ice', data: event.candidate });
-                }
+                audio.srcObject = e.streams[0];
             };
-
-            pc.ontrack = (event) => {
-                const remoteAudio = new Audio();
-                remoteAudio.srcObject = event.streams[0];
-                remoteAudio.autoplay = true;
-            };
-
-            peerConnections[remoteClientId] = pc;
+            peerConnections[remoteId] = pc;
             return pc;
         }
 
-        // Modified createBlockElement to prevent jitter
+        async function handleSignal(m) {
+            const { from, to, type, data } = m.data;
+            if (m.clientId === ably.auth.clientId || (to && to !== ably.auth.clientId)) return;
+            let pc = peerConnections[from] || createPeerConnection(from);
+            if (type === 'offer') {
+                await pc.setRemoteDescription(new RTCSessionDescription(data));
+                const ans = await pc.createAnswer();
+                await pc.setLocalDescription(ans);
+                channel.publish('signal', { to: from, type: 'answer', data: ans });
+            } else if (type === 'answer') await pc.setRemoteDescription(new RTCSessionDescription(data));
+            else if (type === 'ice') await pc.addIceCandidate(new RTCIceCandidate(data));
+        }
+
         function createBlockElement(block, isFirst) {
             const div = document.createElement('div');
-            div.className = 'group relative w-full px-2 py-0.5 min-h-[30px] flex items-start gap-1 block-container fade-in';
+            div.className = 'group relative w-full px-2 py-0.5 flex items-start gap-1 block-container fade-in';
             div.dataset.id = block.id;
-
             let html = '';
             switch (block.type) {
-                case 'h1': html = `<div contenteditable="true" class="w-full text-4xl font-extrabold py-2 outline-none text-[var(--text-main)]" placeholder="Heading 1">${block.content || ''}</div>`; break;
-                case 'h2': html = `<div contenteditable="true" class="w-full text-2xl font-bold mt-4 py-1 outline-none text-[var(--text-main)]" placeholder="Heading 2">${block.content || ''}</div>`; break;
-                case 'todo': html = `<div class="flex items-start gap-3 py-1 flex-1"><input type="checkbox" onchange="toggleTodo('${block.id}')" ${block.checked ? 'checked' : ''} class="mt-1.5 h-4 w-4 rounded border-gray-300 cursor-pointer" /><div contenteditable="true" class="flex-1 outline-none ${block.checked ? 'line-through text-gray-500' : 'text-[var(--text-main)]'}" placeholder="To-do">${block.content || ''}</div></div>`; break;
-                case 'bullet': html = `<div class="flex items-start gap-3 py-1 flex-1"><div class="w-1.5 h-1.5 rounded-full bg-gray-400 mt-2.5 shrink-0"></div><div contenteditable="true" class="flex-1 outline-none text-[var(--text-main)]" placeholder="List item">${block.content || ''}</div></div>`; break;
+                case 'h1': html = `<div contenteditable="true" class="w-full text-4xl font-extrabold py-2 outline-none" placeholder="Heading 1">${block.content || ''}</div>`; break;
                 case 'quote': html = `<div contenteditable="true" class="quote-block flex-1 outline-none" placeholder="Quote">${block.content || ''}</div>`; break;
                 case 'callout': html = `<div class="callout-block flex-1"><div class="text-xl">💡</div><div contenteditable="true" class="flex-1 outline-none" placeholder="Callout">${block.content || ''}</div></div>`; break;
-                case 'table': html = `<table class="orbit-table"><tbody><tr><td contenteditable="true">Item</td><td contenteditable="true">Value</td></tr><tr><td contenteditable="true"></td><td contenteditable="true"></td></tr></tbody></table>`; break;
-                case 'code': html = `<div class="code-block p-4 bg-gray-500/5 rounded-xl font-mono text-sm"><div contenteditable="true" class="outline-none block-textarea" style="white-space: pre-wrap;" placeholder="// Code here">${block.content || ''}</div></div>`; break;
-                case 'divider': html = `<hr class="w-full my-6 border-[var(--border-color)]" />`; break;
-                default: html = `<div contenteditable="true" class="flex-1 outline-none py-1.5 leading-relaxed text-[var(--text-main)]" placeholder="Type '/' for commands...">${block.content || ''}</div>`;
+                case 'table': html = `<table class="orbit-table"><tbody><tr><td contenteditable="true">Item</td><td contenteditable="true">Value</td></tr></tbody></table>`; break;
+                case 'divider': html = `<hr class="w-full my-6 border-gray-200" />`; break;
+                default: html = `<div contenteditable="true" class="flex-1 outline-none py-1.5 leading-relaxed" placeholder="Type '/' for commands...">${block.content || ''}</div>`;
             }
-
-            div.innerHTML = `
-                <div class="flex flex-col items-center opacity-0 group-hover:opacity-100 transition-all py-1 shrink-0 absolute -left-10 top-0">
-                    <div class="drag-handle p-1 hover:text-blue-500"><i data-lucide="grip-vertical" class="w-4 h-4"></i></div>
-                    <button onclick="deleteBlock('${block.id}')" class="p-1 hover:bg-red-500/10 rounded hover:text-red-500"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
-                </div>
-                ${html}
-            `;
-
-            const editable = div.querySelector('[contenteditable="true"]');
-            if (editable) {
-                editable.addEventListener('input', () => { 
-                    block.content = editable.innerHTML; 
-                    saveState(); 
-                    const text = editable.innerText;
-                    if (text.length > 5 && !text.startsWith("/")) hideSlashMenu();
-                });
-                
-                editable.addEventListener('keydown', (e) => {
-                    if (e.key === '/') { 
-                        if (!editable.innerText.trim()) { 
-                            e.preventDefault(); 
-                            openSlashMenu(div, block.id); 
-                        } 
-                    } else if (e.key === 'Enter' && !e.shiftKey) { 
-                        e.preventDefault(); 
-                        const nextType = (block.type === 'todo' || block.type === 'bullet') ? block.type : 'text';
-                        addBlockBelow(block.id, nextType); 
-                        hideSlashMenu();
-                    } else if (e.key === 'Backspace') {
-                        if (editable.innerText === "/") hideSlashMenu();
-                        if (!editable.innerText.trim() && !isFirst) { e.preventDefault(); deleteBlock(block.id); }
-                    } else if (e.key === 'Escape') hideSlashMenu();
+            div.innerHTML = `<div class="drag-handle opacity-0 group-hover:opacity-100 transition-opacity absolute -left-8 top-1"><i data-lucide="grip-vertical" class="w-4 h-4"></i></div>${html}`;
+            const edit = div.querySelector('[contenteditable="true"]');
+            if (edit) {
+                edit.addEventListener('input', () => { block.content = edit.innerHTML; saveState(); if (edit.innerText.length > 5 && !edit.innerText.startsWith('/')) hideSlashMenu(); });
+                edit.addEventListener('keydown', (e) => {
+                    if (e.key === '/') { if (!edit.innerText.trim()) { e.preventDefault(); openSlashMenu(div, block.id); } }
+                    else if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); addBlockBelow(block.id); hideSlashMenu(); }
+                    else if (e.key === 'Backspace' && !edit.innerText.trim() && !isFirst) { e.preventDefault(); deleteBlock(block.id); }
+                    else if (e.key === 'Escape') hideSlashMenu();
                 });
             }
-
             return div;
         }
 
         function openSlashMenu(el, id) { 
             state.activeBlockIdForMenu = id; 
-            const menu = document.getElementById('slash-menu'); 
-            const container = document.getElementById('main-scroll-container');
-            const selection = window.getSelection();
-            let rect;
-            if (selection.rangeCount > 0) {
-                const range = selection.getRangeAt(0).cloneRange();
-                range.collapse(false);
-                rect = range.getBoundingClientRect();
-                if (rect.top === 0 && rect.left === 0) rect = el.getBoundingClientRect();
-            } else rect = el.getBoundingClientRect();
-
-            const containerRect = container.getBoundingClientRect();
+            const menu = document.getElementById('slash-menu'), container = document.getElementById('main-scroll-container');
+            const sel = window.getSelection();
+            let rect = sel.rangeCount > 0 ? sel.getRangeAt(0).getBoundingClientRect() : el.getBoundingClientRect();
+            const cRect = container.getBoundingClientRect();
             menu.style.display = 'flex'; 
-            let top = (rect.top - containerRect.top + container.scrollTop + 24);
-            let left = (rect.left - containerRect.left);
-            if (left + 280 > containerRect.width) left = containerRect.width - 300;
-            if (left < 40) left = 40;
-            menu.style.top = top + 'px'; menu.style.left = left + 'px'; 
+            menu.style.top = (rect.top - cRect.top + container.scrollTop - 4) + 'px'; 
+            menu.style.left = (rect.left - cRect.left) + 'px'; 
             lucide.createIcons(); 
         }
 
         function setupSlashMenu() {
             const items = [
-                { type: 'text', icon: 'type', label: 'Text', desc: 'Standard' }, 
-                { type: 'h1', icon: 'heading-1', label: 'Heading 1', desc: 'Title' }, 
-                { type: 'h2', icon: 'heading-2', label: 'Heading 2', desc: 'Section' }, 
-                { type: 'todo', icon: 'check-square', label: 'To-do', desc: 'Checklist' }, 
-                { type: 'table', icon: 'table', label: 'Table', desc: 'Grid' },
-                { type: 'code', icon: 'code', label: 'Code', desc: 'Script' },
-                { type: 'quote', icon: 'quote', label: 'Quote', desc: 'Focus' }, 
-                { type: 'callout', icon: 'info', label: 'Callout', desc: 'Box' }, 
-                { type: 'divider', icon: 'minus', label: 'Divider', desc: 'Break' }
+                { type: 'text', icon: 'type', label: 'Text' }, { type: 'h1', icon: 'heading-1', label: 'Title' }, 
+                { type: 'quote', icon: 'quote', label: 'Quote' }, { type: 'callout', icon: 'info', label: 'Callout' },
+                { type: 'table', icon: 'table', label: 'Table' }, { type: 'divider', icon: 'minus', label: 'Divider' }
             ];
             document.getElementById('slash-menu-items').innerHTML = items.map(i => `
-                <button onclick="selectSlashItem('${i.type}')" class="w-full flex items-center gap-3 px-3 py-2 hover:bg-gray-500/10 text-left transition-colors">
-                    <div class="w-8 h-8 flex items-center justify-center bg-gray-500/5 border border-[var(--border-color)] rounded-lg text-gray-400 shrink-0">
-                        <i data-lucide="${i.icon}" class="w-3.5 h-3.5"></i>
-                    </div>
-                    <div>
-                        <div class="text-[11px] font-bold text-[var(--text-main)]">${i.label}</div>
-                        <div class="text-[8px] text-gray-500">${i.desc}</div>
-                    </div>
+                <button onclick="selectSlashItem('${i.type}')" class="w-full flex items-center gap-3 px-3 py-2 hover:bg-gray-100 text-left transition-colors">
+                    <div class="w-6 h-6 flex items-center justify-center bg-gray-50 border rounded text-gray-400 shrink-0"><i data-lucide="${i.icon}" class="w-3.5 h-3.5"></i></div>
+                    <div class="text-[11px] font-bold">${i.label}</div>
                 </button>
             `).join('');
         }
@@ -584,14 +360,7 @@
         function selectSlashItem(t) { 
             const p = state.pages.find(pg => pg.id === state.activePageId); 
             const b = p.blocks.find(bk => bk.id === state.activeBlockIdForMenu); 
-            if (b) { 
-                b.type = t; b.content = ''; 
-                renderActivePage(); saveState(); 
-                setTimeout(() => {
-                    const blockEl = document.querySelector(`[data-id="${b.id}"] [contenteditable="true"]`);
-                    if (blockEl) blockEl.focus();
-                }, 50);
-            }
+            if (b) { b.type = t; b.content = ''; renderActivePage(); saveState(); }
             hideSlashMenu();
         }
 
@@ -601,228 +370,112 @@
             document.getElementById('page-icon').innerText = page.icon;
             document.getElementById('header-title').innerText = page.title || 'Workspace';
             document.getElementById('main-title-input').value = page.title;
-            document.getElementById('sync-status').classList.toggle('hidden', !page.isShared);
+            const container = document.getElementById('editor-blocks');
+            const currentFocusedId = document.activeElement?.closest('.block-container')?.dataset.id;
             
-            const container = document.getElementById('editor-blocks'); 
-            const focusedId = document.activeElement?.closest('.block-container')?.dataset.id;
-            
-            // Selective re-rendering to prevent jitter
-            page.blocks.forEach((b) => {
-                const existing = container.querySelector(`[data-id="${b.id}"]`);
-                if (existing) {
-                    if (b.id === focusedId) return; // Don't touch the focused block
-                    const editable = existing.querySelector('[contenteditable="true"]');
-                    if (editable && editable.innerHTML !== b.content) {
-                        editable.innerHTML = b.content || '';
-                    }
+            // Build map of current blocks in DOM
+            const domMap = new Map();
+            container.querySelectorAll('.block-container').forEach(el => domMap.set(el.dataset.id, el));
+
+            page.blocks.forEach((b, i) => {
+                let el = domMap.get(b.id);
+                if (el) {
+                    const edit = el.querySelector('[contenteditable="true"]');
+                    if (edit && b.id !== currentFocusedId && edit.innerHTML !== b.content) edit.innerHTML = b.content || '';
+                    domMap.delete(b.id); // mark as kept
                 } else {
-                    container.appendChild(createBlockElement(b, page.blocks[0].id === b.id));
+                    const newEl = createBlockElement(b, i === 0);
+                    // Insert at correct position
+                    if (i === 0) container.prepend(newEl);
+                    else container.insertBefore(newEl, container.children[i]);
                 }
             });
-
-            // Cleanup removed blocks
-            container.querySelectorAll('.block-container').forEach(el => {
-                if (!page.blocks.find(b => b.id === el.dataset.id)) el.remove();
-            });
-            
-            lucide.createIcons(); 
-            initDragAndDrop();
+            domMap.forEach(el => el.remove()); // delete blocks not in state
+            lucide.createIcons(); initDragAndDrop();
         }
 
         function renderSidebar() {
-            const fList = document.getElementById('favorites-list'), pList = document.getElementById('pages-list');
-            const filtered = state.pages.filter(p => p.title.toLowerCase().includes(state.searchQuery.toLowerCase()));
-            const html = (p) => `<div class="group px-2"><button onclick="setActivePage('${p.id}')" class="w-full flex items-center gap-2 px-2 py-2 text-xs rounded-xl transition-all ${p.id === state.activePageId ? 'sidebar-item-active' : 'text-gray-500 hover:bg-gray-500/10'}"><span>${p.icon}</span><span class="truncate flex-1 text-left">${p.title || 'Untitled'}</span></button></div>`;
-            fList.innerHTML = filtered.filter(p => p.isFavorite).map(html).join('');
-            pList.innerHTML = filtered.filter(p => !p.isFavorite).map(html).join('');
+            const pList = document.getElementById('pages-list');
+            pList.innerHTML = state.pages.map(p => `<button onclick="setActivePage('${p.id}')" class="w-full flex items-center gap-2 px-3 py-2 text-xs rounded-xl transition-all ${p.id === state.activePageId ? 'sidebar-item-active' : 'text-gray-500 hover:bg-gray-100'}"><span>${p.icon}</span><span class="truncate">${p.title || 'Untitled'}</span></button>`).join('');
             lucide.createIcons();
         }
 
-        function setActivePage(id) { 
-            state.activePageId = id; saveState(true); 
-            renderSidebar(); renderActivePage(); 
-            if(ably) joinChannel(id); 
-        }
+        function setActivePage(id) { state.activePageId = id; saveState(true); renderSidebar(); renderActivePage(); if(ably) joinChannel(id); }
+        function updatePageTitle(v) { const p = state.pages.find(pg => pg.id === state.activePageId); if(p) { p.title = v; document.getElementById('header-title').innerText = v || 'Workspace'; saveState(); renderSidebar(); } }
 
         function initAbly() {
             if (!ROOT_ABLY_KEY || ably) return;
             ably = new Ably.Realtime({ key: ROOT_ABLY_KEY, clientId: state.username + '_' + Math.random().toString(36).substr(2, 4) });
-            const page = state.pages.find(p => p.id === state.activePageId);
-            if (page && page.isShared) joinChannel(state.activePageId);
+            joinChannel(state.activePageId);
         }
 
         function joinChannel(id) {
-            if (!ably) return; 
             if (channel) { channel.presence.leave(); channel.unsubscribe(); }
-            
-            channel = ably.channels.get('orbit-v9-' + id, { params: { rewind: '1' } });
-            
+            channel = ably.channels.get('orbit-sync-' + id, { params: { rewind: '1' } });
             channel.subscribe('update', (m) => {
                 if (m.clientId === ably.auth.clientId) return;
-                const remoteData = m.data.pages;
-                if (remoteData) {
-                    const currentPage = remoteData.find(p => p.id === id);
-                    if (currentPage) {
-                        state.pages = state.pages.map(p => p.id === id ? currentPage : p);
-                        renderActivePage();
-                    }
-                }
+                const remote = m.data.pages.find(p => p.id === id);
+                if (remote) { state.pages = state.pages.map(p => p.id === id ? remote : p); renderActivePage(); }
             });
-
             channel.subscribe('signal', async (m) => {
-                if (m.data.to === ably.auth.clientId) handleSignal(m);
-                // Call anyone who just entered the room and is onCall
                 if (m.data.type === 'hello' && state.onCall) {
                     const pc = createPeerConnection(m.clientId);
                     const offer = await pc.createOffer();
                     await pc.setLocalDescription(offer);
                     channel.publish('signal', { to: m.clientId, type: 'offer', data: offer });
-                }
+                } else handleSignal(m);
             });
-
             channel.presence.enter({ onCall: state.onCall });
-            channel.presence.subscribe(() => { 
-                channel.presence.get((err, m) => { if(!err) renderPresence(m); }); 
-            });
-
-            // Greet room to trigger WebRTC
-            channel.publish('signal', { type: 'hello' });
-            
+            channel.presence.subscribe(() => channel.presence.get((err, m) => { if(!err) renderPresence(m); }));
             document.getElementById('sync-status').classList.remove('hidden');
         }
 
         function renderPresence(members) {
-            document.getElementById('collaborators').innerHTML = members.map(m => `
-                <div class="w-7 h-7 rounded-full bg-blue-500 border-2 border-[var(--bg-primary)] flex items-center justify-center text-[10px] text-white font-bold" title="${m.clientId}">
-                    ${m.clientId.charAt(0).toUpperCase()}
-                </div>
-            `).join('');
-
-            const voiceList = document.getElementById('voice-participants');
-            const onCallMembers = members.filter(m => m.data?.onCall);
-            
-            voiceList.innerHTML = onCallMembers.map(m => `
-                <div class="flex items-center gap-3">
-                    <div class="w-6 h-6 rounded-full bg-orange-500 flex items-center justify-center text-[8px] text-white font-bold">
-                        ${m.clientId.charAt(0).toUpperCase()}
-                    </div>
-                    <div class="flex-1">
-                        <div class="text-[10px] font-bold text-[var(--text-main)]">${m.clientId.split('_')[0]}</div>
-                        <div class="text-[8px] text-gray-400">Audio Active</div>
-                    </div>
-                </div>
-            `).join('');
-
-            if (onCallMembers.length === 0) {
-                voiceList.innerHTML = '<div class="text-[10px] text-gray-500 italic py-2 text-center">Empty Room...</div>';
-            }
+            document.getElementById('collaborators').innerHTML = members.map(m => `<div class="w-7 h-7 rounded-full bg-blue-500 border-2 border-white flex items-center justify-center text-[10px] text-white font-bold" title="${m.clientId}">${m.clientId.charAt(0).toUpperCase()}</div>`).join('');
+            const onCall = members.filter(m => m.data?.onCall);
+            document.getElementById('voice-participants').innerHTML = onCall.map(m => `<div class="flex items-center gap-2"><div class="w-5 h-5 rounded-full bg-orange-500 flex items-center justify-center text-[8px] text-white font-bold">${m.clientId.charAt(0).toUpperCase()}</div><span class="text-[10px] font-bold">${m.clientId.split('_')[0]}</span></div>`).join('');
         }
 
         async function joinFriendPage() {
             const code = document.getElementById('friend-page-code').value.trim();
-            if (!code || !ably) return;
+            if (!code) return;
             state.activePageId = code;
-            let existing = state.pages.find(p => p.id === code);
-            if (!existing) {
-                state.pages.push({ id: code, title: 'Remote Space', icon: '🌐', isShared: true, blocks: [], cover: DEFAULT_COVERS[0] });
-            }
-            joinChannel(code); renderSidebar(); renderActivePage(); closeCollabModal();
+            if (!state.pages.find(p => p.id === code)) state.pages.push({ id: code, title: 'Shared', icon: '🌐', isShared: true, blocks: [], cover: DEFAULT_COVERS[0] });
+            setActivePage(code); document.getElementById('collab-modal').classList.add('hidden');
         }
 
         function openSharePageModal() {
-            const p = state.pages.find(p => p.id === state.activePageId); 
-            if(!p) return;
-            p.isShared = true; 
-            document.getElementById('share-code-display').innerText = p.id;
-            document.getElementById('share-modal').classList.remove('hidden'); 
-            saveState(); initAbly();
+            const p = state.pages.find(p => p.id === state.activePageId); if(!p) return;
+            p.isShared = true; document.getElementById('share-code-display').innerText = p.id;
+            document.getElementById('share-modal').classList.remove('hidden'); saveState();
         }
 
-        function addPage() { 
-            const id = 'p' + Math.random().toString(36).substr(2, 9);
-            state.pages.push({ id, title: 'Untitled', icon: '📄', isFavorite: false, cover: DEFAULT_COVERS[0], blocks: [{ id: 'b' + Date.now(), type: 'text', content: '' }] }); 
-            setActivePage(id); 
-        }
-
-        function toggleActiveFavorite() {
+        function addPage() { const id = 'p' + Math.random().toString(36).substr(2, 6); state.pages.push({ id, title: 'Untitled', icon: '📄', cover: DEFAULT_COVERS[0], blocks: [{ id: 'b' + Date.now(), type: 'text', content: '' }] }); setActivePage(id); }
+        function addBlockBelow(id) {
             const p = state.pages.find(pg => pg.id === state.activePageId);
-            if (p) { p.isFavorite = !p.isFavorite; saveState(true); renderSidebar(); }
+            const idx = p.blocks.findIndex(b => b.id === id);
+            const nb = { id: 'b' + Math.random().toString(36).substr(2, 6), type: 'text', content: '' };
+            p.blocks.splice(idx + 1, 0, nb); renderActivePage(); saveState();
+            setTimeout(() => document.querySelector(`[data-id="${nb.id}"] [contenteditable]`).focus(), 10);
         }
-
-        function toggleSidebar() { 
-            state.sidebarOpen = !state.sidebarOpen; 
-            const sb = document.getElementById('sidebar'); 
-            sb.style.width = state.sidebarOpen ? '256px' : '0px'; sb.style.opacity = state.sidebarOpen ? '1' : '0'; 
-            document.getElementById('menu-btn').classList.toggle('hidden', state.sidebarOpen); 
-        }
-
-        function handleWorkspaceClick(e) { 
-            if(e.target.id === 'main-scroll-container' || e.target.id === 'bottom-click-trigger') {
-                const p = state.pages.find(pg => pg.id === state.activePageId);
-                addBlockBelow(p.blocks[p.blocks.length - 1]?.id);
-            }
-        }
-
-        function addBlockBelow(id, type = 'text') {
-            const p = state.pages.find(pg => pg.id === state.activePageId);
-            const idx = id ? p.blocks.findIndex(b => b.id === id) : -1;
-            const nb = { id: 'b' + Math.random().toString(36).substr(2, 9), type, content: '', checked: false };
-            if (idx === -1) p.blocks.push(nb); else p.blocks.splice(idx + 1, 0, nb);
-            renderActivePage(); saveState();
-            setTimeout(() => { const el = document.querySelector(`[data-id="${nb.id}"] [contenteditable]`); if(el) el.focus(); }, 10);
-        }
-
         function deleteBlock(id) {
             const p = state.pages.find(pg => pg.id === state.activePageId);
             if (p.blocks.length > 1) p.blocks = p.blocks.filter(b => b.id !== id);
-            else { p.blocks[0].content = ''; p.blocks[0].type = 'text'; }
             saveState(); renderActivePage();
         }
-
-        function initDragAndDrop() {
-            const main = document.getElementById('editor-blocks');
-            if (sortableMain) sortableMain.destroy();
-            sortableMain = Sortable.create(main, { handle: '.drag-handle', animation: 200, onEnd: (evt) => {
-                const p = state.pages.find(x => x.id === state.activePageId);
-                const b = p.blocks.splice(evt.oldIndex, 1)[0];
-                p.blocks.splice(evt.newIndex, 0, b);
-                saveState();
-            }});
-        }
-
-        function updatePageTitle(v) { 
-            const p = state.pages.find(pg => pg.id === state.activePageId); 
-            if(p) { p.title = v; document.getElementById('header-title').innerText = v || 'Workspace'; saveState(); renderSidebar(); } 
-        }
-
-        function setupFormatListener() {
-            document.addEventListener('selectionchange', () => {
-                const selection = window.getSelection(); const tb = document.getElementById('format-toolbar');
-                if (selection && selection.toString().length > 0 && !selection.isCollapsed) {
-                    const r = selection.getRangeAt(0); const rect = r.getBoundingClientRect();
-                    tb.style.display = 'flex'; tb.style.top = `${rect.top - 50}px`; tb.style.left = `${rect.left}px`;
-                } else tb.style.display = 'none';
-            });
-        }
-
-        function toggleTodo(id) { 
-            const p = state.pages.find(pg => pg.id === state.activePageId); 
-            const b = p.blocks.find(bk => bk.id === id); 
-            if(b) { b.checked = !b.checked; saveState(); renderActivePage(); } 
-        }
-
-        function applyFormat(cmd) { document.execCommand(cmd, false, null); saveState(); }
+        function initDragAndDrop() { if (sortableMain) sortableMain.destroy(); sortableMain = Sortable.create(document.getElementById('editor-blocks'), { handle: '.drag-handle', animation: 150, onEnd: (e) => { const p = state.pages.find(x => x.id === state.activePageId); const b = p.blocks.splice(e.oldIndex, 1)[0]; p.blocks.splice(e.newIndex, 0, b); saveState(); }}); }
+        function setupFormatListener() { document.addEventListener('selectionchange', () => { const sel = window.getSelection(); const tb = document.getElementById('format-toolbar'); if (sel && sel.toString().length > 0 && !sel.isCollapsed) { const r = sel.getRangeAt(0).getBoundingClientRect(); tb.style.display = 'flex'; tb.style.position = 'fixed'; tb.style.top = (r.top - 45) + 'px'; tb.style.left = r.left + 'px'; tb.style.zIndex = 1000; } else tb.style.display = 'none'; }); }
+        function applyFormat(c) { document.execCommand(c, false, null); saveState(); }
         function applyColor(c) { document.execCommand('foreColor', false, c); saveState(); }
-        function applyHighlight(c) { document.execCommand('hiliteColor', false, c); saveState(); }
-        function openThemeModal() { document.getElementById('theme-modal').classList.remove('hidden'); }
-        function closeThemeModal() { document.getElementById('theme-modal').classList.add('hidden'); }
+        function handleWorkspaceClick(e) { if (e.target.id === 'main-scroll-container' || e.target.id === 'bottom-click-trigger') addBlockBelow(state.pages.find(p => p.id === state.activePageId).blocks.slice(-1)[0]?.id); }
+        function toggleSidebar() { state.sidebarOpen = !state.sidebarOpen; const sb = document.getElementById('sidebar'); sb.style.width = state.sidebarOpen ? '256px' : '0px'; sb.style.opacity = state.sidebarOpen ? '1' : '0'; }
         function openCollabModal() { document.getElementById('collab-modal').classList.remove('hidden'); }
-        function closeCollabModal() { document.getElementById('collab-modal').classList.add('hidden'); }
         function closeShareModal() { document.getElementById('share-modal').classList.add('hidden'); }
-        function handleSearch(v) { state.searchQuery = v; renderSidebar(); }
         function toggleEmojiPicker(e) { e.stopPropagation(); document.getElementById('emoji-picker').classList.toggle('hidden'); }
-        function setupEmojiPicker() { document.getElementById('emoji-grid').innerHTML = EMOJI_LIST.map(e => `<button onclick="selectEmoji('${e}')" class="p-2 hover:bg-gray-500/10 rounded-2xl text-3xl transition-all hover:scale-110 active:scale-90">${e}</button>`).join(''); }
+        function setupEmojiPicker() { document.getElementById('emoji-grid').innerHTML = EMOJI_LIST.map(e => `<button onclick="selectEmoji('${e}')" class="p-2 hover:bg-gray-100 rounded text-2xl">${e}</button>`).join(''); }
         function selectEmoji(e) { const p = state.pages.find(pg => pg.id === state.activePageId); if(p) { p.icon = e; renderSidebar(); renderActivePage(); saveState(); } document.getElementById('emoji-picker').classList.add('hidden'); }
+        function setupMenuDragging() { const m = document.getElementById('slash-menu'), h = document.getElementById('slash-menu-drag'); let x, y, d = false; h.onmousedown = (e) => { d = true; x = e.clientX - m.offsetLeft; y = e.clientY - m.offsetTop; e.preventDefault(); }; document.onmousemove = (e) => { if (d) { m.style.left = (e.clientX - x) + 'px'; m.style.top = (e.clientY - y) + 'px'; } }; document.onmouseup = () => d = false; }
+        function handleCoverFile(i) { const f = i.files[0]; if(!f) return; const r = new FileReader(); r.onload = (e) => { const p = state.pages.find(x => x.id === state.activePageId); if(p) { p.cover = e.target.result; document.getElementById('page-cover').src = p.cover; saveState(); } }; r.readAsDataURL(f); }
 
         init();
     </script>
