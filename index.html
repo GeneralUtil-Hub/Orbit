@@ -23,7 +23,6 @@
             --border-color: #e5e7eb;
             --block-hover: rgba(55, 53, 47, 0.04);
             --input-bg: #f3f4f6;
-            --accent-glow: rgba(37, 99, 235, 0.08);
         }
 
         .dark-mode {
@@ -35,22 +34,18 @@
             --border-color: #26262a;
             --block-hover: rgba(255, 255, 255, 0.05);
             --input-bg: #1c1c21;
-            --accent-glow: rgba(96, 165, 250, 0.12);
         }
 
         body { 
             font-family: 'Inter', sans-serif; 
-            -webkit-font-smoothing: antialiased; 
             background-color: var(--bg-primary); 
             color: var(--text-main);
-            transition: background-color 0.4s cubic-bezier(0.4, 0, 0.2, 1), color 0.4s ease;
+            transition: background-color 0.3s ease, color 0.3s ease;
         }
 
         .scrollbar-hide::-webkit-scrollbar { display: none; }
-        .fade-in { animation: fadeIn 0.3s ease-out; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
-
-        .block-container { transition: background-color 0.2s ease; border-radius: 4px; padding: 2px 4px; position: relative; }
+        
+        .block-container { transition: background-color 0.2s ease; border-radius: 4px; padding: 4px 8px; position: relative; margin: 1px 0; }
         .block-container:hover { background-color: var(--block-hover); }
         input:focus, textarea:focus { outline: none; }
         
@@ -59,181 +54,276 @@
         
         .sidebar-item-active { background-color: var(--block-hover); color: var(--text-main); font-weight: 600; border-left: 2px solid var(--brand-color); }
         [contenteditable]:empty:before { content: attr(placeholder); color: var(--text-secondary); opacity: 0.4; pointer-events: none; }
-        
-        .switch { position: relative; display: inline-block; width: 34px; height: 20px; }
-        .switch input { opacity: 0; width: 0; height: 0; }
-        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .3s; border-radius: 34px; }
-        .slider:before { position: absolute; content: ""; height: 14px; width: 14px; left: 3px; bottom: 3px; background-color: white; transition: .3s; border-radius: 50%; }
-        input:checked + .slider { background-color: var(--brand-color); }
-        input:checked + .slider:before { transform: translateX(14px); }
+
+        #editor-blocks:empty::after {
+            content: 'Click here to start writing...';
+            display: block;
+            padding: 1rem 0;
+            color: var(--text-secondary);
+            opacity: 0.3;
+            font-style: italic;
+            cursor: text;
+            font-size: 14px;
+        }
 
         #slash-menu { 
             position: absolute; 
             max-height: 400px; 
-            width: 260px;
+            width: 240px;
             overflow: hidden;
             z-index: 1000;
-            background: var(--bg-primary);
+            background: var(--bg-primary); 
             border: 1px solid var(--border-color);
-            border-radius: 12px;
-            box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.2);
-            backdrop-filter: blur(20px);
+            border-radius: 14px;
+            box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.2);
             display: none;
             flex-direction: column;
+            color: var(--text-main);
         }
 
-        .slash-drag-handle { height: 12px; background: var(--input-bg); cursor: move; border-bottom: 1px solid var(--border-color); }
-        .quote-block { border-left: 3px solid var(--brand-color); padding-left: 1.25rem; font-style: italic; color: var(--text-secondary); margin: 0.5rem 0; }
-        .callout-block { background: var(--accent-glow); border-radius: 8px; padding: 1rem; display: flex; gap: 0.75rem; align-items: flex-start; margin: 0.5rem 0; }
-        .orbit-table { width: 100%; border-collapse: collapse; margin: 1rem 0; border: 1px solid var(--border-color); }
-        .orbit-table td { border: 1px solid var(--border-color); padding: 8px 12px; font-size: 14px; }
-        .voice-active { color: #f97316 !important; filter: drop-shadow(0 0 8px rgba(249, 115, 22, 0.4)); animation: pulse-voice 2s infinite; }
-        @keyframes pulse-voice { 0%, 100% { opacity: 1; } 50% { opacity: 0.7; } }
-        #voice-overlay { position: fixed; bottom: 24px; right: 24px; z-index: 50; display: none; }
+        .slash-item:hover { background-color: var(--brand-color) !important; color: #ffffff !important; }
+        .slash-item:hover .icon-box { background-color: rgba(255, 255, 255, 0.2) !important; color: #ffffff !important; }
+        .slash-item:hover .icon-box i { color: #ffffff !important; }
+
+        .playground-block { background: var(--input-bg); border-radius: 12px; overflow: hidden; border: 1px solid var(--border-color); margin: 1rem 0; }
+        .playground-header { background: rgba(0,0,0,0.05); padding: 8px 12px; display: flex; justify-content: space-between; align-items: center; }
+        .playground-code { font-family: 'Roboto Mono', monospace; font-size: 12px; padding: 12px; width: 100%; min-height: 120px; background: transparent; border: none; color: var(--text-main); }
+        .playground-preview { width: 100%; height: 200px; background: white; border-top: 1px solid var(--border-color); }
+
+        #reopen-sidebar-btn {
+            position: fixed; left: 0; top: 50%; transform: translateY(-50%); z-index: 100;
+            background: var(--sidebar-bg); border: 1px solid var(--border-color); border-left: none;
+            padding: 12px 4px; border-radius: 0 8px 8px 0; display: none; box-shadow: 2px 0 10px rgba(0,0,0,0.05);
+        }
+
+        .orbit-logo { width: 22px; height: 22px; }
+
+        .banner-btn {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(8px);
+            color: #111827 !important;
+            padding: 8px 14px;
+            border-radius: 10px;
+            font-size: 11px;
+            font-weight: 700;
+            border: 1px solid rgba(0,0,0,0.1);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            transition: all 0.2s;
+        }
+        .dark-mode .banner-btn {
+            background: rgba(30, 30, 40, 0.85);
+            color: #efeff1 !important;
+            border-color: rgba(255,255,255,0.15);
+        }
+        
+        #progress-bar { position: fixed; top: 0; left: 0; width: 0%; height: 3px; background: var(--brand-color); z-index: 100; }
+        
+        .switch { position: relative; display: inline-block; width: 32px; height: 18px; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .4s; border-radius: 34px; }
+        .slider:before { position: absolute; content: ""; height: 12px; width: 12px; left: 3px; bottom: 3px; background-color: white; transition: .4s; border-radius: 50%; }
+        input:checked + .slider { background-color: var(--brand-color); }
+        input:checked + .slider:before { transform: translateX(14px); }
+
+        #exit-focus-btn { position: fixed; top: 20px; right: 20px; z-index: 200; display: none; background: var(--bg-primary); border: 1px solid var(--border-color); padding: 8px 16px; border-radius: 12px; font-size: 11px; font-weight: 700; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+        .focus-mode #sidebar, .focus-mode #header, .focus-mode #editor-stats { display: none !important; }
+        .focus-mode #exit-focus-btn { display: flex !important; }
+
+        /* TOC Styles */
+        .toc-item { font-size: 11px; padding: 4px 12px; color: var(--text-secondary); cursor: pointer; border-radius: 6px; transition: all 0.2s; }
+        .toc-item:hover { color: var(--brand-color); background: var(--block-hover); }
+        .toc-h2 { margin-left: 12px; }
+
+        /* Block Background Colors */
+        .bg-highlight-blue { background-color: rgba(37, 99, 235, 0.1) !important; }
+        .bg-highlight-green { background-color: rgba(34, 197, 94, 0.1) !important; }
+        .bg-highlight-yellow { background-color: rgba(234, 179, 8, 0.1) !important; }
+        .bg-highlight-red { background-color: rgba(239, 68, 68, 0.1) !important; }
     </style>
 </head>
 <body class="overflow-hidden">
-    <div id="app" class="flex h-screen w-full relative z-10">
-        <input type="file" id="cover-upload-input" class="hidden" accept="image/*" onchange="handleCoverFile(this)" />
-        <div id="format-toolbar" class="bg-[var(--bg-primary)] border border-[var(--border-color)] rounded-lg shadow-xl p-1 flex items-center gap-1">
-            <button class="toolbar-btn p-1 px-2 hover:bg-gray-100 rounded text-xs font-bold" onmousedown="applyFormat('bold'); event.preventDefault();">B</button>
-            <button class="toolbar-btn p-1 px-2 hover:bg-gray-100 rounded text-xs italic" onmousedown="applyFormat('italic'); event.preventDefault();">I</button>
-            <div class="h-4 w-px bg-gray-200 mx-1"></div>
-            <button class="toolbar-btn p-1 px-2 text-red-500 hover:bg-red-50 rounded text-[10px] font-bold" onmousedown="applyColor('#ef4444'); event.preventDefault();">Red</button>
-            <button class="toolbar-btn p-1 px-2 text-blue-500 hover:bg-blue-50 rounded text-[10px] font-bold" onmousedown="applyColor('#3b82f6'); event.preventDefault();">Blue</button>
-        </div>
+    <div id="progress-bar"></div>
+    <button id="exit-focus-btn" onclick="toggleFocusMode()" class="items-center gap-2 text-[var(--text-main)]">
+        <i data-lucide="minimize-2" class="w-3.5 h-3.5"></i> Exit Focus
+    </button>
+    <button id="reopen-sidebar-btn" onclick="toggleSidebar()"><i data-lucide="chevron-right" class="w-4 h-4"></i></button>
 
-        <aside id="sidebar" class="w-64 flex flex-col bg-[var(--sidebar-bg)] border-r border-[var(--border-color)] transition-all duration-300 shrink-0 z-20">
-            <div class="p-4 flex flex-col gap-5">
+    <div id="app" class="flex h-screen w-full relative z-10">
+        <aside id="sidebar" class="w-64 flex flex-col bg-[var(--sidebar-bg)] border-r border-[var(--border-color)] transition-all duration-300 shrink-0 z-20 overflow-hidden">
+            <div class="p-4 flex flex-col gap-5 min-w-[256px]">
                 <div class="flex items-center justify-between font-bold text-sm">
-                    <div class="flex items-center gap-2">Orbit</div>
-                    <button onclick="toggleSidebar()" class="text-gray-400"><i data-lucide="chevron-left" class="w-4 h-4"></i></button>
+                    <div class="flex items-center gap-2 text-[var(--text-main)]">
+                         <svg class="orbit-logo text-blue-600" viewBox="0 0 24 24">
+                            <ellipse cx="12" cy="12" rx="10" ry="3.5" transform="rotate(-20 12 12)" stroke="currentColor" stroke-width="1.8" fill="none" />
+                            <circle cx="12" cy="12" r="7" fill="var(--sidebar-bg)" style="transition: fill 0.4s" />
+                            <circle cx="12" cy="12" r="5" fill="currentColor" />
+                        </svg>
+                        Orbit
+                    </div>
+                    <button onclick="toggleSidebar()" class="text-gray-400 hover:text-gray-600 transition-colors"><i data-lucide="chevron-left" class="w-4 h-4"></i></button>
                 </div>
-                <input type="text" oninput="handleSearch(this.value)" class="w-full bg-[var(--input-bg)] rounded-xl py-2 px-3 text-xs outline-none" placeholder="Search" />
+                <input type="text" oninput="handleSearch(this.value)" class="w-full bg-[var(--input-bg)] rounded-xl py-2 px-3 text-xs outline-none focus:ring-1 focus:ring-blue-500/20 text-[var(--text-main)]" placeholder="Search pages..." />
             </div>
-            <div class="flex-1 overflow-y-auto px-2 space-y-4 scrollbar-hide">
+
+            <div class="flex-1 overflow-y-auto px-2 space-y-6 scrollbar-hide min-w-[256px]">
                 <div>
-                    <div class="px-3 py-1 text-[10px] font-bold text-gray-400 uppercase tracking-widest">Workspace</div>
+                    <div class="px-3 py-1 text-[10px] font-bold text-gray-400 uppercase tracking-widest flex justify-between items-center group">
+                        Workspace
+                        <button onclick="addPage()" class="opacity-0 group-hover:opacity-100 text-gray-400 hover:text-blue-500 transition-all"><i data-lucide="plus" class="w-3.5 h-3.5"></i></button>
+                    </div>
                     <div id="pages-list" class="space-y-0.5 mt-2"></div>
                 </div>
+
+                <div id="toc-container" class="hidden">
+                    <div class="px-3 py-1 text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">Table of Contents</div>
+                    <div id="toc-list" class="space-y-1"></div>
+                </div>
+
+                <div class="px-3">
+                    <div class="text-[10px] font-bold text-gray-400 uppercase tracking-widest flex items-center gap-2"><i data-lucide="archive" class="w-3 h-3"></i> Clipboard</div>
+                    <div id="block-clipboard" class="p-2 space-y-2"></div>
+                </div>
             </div>
-            <div class="p-4 border-t border-[var(--border-color)] space-y-2">
-                <button onclick="openCollabModal()" class="w-full flex items-center gap-3 px-3 py-2 text-xs text-orange-500 hover:bg-orange-50 rounded-xl transition-colors font-medium">
+
+            <div class="p-4 border-t border-[var(--border-color)] space-y-1 min-w-[256px]">
+                <button onclick="exportToMarkdown()" class="w-full flex items-center gap-3 px-3 py-2 text-xs text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/10 rounded-xl transition-colors font-semibold">
+                    <i data-lucide="download" class="w-4 h-4"></i> Export .md
+                </button>
+                <button onclick="openCollabModal()" class="w-full flex items-center gap-3 px-3 py-2 text-xs text-orange-600 hover:bg-orange-50 dark:hover:bg-orange-900/10 rounded-xl transition-colors font-semibold">
                     <i data-lucide="users" class="w-4 h-4"></i> Join Workspace
                 </button>
-                <button onclick="addPage()" class="w-full flex items-center gap-3 px-3 py-2 text-xs text-gray-500 hover:bg-gray-100 rounded-xl transition-colors font-medium">
-                    <i data-lucide="plus" class="w-4 h-4"></i> New Page
+                <button onclick="toggleDarkModeUI()" class="w-full flex items-center gap-3 px-3 py-2 text-xs text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-xl transition-colors font-medium">
+                    <i data-lucide="moon" class="w-4 h-4"></i> Dark Mode
                 </button>
             </div>
         </aside>
 
         <main id="main-content" class="flex-1 flex flex-col h-full bg-[var(--bg-primary)] relative overflow-hidden" onclick="handleWorkspaceClick(event)">
-            <div class="h-14 border-b border-[var(--border-color)] flex items-center justify-between px-6 shrink-0 z-20 bg-[var(--bg-primary)]/80 backdrop-blur-md">
-                <div id="header-title" class="text-xs font-bold text-[var(--text-main)]">Workspace</div>
+            <div id="header" class="h-14 border-b border-[var(--border-color)] flex items-center justify-between px-6 shrink-0 z-20 bg-[var(--bg-primary)]/80 backdrop-blur-md">
+                <div class="flex items-center gap-3 text-[10px] font-medium text-gray-400 uppercase tracking-tight">
+                    <span>Orbit</span>
+                    <i data-lucide="chevron-right" class="w-3 h-3"></i>
+                    <span>Workspace</span>
+                    <i data-lucide="chevron-right" class="w-3 h-3"></i>
+                    <span id="header-title" class="text-[var(--text-main)] font-bold truncate max-w-[150px]">Home</span>
+                    <div id="save-status" class="ml-4 opacity-0 transition-opacity flex items-center gap-1.5 text-emerald-500 font-bold">
+                        <i data-lucide="check-circle" class="w-3 h-3"></i> Saved
+                    </div>
+                </div>
                 <div class="flex items-center gap-3">
-                    <button onclick="toggleVoiceOrbit()" id="voice-btn" class="p-2 rounded-lg hover:bg-gray-100 text-gray-400"><i data-lucide="mic" class="w-4 h-4"></i></button>
+                    <button onclick="toggleVoiceOrbit()" id="voice-btn" class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-400 transition-all"><i data-lucide="mic" class="w-4 h-4"></i></button>
                     <div id="collaborators" class="flex -space-x-2"></div>
                     <div id="sync-status" class="hidden flex items-center gap-2 text-[10px] text-green-600 font-bold uppercase"><div class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div> Live</div>
-                    <button onclick="openSharePageModal()" class="text-[10px] font-bold text-white bg-blue-600 px-3 py-1.5 rounded-lg">Share</button>
+                    <button onclick="openSharePageModal()" class="text-[10px] font-bold text-white bg-blue-600 px-3 py-1.5 rounded-lg hover:bg-blue-700 transition-all shadow-md">Share</button>
                 </div>
             </div>
 
-            <div class="flex-1 overflow-y-auto scrollbar-hide relative" id="main-scroll-container">
+            <div class="flex-1 overflow-y-auto scrollbar-hide relative" id="main-scroll-container" onscroll="updateProgressBar()">
                 <div class="relative h-64 group overflow-hidden">
-                    <img id="page-cover" src="" alt="Cover" class="w-full h-full object-cover" />
-                    <button onclick="document.getElementById('cover-upload-input').click()" class="absolute bottom-4 right-4 bg-white/90 px-3 py-1.5 text-[10px] font-bold rounded-lg border shadow-sm opacity-0 group-hover:opacity-100 transition-opacity">Change Cover</button>
+                    <img id="page-cover" src="" alt="Cover" class="w-full h-full object-cover transition-all duration-700" />
+                    <div class="absolute bottom-4 right-4 flex gap-2 opacity-0 group-hover:opacity-100 transition-all transform translate-y-2 group-hover:translate-y-0">
+                        <button onclick="document.getElementById('cover-upload-input').click()" class="banner-btn">Upload</button>
+                        <button onclick="changeCover()" class="banner-btn">Random</button>
+                    </div>
                 </div>
                 <div class="max-w-3xl mx-auto px-8 lg:px-20 pb-64 relative">
                     <div class="mt-[-40px] mb-8 relative z-10">
-                        <div id="page-icon" onclick="toggleEmojiPicker(event)" class="text-7xl cursor-pointer hover:scale-105 transition-transform select-none">🚀</div>
-                        <div id="emoji-picker" class="hidden absolute top-full left-0 mt-2 p-4 bg-white border rounded-2xl shadow-2xl z-50 w-64"><div class="grid grid-cols-5 gap-2" id="emoji-grid"></div></div>
-                        <input id="main-title-input" oninput="updatePageTitle(this.value)" class="w-full text-5xl font-black border-none outline-none mt-8 bg-transparent text-[var(--text-main)]" placeholder="Untitled" />
+                        <div id="page-icon" onclick="toggleEmojiPicker(event)" class="text-7xl cursor-pointer hover:scale-105 transition-transform select-none drop-shadow-xl">🚀</div>
+                        <div id="emoji-picker" class="hidden absolute top-full left-0 mt-2 p-4 bg-[var(--bg-primary)] border border-[var(--border-color)] rounded-2xl shadow-2xl z-50 w-64 backdrop-blur-md"><div class="grid grid-cols-5 gap-2" id="emoji-grid"></div></div>
+                        <input id="main-title-input" oninput="updatePageTitle(this.value)" class="w-full text-5xl font-black border-none outline-none mt-8 bg-transparent text-[var(--text-main)] placeholder-gray-400/20" placeholder="Untitled Workspace" />
                     </div>
+                    
                     <div id="editor-blocks" class="space-y-0.5 min-h-[100px]"></div>
                     <div id="bottom-click-trigger" class="h-64 w-full cursor-text"></div>
-                    <div id="slash-menu" class="slash-menu-enter">
+                    
+                    <div id="slash-menu">
                         <div class="slash-drag-handle" id="slash-menu-drag"></div>
                         <div id="slash-menu-items" class="py-1"></div>
                     </div>
+                </div>
+
+                <div id="editor-stats">
+                    <span id="stat-words">0 Words</span>
+                    <span id="stat-chars">0 Chars</span>
+                    <span id="stat-read">0m Reading</span>
                 </div>
             </div>
         </main>
     </div>
 
-    <div id="voice-overlay" class="bg-white dark:bg-[#1e1e1e] border border-[var(--border-color)] rounded-2xl p-4 shadow-2xl w-56 fade-in">
-        <div class="text-[10px] font-bold text-gray-400 uppercase mb-3">In Voice Room</div>
-        <div id="voice-participants" class="space-y-2"></div>
-        <button onclick="toggleVoiceOrbit()" class="w-full mt-4 py-2 bg-red-500/10 text-red-500 text-[10px] font-bold uppercase rounded-lg">Leave</button>
+    <!-- Voice Overlay -->
+    <div id="voice-overlay" class="bg-[var(--bg-primary)] border border-[var(--border-color)] rounded-2xl p-4 shadow-2xl w-64 fade-in" style="position: fixed; bottom: 24px; right: 24px; z-index: 100; display: none;">
+        <div class="flex items-center justify-between mb-4"><div class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Voice Room</div><div class="w-1.5 h-1.5 bg-orange-500 rounded-full animate-ping"></div></div>
+        <div id="voice-participants" class="space-y-3 mb-4"></div>
+        <div class="space-y-4 pt-4 border-t border-[var(--border-color)]">
+            <div class="space-y-2"><div class="flex justify-between text-[9px] font-bold text-gray-500 uppercase"><span>Mic Gain</span><span id="vol-value">100%</span></div><input type="range" min="0" max="200" value="100" class="w-full accent-blue-600" oninput="updateMicVolume(this.value)"></div>
+            <div class="flex items-center justify-between"><span class="text-[9px] font-bold text-gray-500 uppercase">Noise Filter</span><label class="switch"><input type="checkbox" id="iso-toggle" checked onchange="toggleIsolation()"><span class="slider"></span></label></div>
+            <div class="flex gap-2"><button onclick="toggleAudioTest()" id="test-mic-btn" class="flex-1 py-2 bg-blue-600/10 text-blue-600 text-[9px] font-bold uppercase rounded-lg border border-blue-500/20">Test Mic</button></div>
+        </div>
+        <button onclick="toggleVoiceOrbit()" class="w-full mt-4 py-2 bg-red-500/10 text-red-500 text-[10px] font-bold uppercase rounded-lg">Disconnect</button>
     </div>
 
-    <div id="collab-modal" class="hidden fixed inset-0 z-[100] bg-black/40 flex items-center justify-center backdrop-blur-sm">
+    <!-- Modals -->
+    <div id="collab-modal" class="hidden fixed inset-0 z-[100] bg-black/50 flex items-center justify-center backdrop-blur-sm">
         <div class="bg-white dark:bg-[#1e1e1e] w-80 rounded-2xl p-6 shadow-2xl text-center">
-            <h3 class="font-bold mb-4">Join Workspace</h3>
-            <input id="friend-page-code" type="text" placeholder="Workspace Code" class="w-full bg-gray-50 border rounded-xl px-4 py-3 text-sm outline-none mb-4" />
-            <button onclick="joinFriendPage()" class="w-full py-3 bg-blue-600 rounded-xl text-sm font-bold text-white">Connect</button>
+            <h3 class="font-bold mb-4 dark:text-white">Join Workspace</h3>
+            <input id="friend-page-code" type="text" placeholder="Workspace Code" class="w-full bg-white dark:bg-gray-800 dark:text-white text-black border border-gray-200 dark:border-gray-700 rounded-xl px-4 py-3 text-sm outline-none mb-4 font-mono" />
+            <button onclick="joinFriendPage()" class="w-full py-3 bg-blue-600 rounded-xl text-sm font-bold text-white shadow-lg">Connect</button>
         </div>
     </div>
 
     <div id="name-modal" class="hidden fixed inset-0 z-[200] bg-black/60 flex items-center justify-center backdrop-blur-md">
-        <div class="bg-white w-72 rounded-2xl p-6 shadow-2xl">
-            <h3 class="font-bold mb-4">Orbit Identity</h3>
-            <input id="initial-name" type="text" class="w-full bg-gray-50 border rounded-xl px-4 py-3 text-sm outline-none mb-4" placeholder="Your name" />
-            <button onclick="window.saveInitialName()" class="w-full py-3 bg-blue-600 rounded-xl text-sm font-bold text-white">Enter</button>
+        <div class="bg-white dark:bg-gray-900 w-72 rounded-2xl p-6 shadow-2xl">
+            <h3 class="font-bold mb-4 dark:text-white">Orbit Login</h3>
+            <input id="initial-name" type="text" class="w-full bg-gray-50 dark:bg-gray-800 dark:text-white border rounded-xl px-4 py-3 text-sm outline-none mb-4" placeholder="Your name" />
+            <button onclick="window.saveInitialName()" class="w-full py-3 bg-blue-600 rounded-xl text-sm font-bold text-white shadow-xl">Launch</button>
         </div>
     </div>
 
     <div id="share-modal" class="hidden fixed inset-0 z-[100] bg-black/40 flex items-center justify-center backdrop-blur-sm">
-        <div class="bg-white w-72 rounded-2xl p-6 shadow-2xl text-center">
-            <h3 class="font-bold mb-4">Share Code</h3>
-            <div class="bg-gray-100 p-4 rounded-xl mb-4 font-mono text-xs font-bold text-blue-600" id="share-code-display"></div>
-            <button onclick="closeShareModal()" class="w-full py-2 text-xs font-bold text-gray-500">Close</button>
+        <div class="bg-white dark:bg-gray-800 w-72 rounded-2xl p-6 shadow-2xl text-center">
+            <h3 class="font-bold mb-4 dark:text-white">Share Code</h3>
+            <div class="bg-gray-100 dark:bg-gray-900 p-4 rounded-xl mb-6 font-mono text-sm font-bold text-blue-600 select-all" id="share-code-display"></div>
+            <button onclick="document.getElementById('share-modal').classList.add('hidden')" class="w-full py-2 text-xs font-bold text-gray-500 uppercase tracking-widest">Done</button>
         </div>
     </div>
 
     <div id="remote-audio-container" class="hidden"></div>
+    <audio id="self-test-audio" class="hidden" autoplay></audio>
 
     <script>
         const ROOT_ABLY_KEY = "LJhgHg.rF2whQ:Imz-F_d5gOcMGAiJNWIGjhaAXXba8Hpbefj3LtPaT0s"; 
-        const DEFAULT_COVERS = ['https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&q=80&w=2000', 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&q=80&w=2000'];
-        const EMOJI_LIST = ['🚀', '🪐', '🌑', '✨', '🛸', '🛰️', '🌍', '☄️', '🔭', '🎨', '📝', '🛠️', '🎯'];
-        const STORAGE_KEY = 'orbit_workspace_v10_sync';
+        const DEFAULT_COVERS = ['https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&q=80&w=2000', 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&q=80&w=2000', 'https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?auto=format&fit=crop&q=80&w=2000'];
+        const EMOJI_LIST = ['🚀', '🪐', '✨', '🛸', '🌍', '☄️', '🔭', '🎨', '📝', '🛠️', '🎯', '💡'];
+        const STORAGE_KEY = 'orbit_v19_pro_edition';
 
         let state = {
-            username: '', darkMode: false, onCall: false, activePageId: '1',
-            pages: [{ 
-                id: '1', title: 'Home', icon: '🚀', cover: DEFAULT_COVERS[1], isShared: false, 
-                blocks: [{ id: 'b1', type: 'h1', content: 'Welcome' }, { id: 'b2', type: 'text', content: 'Start typing...' }] 
-            }],
+            username: '', darkMode: false, onCall: false, activePageId: '1', searchQuery: '', focusMode: false,
+            pages: [{ id: '1', title: 'Home', icon: '🚀', cover: DEFAULT_COVERS[0], isShared: false, blocks: [{ id: 'b1', type: 'h1', content: 'Orbit Workspace' }, { id: 'b2', type: 'text', content: 'Welcome to your collaborative sanctuary.' }] }],
+            clipboard: [], sidebarOpen: true
         };
 
-        let ably = null, channel = null, sortableMain = null;
-        let localStream = null, peerConnections = {};
+        let ably = null, channel = null, sortableMain = null, sortableClipboard = null;
+        let localStream = null, peerConnections = {}, audioCtx = null, gainNode = null, isAudioTesting = false;
+        let saveTimeout = null;
 
         window.saveInitialName = function() {
             const name = document.getElementById('initial-name').value.trim();
-            if (!name) return;
-            state.username = name;
+            if (!name) return; state.username = name;
             document.getElementById('name-modal').classList.add('hidden');
-            saveState(true);
-            init();
+            saveState(true); init();
         };
 
         function init() {
-            loadState();
+            loadState(); applyTheme();
             if (!state.username) { document.getElementById('name-modal').classList.remove('hidden'); return; }
             renderSidebar(); renderActivePage(); setupEmojiPicker(); setupSlashMenu();
-            initDragAndDrop(); setupFormatListener(); setupMenuDragging();
+            initDragAndDrop(); setupMenuDragging();
             document.addEventListener('mousedown', (e) => {
                 const menu = document.getElementById('slash-menu');
                 if (menu && menu.style.display === 'flex' && !menu.contains(e.target)) hideSlashMenu();
             });
-            initAbly();
-            lucide.createIcons();
-        }
-
-        function hideSlashMenu() {
-            const menu = document.getElementById('slash-menu');
-            if (menu) { menu.style.display = 'none'; state.activeBlockIdForMenu = null; }
+            initAbly(); lucide.createIcons();
         }
 
         function loadState() {
@@ -244,33 +334,124 @@
         function saveState(skipBroadcast = false) {
             localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
             const activePage = state.pages.find(p => p.id === state.activePageId);
-            if (!skipBroadcast && channel && activePage?.isShared) {
-                channel.publish('update', { pages: state.pages });
+            if (!skipBroadcast && channel && activePage?.isShared) channel.publish('update', { pages: state.pages });
+            
+            // Visual saved status heartbeat
+            const status = document.getElementById('save-status');
+            status.style.opacity = '1';
+            clearTimeout(saveTimeout);
+            saveTimeout = setTimeout(() => status.style.opacity = '0', 2000);
+            
+            updateEditorStats();
+            renderTOC();
+        }
+
+        function applyTheme() {
+            document.body.classList.toggle('dark-mode', state.darkMode);
+            document.body.classList.toggle('focus-mode', state.focusMode);
+        }
+
+        function toggleDarkModeUI() { state.darkMode = !state.darkMode; applyTheme(); saveState(true); }
+        function toggleFocusMode() { state.focusMode = !state.focusMode; applyTheme(); saveState(true); }
+
+        function updateProgressBar() {
+            const container = document.getElementById('main-scroll-container');
+            const scrolled = (container.scrollTop / (container.scrollHeight - container.clientHeight)) * 100;
+            document.getElementById('progress-bar').style.width = scrolled + "%";
+        }
+
+        function updateEditorStats() {
+            const p = state.pages.find(pg => pg.id === state.activePageId); if (!p) return;
+            let text = p.blocks.map(b => (b.content || '').replace(/<[^>]*>?/gm, '')).join(' ');
+            let wordCount = text.trim() ? text.trim().split(/\s+/).length : 0;
+            document.getElementById('stat-words').innerText = `${wordCount} Words`;
+            document.getElementById('stat-chars').innerText = `${text.length} Chars`;
+            document.getElementById('stat-read').innerText = `${Math.max(1, Math.ceil(wordCount / 200))}m Read`;
+        }
+
+        function renderTOC() {
+            const p = state.pages.find(pg => pg.id === state.activePageId);
+            const list = document.getElementById('toc-list');
+            const container = document.getElementById('toc-container');
+            const headings = p.blocks.filter(b => b.type === 'h1' || b.type === 'h2');
+            
+            if (headings.length > 0) {
+                container.classList.remove('hidden');
+                list.innerHTML = headings.map(h => `
+                    <div class="toc-item ${h.type === 'h2' ? 'toc-h2' : ''}" onclick="scrollToBlock('${h.id}')">
+                        ${h.content.replace(/<[^>]*>?/gm, '') || 'Untitled'}
+                    </div>
+                `).join('');
+            } else {
+                container.classList.add('hidden');
             }
         }
 
+        function scrollToBlock(id) {
+            const el = document.querySelector(`[data-id="${id}"]`);
+            if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+
+        function exportToMarkdown() {
+            const p = state.pages.find(pg => pg.id === state.activePageId);
+            let md = `# ${p.title}\n\n`;
+            p.blocks.forEach(b => {
+                if (b.type === 'h1') md += `# ${b.content}\n\n`;
+                else if (b.type === 'h2') md += `## ${b.content}\n\n`;
+                else if (b.type === 'todo') md += `- [${b.checked ? 'x' : ' '}] ${b.content}\n`;
+                else if (b.type === 'quote') md += `> ${b.content}\n\n`;
+                else md += `${b.content}\n\n`;
+            });
+            const blob = new Blob([md], { type: 'text/markdown' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${p.title.replace(/\s+/g, '_')}.md`;
+            a.click();
+        }
+
+        // --- Audio Logic ---
         async function toggleVoiceOrbit() {
             state.onCall = !state.onCall;
             const btn = document.getElementById('voice-btn');
             const overlay = document.getElementById('voice-overlay');
             if (state.onCall) {
                 try {
-                    localStream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                    btn.classList.add('voice-active');
-                    overlay.style.display = 'block';
+                    const constraints = { audio: { echoCancellation: true, noiseSuppression: document.getElementById('iso-toggle').checked, autoGainControl: true } };
+                    localStream = await navigator.mediaDevices.getUserMedia(constraints);
+                    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                    const source = audioCtx.createMediaStreamSource(localStream);
+                    gainNode = audioCtx.createGain(); source.connect(gainNode);
+                    btn.classList.add('voice-active'); overlay.style.display = 'block';
                 } catch (e) { state.onCall = false; return; }
             } else {
-                btn.classList.remove('voice-active');
-                overlay.style.display = 'none';
+                btn.classList.remove('voice-active'); overlay.style.display = 'none';
                 if (localStream) { localStream.getTracks().forEach(t => t.stop()); localStream = null; }
+                if (audioCtx) { audioCtx.close(); audioCtx = null; }
                 Object.values(peerConnections).forEach(pc => pc.close());
-                peerConnections = {};
+                peerConnections = {}; stopAudioTest();
                 document.getElementById('remote-audio-container').innerHTML = '';
             }
-            if (channel) {
-                channel.presence.update({ onCall: state.onCall });
-                channel.publish('signal', { type: 'hello' }); // Inform others to start calling
-            }
+            if (channel) { channel.presence.update({ onCall: state.onCall }); channel.publish('signal', { type: 'hello' }); }
+            lucide.createIcons();
+        }
+
+        function updateMicVolume(val) { if (gainNode) gainNode.gain.value = val / 100; document.getElementById('vol-value').innerText = val + "%"; }
+        async function toggleIsolation() { if (!localStream) return; const track = localStream.getAudioTracks()[0]; await track.applyConstraints({ noiseSuppression: document.getElementById('iso-toggle').checked }); }
+        function toggleAudioTest() {
+            if (!localStream) return;
+            const testBtn = document.getElementById('test-mic-btn');
+            const testAudio = document.getElementById('self-test-audio');
+            const indicator = document.getElementById('self-test-indicator');
+            isAudioTesting = !isAudioTesting;
+            if (isAudioTesting) { testAudio.srcObject = localStream; testBtn.innerText = "Stop Test"; indicator.classList.remove('hidden'); }
+            else stopAudioTest();
+        }
+        function stopAudioTest() {
+            const testBtn = document.getElementById('test-mic-btn'); const testAudio = document.getElementById('self-test-audio');
+            const indicator = document.getElementById('self-test-indicator');
+            isAudioTesting = false; testAudio.srcObject = null;
+            if (testBtn) testBtn.innerText = "Test Mic"; if (indicator) indicator.classList.add('hidden');
         }
 
         function createPeerConnection(remoteId) {
@@ -278,130 +459,168 @@
             if (localStream) localStream.getTracks().forEach(track => pc.addTrack(track, localStream));
             pc.onicecandidate = (e) => { if (e.candidate) channel.publish('signal', { to: remoteId, type: 'ice', data: e.candidate }); };
             pc.ontrack = (e) => {
-                let audio = document.getElementById(`audio-${remoteId}`);
-                if (!audio) {
-                    audio = document.createElement('audio');
-                    audio.id = `audio-${remoteId}`;
-                    audio.autoplay = true;
-                    document.getElementById('remote-audio-container').appendChild(audio);
-                }
-                audio.srcObject = e.streams[0];
+                let audio = document.createElement('audio'); audio.autoplay = true; audio.srcObject = e.streams[0];
+                document.getElementById('remote-audio-container').appendChild(audio);
             };
-            peerConnections[remoteId] = pc;
-            return pc;
+            peerConnections[remoteId] = pc; return pc;
         }
 
         async function handleSignal(m) {
             const { from, to, type, data } = m.data;
             if (m.clientId === ably.auth.clientId || (to && to !== ably.auth.clientId)) return;
             let pc = peerConnections[from] || createPeerConnection(from);
-            if (type === 'offer') {
-                await pc.setRemoteDescription(new RTCSessionDescription(data));
-                const ans = await pc.createAnswer();
-                await pc.setLocalDescription(ans);
-                channel.publish('signal', { to: from, type: 'answer', data: ans });
-            } else if (type === 'answer') await pc.setRemoteDescription(new RTCSessionDescription(data));
+            if (type === 'offer') { await pc.setRemoteDescription(new RTCSessionDescription(data)); const ans = await pc.createAnswer(); await pc.setLocalDescription(ans); channel.publish('signal', { to: from, type: 'answer', data: ans }); }
+            else if (type === 'answer') await pc.setRemoteDescription(new RTCSessionDescription(data));
             else if (type === 'ice') await pc.addIceCandidate(new RTCIceCandidate(data));
         }
 
+        // --- Blocks ---
         function createBlockElement(block, isFirst) {
             const div = document.createElement('div');
-            div.className = 'group relative w-full px-2 py-0.5 flex items-start gap-1 block-container fade-in';
-            div.dataset.id = block.id;
+            div.className = `group relative w-full block-container fade-in ${block.highlight || ''}`;
+            div.dataset.id = block.id; div.dataset.type = block.type;
             let html = '';
             switch (block.type) {
-                case 'h1': html = `<div contenteditable="true" class="w-full text-4xl font-extrabold py-2 outline-none" placeholder="Heading 1">${block.content || ''}</div>`; break;
-                case 'quote': html = `<div contenteditable="true" class="quote-block flex-1 outline-none" placeholder="Quote">${block.content || ''}</div>`; break;
-                case 'callout': html = `<div class="callout-block flex-1"><div class="text-xl">💡</div><div contenteditable="true" class="flex-1 outline-none" placeholder="Callout">${block.content || ''}</div></div>`; break;
-                case 'table': html = `<table class="orbit-table"><tbody><tr><td contenteditable="true">Item</td><td contenteditable="true">Value</td></tr></tbody></table>`; break;
-                case 'divider': html = `<hr class="w-full my-6 border-gray-200" />`; break;
-                default: html = `<div contenteditable="true" class="flex-1 outline-none py-1.5 leading-relaxed" placeholder="Type '/' for commands...">${block.content || ''}</div>`;
+                case 'h1': html = `<div contenteditable="true" class="w-full text-4xl font-extrabold py-2 outline-none text-[var(--text-main)]" placeholder="Heading 1">${block.content || ''}</div>`; break;
+                case 'h2': html = `<div contenteditable="true" class="w-full text-2xl font-bold py-1 outline-none text-[var(--text-main)]" placeholder="Heading 2">${block.content || ''}</div>`; break;
+                case 'todo': html = `<div class="flex items-start gap-3 py-1 flex-1"><input type="checkbox" onchange="toggleTodoState('${block.id}')" ${block.checked ? 'checked' : ''} class="mt-1.5 h-4 w-4 rounded border-gray-300 cursor-pointer" /><div contenteditable="true" class="flex-1 outline-none text-[var(--text-main)] ${block.checked ? 'line-through opacity-50' : ''}" placeholder="To-do">${block.content || ''}</div></div>`; break;
+                case 'quote': html = `<div contenteditable="true" class="quote-block flex-1 outline-none text-[var(--text-main)]" placeholder="Quote">${block.content || ''}</div>`; break;
+                case 'callout': html = `<div class="callout-block flex-1"><div class="text-xl">💡</div><div contenteditable="true" class="flex-1 outline-none text-[var(--text-main)]" placeholder="Callout">${block.content || ''}</div></div>`; break;
+                case 'playground': html = `<div class="playground-block flex-1"><div class="playground-header"><span class="text-[9px] font-bold text-gray-500 uppercase">Sandbox</span><button onclick="runPlayground('${block.id}')" class="bg-blue-600 text-white text-[9px] font-bold px-3 py-1 rounded-md">RUN</button></div><textarea class="playground-code outline-none" oninput="updatePlaygroundCode('${block.id}', this.value)">${block.content || ''}</textarea><iframe id="pg-preview-${block.id}" class="playground-preview"></iframe></div>`; break;
+                case 'divider': html = `<hr class="w-full my-6 border-[var(--border-color)]" />`; break;
+                case 'math': html = `<div class="w-full my-4 text-center text-xl" id="math-${block.id}"></div>`; break;
+                case 'timestamp': html = `<div class="flex-1 text-[10px] font-mono text-blue-500 border border-blue-500/20 bg-blue-500/5 px-2 py-1 rounded inline-block my-2">${block.content}</div>`; break;
+                default: html = `<div contenteditable="true" class="flex-1 outline-none py-1.5 leading-relaxed text-[var(--text-main)]" placeholder="Type '/' for commands...">${block.content || ''}</div>`;
             }
-            div.innerHTML = `<div class="drag-handle opacity-0 group-hover:opacity-100 transition-opacity absolute -left-8 top-1"><i data-lucide="grip-vertical" class="w-4 h-4"></i></div>${html}`;
+            div.innerHTML = `<div class="drag-handle opacity-0 group-hover:opacity-100 transition-opacity absolute -left-8 top-1 flex flex-col gap-1"><i data-lucide="grip-vertical" class="w-4 h-4"></i><button onclick="deleteBlock('${block.id}')" class="hover:text-red-500"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button></div>${html}`;
+            
             const edit = div.querySelector('[contenteditable="true"]');
             if (edit) {
-                edit.addEventListener('input', () => { block.content = edit.innerHTML; saveState(); if (edit.innerText.length > 5 && !edit.innerText.startsWith('/')) hideSlashMenu(); });
+                edit.addEventListener('input', () => { 
+                    const raw = edit.innerText;
+                    if (raw === '# ') { edit.innerText = ''; selectSlashItem('h1', block.id); return; }
+                    if (raw === '[] ') { edit.innerText = ''; selectSlashItem('todo', block.id); return; }
+                    if (raw === '---') { edit.innerText = ''; selectSlashItem('divider', block.id); return; }
+                    block.content = edit.innerHTML; saveState(); 
+                    if (raw.length > 5 && !raw.startsWith('/')) hideSlashMenu(); 
+                });
                 edit.addEventListener('keydown', (e) => {
                     if (e.key === '/') { if (!edit.innerText.trim()) { e.preventDefault(); openSlashMenu(div, block.id); } }
                     else if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); addBlockBelow(block.id); hideSlashMenu(); }
                     else if (e.key === 'Backspace' && !edit.innerText.trim() && !isFirst) { e.preventDefault(); deleteBlock(block.id); }
-                    else if (e.key === 'Escape') hideSlashMenu();
                 });
             }
+            if(block.type === 'playground') setTimeout(() => runPlayground(block.id), 50);
+            if(block.type === 'math') setTimeout(() => katex.render(block.content || 'e=mc^2', document.getElementById(`math-${block.id}`)), 50);
             return div;
         }
 
+        function toggleTodoState(id) {
+            const p = state.pages.find(pg => pg.id === state.activePageId);
+            const b = p.blocks.find(bk => bk.id === id);
+            if (b) { b.checked = !b.checked; renderActivePage(); saveState(); }
+        }
+
+        // --- Slash Menu ---
         function openSlashMenu(el, id) { 
             state.activeBlockIdForMenu = id; 
             const menu = document.getElementById('slash-menu'), container = document.getElementById('main-scroll-container');
-            const sel = window.getSelection();
-            let rect = sel.rangeCount > 0 ? sel.getRangeAt(0).getBoundingClientRect() : el.getBoundingClientRect();
+            const selection = window.getSelection();
+            let rect = (selection.rangeCount > 0) ? selection.getRangeAt(0).getBoundingClientRect() : el.getBoundingClientRect();
             const cRect = container.getBoundingClientRect();
             menu.style.display = 'flex'; 
-            menu.style.top = (rect.top - cRect.top + container.scrollTop - 4) + 'px'; 
-            menu.style.left = (rect.left - cRect.left) + 'px'; 
+            menu.style.top = (rect.top - cRect.top + container.scrollTop) + 'px'; 
+            let rightOffset = state.sidebarOpen ? 350 : 240; 
+            menu.style.left = (rect.left - cRect.left + rightOffset) + 'px'; 
+            if (parseInt(menu.style.left) + 240 > cRect.width) menu.style.left = (cRect.width - 250) + 'px';
             lucide.createIcons(); 
         }
 
         function setupSlashMenu() {
             const items = [
-                { type: 'text', icon: 'type', label: 'Text' }, { type: 'h1', icon: 'heading-1', label: 'Title' }, 
-                { type: 'quote', icon: 'quote', label: 'Quote' }, { type: 'callout', icon: 'info', label: 'Callout' },
-                { type: 'table', icon: 'table', label: 'Table' }, { type: 'divider', icon: 'minus', label: 'Divider' }
+                { type: 'text', icon: 'type', label: 'Plain Text' }, { type: 'h1', icon: 'heading-1', label: 'H1' }, 
+                { type: 'h2', icon: 'heading-2', label: 'H2' }, { type: 'todo', icon: 'check-square', label: 'To-do' }, 
+                { type: 'quote', icon: 'quote', label: 'Quote' }, { type: 'highlight', icon: 'highlighter', label: 'Highlight' },
+                { type: 'playground', icon: 'code', label: 'Sandbox' }, { type: 'math', icon: 'sigma', label: 'LaTeX' },
+                { type: 'divider', icon: 'minus', label: 'Divider' }
             ];
             document.getElementById('slash-menu-items').innerHTML = items.map(i => `
-                <button onclick="selectSlashItem('${i.type}')" class="w-full flex items-center gap-3 px-3 py-2 hover:bg-gray-100 text-left transition-colors">
-                    <div class="w-6 h-6 flex items-center justify-center bg-gray-50 border rounded text-gray-400 shrink-0"><i data-lucide="${i.icon}" class="w-3.5 h-3.5"></i></div>
+                <button onclick="handleSlashAction('${i.type}')" class="slash-item w-full flex items-center gap-3 px-3 py-2.5 transition-all text-left group">
+                    <div class="icon-box w-6 h-6 flex items-center justify-center bg-gray-50 dark:bg-gray-800 border border-[var(--border-color)] rounded text-gray-400 shrink-0 transition-all"><i data-lucide="${i.icon}" class="w-3.5 h-3.5"></i></div>
                     <div class="text-[11px] font-bold">${i.label}</div>
-                </button>
-            `).join('');
+                </button>`).join('');
         }
 
-        function selectSlashItem(t) { 
+        function handleSlashAction(type) {
+            if (type === 'highlight') {
+                const p = state.pages.find(pg => pg.id === state.activePageId);
+                const b = p.blocks.find(bk => bk.id === state.activeBlockIdForMenu);
+                const colors = ['', 'bg-highlight-blue', 'bg-highlight-green', 'bg-highlight-yellow', 'bg-highlight-red'];
+                let cur = colors.indexOf(b.highlight || '');
+                b.highlight = colors[(cur + 1) % colors.length];
+                renderActivePage(); saveState(); hideSlashMenu();
+            } else {
+                selectSlashItem(type);
+            }
+        }
+
+        function selectSlashItem(t, targetId = null) { 
             const p = state.pages.find(pg => pg.id === state.activePageId); 
-            const b = p.blocks.find(bk => bk.id === state.activeBlockIdForMenu); 
-            if (b) { b.type = t; b.content = ''; renderActivePage(); saveState(); }
+            const b = p.blocks.find(bk => bk.id === (targetId || state.activeBlockIdForMenu)); 
+            if (b) { 
+                b.type = t; 
+                if (t === 'playground') b.content = '<h1>Hello</h1>\n<style>h1{color:blue;}</style>';
+                else if (t === 'math') b.content = 'e^{i\\pi} + 1 = 0';
+                else b.content = '';
+                renderActivePage(); saveState();
+                setTimeout(() => { const el = document.querySelector(`[data-id="${b.id}"] [contenteditable="true"]`); if (el) el.focus(); }, 50);
+            }
             hideSlashMenu();
         }
+
+        function hideSlashMenu() { document.getElementById('slash-menu').style.display = 'none'; state.activeBlockIdForMenu = null; }
 
         function renderActivePage() {
             const page = state.pages.find(p => p.id === state.activePageId) || state.pages[0];
             document.getElementById('page-cover').src = page.cover;
             document.getElementById('page-icon').innerText = page.icon;
-            document.getElementById('header-title').innerText = page.title || 'Workspace';
+            document.getElementById('header-title').innerText = page.title || 'Untitled';
             document.getElementById('main-title-input').value = page.title;
             const container = document.getElementById('editor-blocks');
-            const currentFocusedId = document.activeElement?.closest('.block-container')?.dataset.id;
-            
-            // Build map of current blocks in DOM
+            const focusedId = document.activeElement?.closest('.block-container')?.dataset.id;
             const domMap = new Map();
             container.querySelectorAll('.block-container').forEach(el => domMap.set(el.dataset.id, el));
-
             page.blocks.forEach((b, i) => {
                 let el = domMap.get(b.id);
-                if (el) {
+                if (el && el.dataset.type === b.type) {
                     const edit = el.querySelector('[contenteditable="true"]');
-                    if (edit && b.id !== currentFocusedId && edit.innerHTML !== b.content) edit.innerHTML = b.content || '';
-                    domMap.delete(b.id); // mark as kept
+                    if (edit && b.id !== focusedId && edit.innerHTML !== b.content) edit.innerHTML = b.content || '';
+                    if (b.highlight) { el.classList.add(b.highlight); } else { el.classList.remove('bg-highlight-blue', 'bg-highlight-green', 'bg-highlight-yellow', 'bg-highlight-red'); }
+                    domMap.delete(b.id);
                 } else {
+                    if (el) el.remove();
                     const newEl = createBlockElement(b, i === 0);
-                    // Insert at correct position
-                    if (i === 0) container.prepend(newEl);
-                    else container.insertBefore(newEl, container.children[i]);
+                    container.insertBefore(newEl, container.children[i]);
                 }
             });
-            domMap.forEach(el => el.remove()); // delete blocks not in state
-            lucide.createIcons(); initDragAndDrop();
+            domMap.forEach(el => el.remove());
+            const clip = document.getElementById('block-clipboard');
+            clip.innerHTML = state.clipboard.map(b => `<div class="p-2 bg-[var(--bg-primary)] border border-[var(--border-color)] rounded-lg text-[10px] truncate shadow-sm cursor-grab" data-id="${b.id}">${(b.content || b.type).replace(/<[^>]*>?/gm, '')}</div>`).join('');
+            lucide.createIcons(); initDragAndDrop(); updateEditorStats(); updateProgressBar(); renderTOC();
         }
 
         function renderSidebar() {
             const pList = document.getElementById('pages-list');
-            pList.innerHTML = state.pages.map(p => `<button onclick="setActivePage('${p.id}')" class="w-full flex items-center gap-2 px-3 py-2 text-xs rounded-xl transition-all ${p.id === state.activePageId ? 'sidebar-item-active' : 'text-gray-500 hover:bg-gray-100'}"><span>${p.icon}</span><span class="truncate">${p.title || 'Untitled'}</span></button>`).join('');
+            const filtered = state.pages.filter(p => p.title.toLowerCase().includes(state.searchQuery.toLowerCase()));
+            pList.innerHTML = filtered.map(p => `
+                <div class="flex items-center group/page">
+                    <button onclick="setActivePage('${p.id}')" class="flex-1 flex items-center gap-2 px-3 py-2 text-xs rounded-xl transition-all ${p.id === state.activePageId ? 'sidebar-item-active' : 'text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800'}"><span>${p.icon}</span><span class="truncate">${p.title || 'Untitled'}</span></button>
+                    <button onclick="deletePage('${p.id}')" class="opacity-0 group-hover/page:opacity-100 p-2 text-gray-400 hover:text-red-500 transition-opacity"><i data-lucide="trash-2" class="w-3 h-3"></i></button>
+                </div>`).join('');
             lucide.createIcons();
         }
 
-        function setActivePage(id) { state.activePageId = id; saveState(true); renderSidebar(); renderActivePage(); if(ably) joinChannel(id); }
-        function updatePageTitle(v) { const p = state.pages.find(pg => pg.id === state.activePageId); if(p) { p.title = v; document.getElementById('header-title').innerText = v || 'Workspace'; saveState(); renderSidebar(); } }
+        function handleSearch(v) { state.searchQuery = v; renderSidebar(); }
 
         function initAbly() {
             if (!ROOT_ABLY_KEY || ably) return;
@@ -411,36 +630,28 @@
 
         function joinChannel(id) {
             if (channel) { channel.presence.leave(); channel.unsubscribe(); }
-            channel = ably.channels.get('orbit-sync-' + id, { params: { rewind: '1' } });
+            channel = ably.channels.get('orbit-v19-' + id, { params: { rewind: '1' } });
             channel.subscribe('update', (m) => {
                 if (m.clientId === ably.auth.clientId) return;
                 const remote = m.data.pages.find(p => p.id === id);
                 if (remote) { state.pages = state.pages.map(p => p.id === id ? remote : p); renderActivePage(); }
             });
-            channel.subscribe('signal', async (m) => {
-                if (m.data.type === 'hello' && state.onCall) {
-                    const pc = createPeerConnection(m.clientId);
-                    const offer = await pc.createOffer();
-                    await pc.setLocalDescription(offer);
-                    channel.publish('signal', { to: m.clientId, type: 'offer', data: offer });
-                } else handleSignal(m);
-            });
+            channel.subscribe('signal', handleSignal);
             channel.presence.enter({ onCall: state.onCall });
             channel.presence.subscribe(() => channel.presence.get((err, m) => { if(!err) renderPresence(m); }));
             document.getElementById('sync-status').classList.remove('hidden');
         }
 
         function renderPresence(members) {
-            document.getElementById('collaborators').innerHTML = members.map(m => `<div class="w-7 h-7 rounded-full bg-blue-500 border-2 border-white flex items-center justify-center text-[10px] text-white font-bold" title="${m.clientId}">${m.clientId.charAt(0).toUpperCase()}</div>`).join('');
+            document.getElementById('collaborators').innerHTML = members.map(m => `<div class="w-7 h-7 rounded-full bg-blue-500 border-2 border-white dark:border-gray-900 flex items-center justify-center text-[10px] text-white font-bold" title="${m.clientId}">${m.clientId.charAt(0).toUpperCase()}</div>`).join('');
             const onCall = members.filter(m => m.data?.onCall);
-            document.getElementById('voice-participants').innerHTML = onCall.map(m => `<div class="flex items-center gap-2"><div class="w-5 h-5 rounded-full bg-orange-500 flex items-center justify-center text-[8px] text-white font-bold">${m.clientId.charAt(0).toUpperCase()}</div><span class="text-[10px] font-bold">${m.clientId.split('_')[0]}</span></div>`).join('');
+            document.getElementById('voice-participants').innerHTML = onCall.map(m => `<div class="flex items-center gap-2"><div class="w-5 h-5 rounded-full bg-orange-500 flex items-center justify-center text-[8px] text-white font-bold">${m.clientId.charAt(0).toUpperCase()}</div><span class="text-[10px] font-bold dark:text-white">${m.clientId.split('_')[0]}</span></div>`).join('');
         }
 
         async function joinFriendPage() {
             const code = document.getElementById('friend-page-code').value.trim();
-            if (!code) return;
-            state.activePageId = code;
-            if (!state.pages.find(p => p.id === code)) state.pages.push({ id: code, title: 'Shared', icon: '🌐', isShared: true, blocks: [], cover: DEFAULT_COVERS[0] });
+            if (!code) return; state.activePageId = code;
+            if (!state.pages.find(p => p.id === code)) state.pages.push({ id: code, title: 'Shared Space', icon: '🌐', isShared: true, blocks: [], cover: DEFAULT_COVERS[0] });
             setActivePage(code); document.getElementById('collab-modal').classList.add('hidden');
         }
 
@@ -450,31 +661,43 @@
             document.getElementById('share-modal').classList.remove('hidden'); saveState();
         }
 
+        // --- Utils ---
+        function changeCover() { const p = state.pages.find(pg => pg.id === state.activePageId); if (p) { p.cover = DEFAULT_COVERS[Math.floor(Math.random()*DEFAULT_COVERS.length)]; renderActivePage(); saveState(); } }
         function addPage() { const id = 'p' + Math.random().toString(36).substr(2, 6); state.pages.push({ id, title: 'Untitled', icon: '📄', cover: DEFAULT_COVERS[0], blocks: [{ id: 'b' + Date.now(), type: 'text', content: '' }] }); setActivePage(id); }
+        function deletePage(id) { if(state.pages.length > 1) { state.pages = state.pages.filter(p => p.id !== id); if(state.activePageId === id) setActivePage(state.pages[0].id); else renderSidebar(); saveState(true); } }
         function addBlockBelow(id) {
-            const p = state.pages.find(pg => pg.id === state.activePageId);
-            const idx = p.blocks.findIndex(b => b.id === id);
+            const p = state.pages.find(pg => pg.id === state.activePageId); const idx = p.blocks.findIndex(b => b.id === id);
             const nb = { id: 'b' + Math.random().toString(36).substr(2, 6), type: 'text', content: '' };
             p.blocks.splice(idx + 1, 0, nb); renderActivePage(); saveState();
-            setTimeout(() => document.querySelector(`[data-id="${nb.id}"] [contenteditable]`).focus(), 10);
+            setTimeout(() => { const el = document.querySelector(`[data-id="${nb.id}"] [contenteditable]`); if(el) el.focus(); }, 10);
         }
-        function deleteBlock(id) {
+        function deleteBlock(id) { const p = state.pages.find(pg => pg.id === state.activePageId); if (p.blocks.length > 1) p.blocks = p.blocks.filter(b => b.id !== id); saveState(); renderActivePage(); }
+        
+        function handleWorkspaceClick(e) { 
             const p = state.pages.find(pg => pg.id === state.activePageId);
-            if (p.blocks.length > 1) p.blocks = p.blocks.filter(b => b.id !== id);
-            saveState(); renderActivePage();
+            if (e.target.id === 'main-scroll-container' || e.target.id === 'bottom-click-trigger' || e.target.id === 'editor-blocks') {
+                addBlockBelow(p.blocks[p.blocks.length - 1]?.id);
+            }
         }
-        function initDragAndDrop() { if (sortableMain) sortableMain.destroy(); sortableMain = Sortable.create(document.getElementById('editor-blocks'), { handle: '.drag-handle', animation: 150, onEnd: (e) => { const p = state.pages.find(x => x.id === state.activePageId); const b = p.blocks.splice(e.oldIndex, 1)[0]; p.blocks.splice(e.newIndex, 0, b); saveState(); }}); }
-        function setupFormatListener() { document.addEventListener('selectionchange', () => { const sel = window.getSelection(); const tb = document.getElementById('format-toolbar'); if (sel && sel.toString().length > 0 && !sel.isCollapsed) { const r = sel.getRangeAt(0).getBoundingClientRect(); tb.style.display = 'flex'; tb.style.position = 'fixed'; tb.style.top = (r.top - 45) + 'px'; tb.style.left = r.left + 'px'; tb.style.zIndex = 1000; } else tb.style.display = 'none'; }); }
-        function applyFormat(c) { document.execCommand(c, false, null); saveState(); }
-        function applyColor(c) { document.execCommand('foreColor', false, c); saveState(); }
-        function handleWorkspaceClick(e) { if (e.target.id === 'main-scroll-container' || e.target.id === 'bottom-click-trigger') addBlockBelow(state.pages.find(p => p.id === state.activePageId).blocks.slice(-1)[0]?.id); }
-        function toggleSidebar() { state.sidebarOpen = !state.sidebarOpen; const sb = document.getElementById('sidebar'); sb.style.width = state.sidebarOpen ? '256px' : '0px'; sb.style.opacity = state.sidebarOpen ? '1' : '0'; }
+
+        function initDragAndDrop() {
+            if (sortableMain) sortableMain.destroy(); if (sortableClipboard) sortableClipboard.destroy();
+            sortableMain = Sortable.create(document.getElementById('editor-blocks'), { group: 'blocks', handle: '.drag-handle', animation: 150, onEnd: (e) => {
+                const p = state.pages.find(x => x.id === state.activePageId);
+                const b = p.blocks.splice(e.oldIndex, 1)[0]; p.blocks.splice(e.newIndex, 0, b);
+                saveState(); renderActivePage();
+            }});
+            sortableClipboard = Sortable.create(document.getElementById('block-clipboard'), { group: 'blocks', animation: 150 });
+        }
+
+        function setActivePage(id) { state.activePageId = id; saveState(true); renderSidebar(); renderActivePage(); if(ably) joinChannel(id); }
+        function updatePageTitle(v) { const p = state.pages.find(pg => pg.id === state.activePageId); if(p) { p.title = v; document.getElementById('header-title').innerText = v || 'Untitled'; saveState(); renderSidebar(); } }
+        function toggleSidebar() { state.sidebarOpen = !state.sidebarOpen; const sb = document.getElementById('sidebar'); const reopenBtn = document.getElementById('reopen-sidebar-btn'); sb.style.width = state.sidebarOpen ? '256px' : '0px'; sb.style.opacity = state.sidebarOpen ? '1' : '0'; reopenBtn.style.display = state.sidebarOpen ? 'none' : 'block'; }
         function openCollabModal() { document.getElementById('collab-modal').classList.remove('hidden'); }
-        function closeShareModal() { document.getElementById('share-modal').classList.add('hidden'); }
         function toggleEmojiPicker(e) { e.stopPropagation(); document.getElementById('emoji-picker').classList.toggle('hidden'); }
-        function setupEmojiPicker() { document.getElementById('emoji-grid').innerHTML = EMOJI_LIST.map(e => `<button onclick="selectEmoji('${e}')" class="p-2 hover:bg-gray-100 rounded text-2xl">${e}</button>`).join(''); }
+        function setupEmojiPicker() { document.getElementById('emoji-grid').innerHTML = EMOJI_LIST.map(e => `<button onclick="selectEmoji('${e}')" class="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded text-2xl">${e}</button>`).join(''); }
         function selectEmoji(e) { const p = state.pages.find(pg => pg.id === state.activePageId); if(p) { p.icon = e; renderSidebar(); renderActivePage(); saveState(); } document.getElementById('emoji-picker').classList.add('hidden'); }
-        function setupMenuDragging() { const m = document.getElementById('slash-menu'), h = document.getElementById('slash-menu-drag'); let x, y, d = false; h.onmousedown = (e) => { d = true; x = e.clientX - m.offsetLeft; y = e.clientY - m.offsetTop; e.preventDefault(); }; document.onmousemove = (e) => { if (d) { m.style.left = (e.clientX - x) + 'px'; m.style.top = (e.clientY - y) + 'px'; } }; document.onmouseup = () => d = false; }
+        function setupMenuDragging() { const m = document.getElementById('slash-menu'), h = document.getElementById('slash-menu-drag'); if(!h) return; let x, y, d = false; h.onmousedown = (e) => { d = true; x = e.clientX - m.offsetLeft; y = e.clientY - m.offsetTop; e.preventDefault(); e.stopPropagation(); }; document.onmousemove = (e) => { if (d) { m.style.left = (e.clientX - x) + 'px'; m.style.top = (e.clientY - y) + 'px'; } }; document.onmouseup = () => d = false; }
         function handleCoverFile(i) { const f = i.files[0]; if(!f) return; const r = new FileReader(); r.onload = (e) => { const p = state.pages.find(x => x.id === state.activePageId); if(p) { p.cover = e.target.result; document.getElementById('page-cover').src = p.cover; saveState(); } }; r.readAsDataURL(f); }
 
         init();
