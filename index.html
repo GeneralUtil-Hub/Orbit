@@ -81,8 +81,9 @@
             color: var(--text-main);
         }
 
+        /* Improved Hover Contrast */
         .slash-item:hover { background-color: var(--brand-color) !important; color: #ffffff !important; }
-        .slash-item:hover .icon-box { background-color: rgba(255, 255, 255, 0.2) !important; color: #ffffff !important; border-color: transparent !important; }
+        .slash-item:hover .icon-box { background-color: rgba(255, 255, 255, 0.3) !important; color: #ffffff !important; border-color: transparent !important; }
         .slash-item:hover .icon-box i { color: #ffffff !important; }
 
         .playground-block { background: var(--input-bg); border-radius: 12px; overflow: hidden; border: 1px solid var(--border-color); margin: 1rem 0; }
@@ -106,15 +107,16 @@
             border-radius: 10px;
             font-size: 11px;
             font-weight: 700;
-            border: 1px solid rgba(0,0,0,0.1);
+            border: 1px solid rgba(0,0,0,0.15);
             box-shadow: 0 4px 6px rgba(0,0,0,0.05);
             transition: all 0.2s;
         }
         .dark-mode .banner-btn {
             background: rgba(30, 30, 40, 0.85);
             color: #efeff1 !important;
-            border-color: rgba(255,255,255,0.15);
+            border-color: rgba(255,255,255,0.2);
         }
+        .banner-btn:hover { transform: translateY(-1px); box-shadow: 0 6px 12px rgba(0,0,0,0.1); }
         
         #progress-bar { position: fixed; top: 0; left: 0; width: 0%; height: 3px; background: var(--brand-color); z-index: 100; }
         
@@ -129,7 +131,6 @@
         .focus-mode #sidebar, .focus-mode #header, .focus-mode #editor-stats { display: none !important; }
         .focus-mode #exit-focus-btn { display: flex !important; }
 
-        /* Refined Editor Stats */
         #editor-stats {
             position: fixed;
             bottom: 24px;
@@ -153,6 +154,10 @@
         }
         .stat-pill i { width: 12px; height: 12px; opacity: 0.6; }
 
+        .toc-item { font-size: 11px; padding: 4px 12px; color: var(--text-secondary); cursor: pointer; border-radius: 6px; transition: all 0.2s; }
+        .toc-item:hover { color: var(--brand-color); background: var(--block-hover); }
+        .toc-h2 { margin-left: 12px; }
+
         .bg-highlight-blue { background-color: rgba(37, 99, 235, 0.1) !important; }
         .bg-highlight-green { background-color: rgba(34, 197, 94, 0.1) !important; }
         .bg-highlight-yellow { background-color: rgba(234, 179, 8, 0.1) !important; }
@@ -167,6 +172,9 @@
     <button id="reopen-sidebar-btn" onclick="toggleSidebar()"><i data-lucide="chevron-right" class="w-4 h-4 text-gray-400"></i></button>
 
     <div id="app" class="flex h-screen w-full relative z-10">
+        <input type="file" id="cover-upload-input" class="hidden" accept="image/*" onchange="handleCoverFile(this)" />
+        <input type="file" id="import-md-input" class="hidden" accept=".md,.txt" onchange="handleImportFile(this)" />
+        
         <aside id="sidebar" class="w-64 flex flex-col bg-[var(--sidebar-bg)] border-r border-[var(--border-color)] transition-all duration-300 shrink-0 z-20 overflow-hidden">
             <div class="p-4 flex flex-col gap-5 min-w-[256px]">
                 <div class="flex items-center justify-between font-bold text-sm">
@@ -210,6 +218,9 @@
                 <button onclick="exportToMarkdown()" class="w-full flex items-center gap-3 px-3 py-2 text-xs text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/10 rounded-xl transition-colors font-semibold">
                     <i data-lucide="download" class="w-4 h-4"></i> Export .md
                 </button>
+                <button onclick="document.getElementById('import-md-input').click()" class="w-full flex items-center gap-3 px-3 py-2 text-xs text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-900/10 rounded-xl transition-colors font-semibold">
+                    <i data-lucide="file-up" class="w-4 h-4"></i> Import .md
+                </button>
                 <button onclick="openCollabModal()" class="w-full flex items-center gap-3 px-3 py-2 text-xs text-orange-600 hover:bg-orange-50 dark:hover:bg-orange-900/10 rounded-xl transition-colors font-semibold">
                     <i data-lucide="users" class="w-4 h-4"></i> Join Workspace
                 </button>
@@ -223,8 +234,6 @@
             <div id="header" class="h-14 border-b border-[var(--border-color)] flex items-center justify-between px-6 shrink-0 z-20 bg-[var(--bg-primary)]/80 backdrop-blur-md">
                 <div class="flex items-center gap-3 text-[10px] font-medium text-gray-400 uppercase tracking-tight">
                     <span>Orbit</span>
-                    <i data-lucide="chevron-right" class="w-3 h-3"></i>
-                    <span>Workspace</span>
                     <i data-lucide="chevron-right" class="w-3 h-3"></i>
                     <span id="header-title" class="text-[var(--text-main)] font-bold truncate max-w-[150px]">Home</span>
                     <div id="save-status" class="ml-4 opacity-0 transition-opacity flex items-center gap-1.5 text-emerald-500 font-bold">
@@ -259,11 +268,11 @@
                     
                     <div id="slash-menu">
                         <div class="slash-drag-handle" id="slash-menu-drag"></div>
+                        <div class="px-4 py-3 text-[10px] font-bold text-gray-400 uppercase tracking-widest border-b border-[var(--border-color)]">Blocks & Actions</div>
                         <div id="slash-menu-items" class="py-1"></div>
                     </div>
                 </div>
 
-                <!-- Redesigned Stats Bar -->
                 <div id="editor-stats">
                     <div class="stat-pill" title="Total Word Count"><i data-lucide="type"></i><span id="stat-words">0</span></div>
                     <div class="stat-pill" title="Total Character Count"><i data-lucide="hash"></i><span id="stat-chars">0</span></div>
@@ -273,12 +282,12 @@
         </main>
     </div>
 
-    <!-- Voice Room UI -->
+    <!-- Voice Overlay -->
     <div id="voice-overlay" class="bg-[var(--bg-primary)] border border-[var(--border-color)] rounded-2xl p-4 shadow-2xl w-64 fade-in" style="position: fixed; bottom: 24px; right: 24px; z-index: 100; display: none;">
         <div class="flex items-center justify-between mb-4"><div class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Voice Room</div><div class="w-1.5 h-1.5 bg-orange-500 rounded-full animate-ping"></div></div>
         <div id="voice-participants" class="space-y-3 mb-4"></div>
         <div class="space-y-4 pt-4 border-t border-[var(--border-color)]">
-            <div class="space-y-2"><div class="flex justify-between text-[9px] font-bold text-gray-500 uppercase"><span>Mic Boost</span><span id="vol-value">100%</span></div><input type="range" min="0" max="200" value="100" class="w-full accent-blue-600" oninput="updateMicVolume(this.value)"></div>
+            <div class="space-y-2"><div class="flex justify-between text-[9px] font-bold text-gray-500 uppercase"><span>Mic Gain</span><span id="vol-value">100%</span></div><input type="range" min="0" max="200" value="100" class="w-full accent-blue-600" oninput="updateMicVolume(this.value)"></div>
             <div class="flex items-center justify-between"><span class="text-[9px] font-bold text-gray-500 uppercase">Isolation</span><label class="switch"><input type="checkbox" id="iso-toggle" checked onchange="toggleIsolation()"><span class="slider"></span></label></div>
             <div class="flex gap-2"><button onclick="toggleAudioTest()" id="test-mic-btn" class="flex-1 py-2 bg-blue-600/10 text-blue-600 text-[9px] font-bold uppercase rounded-lg border border-blue-500/20">Test Mic</button></div>
         </div>
@@ -286,18 +295,20 @@
         <button onclick="toggleVoiceOrbit()" class="w-full mt-4 py-2 bg-red-500/10 text-red-500 text-[10px] font-bold uppercase rounded-lg">Disconnect</button>
     </div>
 
-    <!-- Modals -->
     <div id="collab-modal" class="hidden fixed inset-0 z-[100] bg-black/50 flex items-center justify-center backdrop-blur-sm">
         <div class="bg-white dark:bg-[#1e1e1e] w-80 rounded-2xl p-6 shadow-2xl text-center">
             <h3 class="font-bold mb-4 dark:text-white">Join Workspace</h3>
-            <input id="friend-page-code" type="text" placeholder="Workspace Code" class="w-full bg-white dark:bg-gray-800 dark:text-white text-black border border-gray-200 dark:border-gray-700 rounded-xl px-4 py-3 text-sm outline-none mb-4 font-mono" />
-            <button onclick="joinFriendPage()" class="w-full py-3 bg-blue-600 rounded-xl text-sm font-bold text-white shadow-lg">Connect</button>
+            <input id="friend-page-code" type="text" placeholder="Workspace Code" class="w-full bg-gray-50 dark:bg-gray-800 dark:text-white text-black border border-gray-200 dark:border-gray-700 rounded-xl px-4 py-3 text-sm outline-none mb-4 font-mono" />
+            <div class="flex gap-2">
+                <button onclick="document.getElementById('collab-modal').classList.add('hidden')" class="flex-1 py-3 bg-gray-100 dark:bg-gray-800 rounded-xl text-sm font-bold text-gray-500">Cancel</button>
+                <button onclick="joinFriendPage()" class="flex-1 py-3 bg-blue-600 rounded-xl text-sm font-bold text-white shadow-lg">Connect</button>
+            </div>
         </div>
     </div>
 
     <div id="name-modal" class="hidden fixed inset-0 z-[200] bg-black/60 flex items-center justify-center backdrop-blur-md">
         <div class="bg-white dark:bg-gray-900 w-72 rounded-2xl p-6 shadow-2xl">
-            <h3 class="font-bold mb-4 dark:text-white">Workspace Identity</h3>
+            <h3 class="font-bold mb-4 dark:text-white">Orbit Hello</h3>
             <input id="initial-name" type="text" class="w-full bg-gray-50 dark:bg-gray-800 dark:text-white border rounded-xl px-4 py-3 text-sm outline-none mb-4" placeholder="Your name" />
             <button onclick="window.saveInitialName()" class="w-full py-3 bg-blue-600 rounded-xl text-sm font-bold text-white shadow-xl">Launch</button>
         </div>
@@ -317,18 +328,27 @@
     <script>
         const ROOT_ABLY_KEY = "LJhgHg.rF2whQ:Imz-F_d5gOcMGAiJNWIGjhaAXXba8Hpbefj3LtPaT0s"; 
         const DEFAULT_COVERS = ['https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&q=80&w=2000', 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&q=80&w=2000', 'https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?auto=format&fit=crop&q=80&w=2000'];
-        const EMOJI_LIST = ['🚀', '🪐', '✨', '🛸', '🌍', '☄️', '🔭', '🎨', '📝', '🛠️', '🎯', '💡', '📊', '💻'];
-        const STORAGE_KEY = 'orbit_v21_webrtc_targeted';
+        const EMOJI_LIST = ['🚀', '🪐', '✨', '🛸', '🌍', '☄️', '🔭', '🎨', '📝', '🛠️', '🎯', '💡'];
+        const STORAGE_KEY = 'orbit_v22_final_sync';
 
         let state = {
             username: '', darkMode: false, onCall: false, activePageId: '1', searchQuery: '', focusMode: false,
-            pages: [{ id: '1', title: 'Home', icon: '🚀', cover: DEFAULT_COVERS[0], isShared: false, blocks: [{ id: 'b1', type: 'h1', content: 'Orbit Workspace' }, { id: 'b2', type: 'text', content: 'Ready for collaboration.' }] }],
+            pages: [{ id: '1', title: 'Home', icon: '🚀', cover: DEFAULT_COVERS[0], isShared: false, blocks: [{ id: 'b1', type: 'h1', content: 'Orbit Workspace' }, { id: 'b2', type: 'text', content: 'Sync active. Type / for commands.' }] }],
             clipboard: [], sidebarOpen: true
         };
 
         let ably = null, channel = null, sortableMain = null, sortableClipboard = null;
         let localStream = null, peerConnections = {}, audioCtx = null, gainNode = null, isAudioTesting = false;
         let saveTimeout = null;
+
+        // Ensure setActivePage is defined early for global access
+        const setActivePage = (id) => { 
+            state.activePageId = id; 
+            saveState(true); 
+            renderSidebar(); 
+            renderActivePage(); 
+            if(ably) joinChannel(id); 
+        };
 
         window.saveInitialName = function() {
             const name = document.getElementById('initial-name').value.trim();
@@ -357,7 +377,9 @@
         function saveState(skipBroadcast = false) {
             localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
             const activePage = state.pages.find(p => p.id === state.activePageId);
-            if (!skipBroadcast && channel && activePage?.isShared) channel.publish('update', { pages: state.pages });
+            if (!skipBroadcast && channel && activePage?.isShared) {
+                channel.publish('update', { pages: state.pages });
+            }
             
             const status = document.getElementById('save-status');
             if(status) {
@@ -397,6 +419,7 @@
             const p = state.pages.find(pg => pg.id === state.activePageId);
             const list = document.getElementById('toc-list');
             const container = document.getElementById('toc-container');
+            if(!p) return;
             const headings = p.blocks.filter(b => b.type === 'h1' || b.type === 'h2');
             if (headings.length > 0) {
                 container.classList.remove('hidden');
@@ -423,7 +446,30 @@
             const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `${p.title}.md`; a.click();
         }
 
-        // --- Audio & WebRTC targeted signaling ---
+        function handleImportFile(input) {
+            const file = input.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const text = e.target.result;
+                const lines = text.split('\n');
+                const newBlocks = lines.filter(l => l.trim()).map(line => {
+                    let type = 'text', content = line.trim();
+                    if (line.startsWith('# ')) { type = 'h1'; content = line.substring(2); }
+                    else if (line.startsWith('## ')) { type = 'h2'; content = line.substring(3); }
+                    else if (line.startsWith('> ')) { type = 'quote'; content = line.substring(2); }
+                    else if (line.startsWith('- [ ] ')) { type = 'todo'; content = line.substring(6); }
+                    else if (line.startsWith('- [x] ')) { type = 'todo'; content = line.substring(6); }
+                    return { id: 'b' + Math.random().toString(36).substr(2, 6), type, content };
+                });
+                const p = state.pages.find(pg => pg.id === state.activePageId);
+                p.blocks = newBlocks.length > 0 ? newBlocks : [{ id: 'b' + Date.now(), type: 'text', content: 'Empty import.' }];
+                renderActivePage(); saveState();
+            };
+            reader.readAsText(file);
+        }
+
+        // --- Audio Logic ---
         async function toggleVoiceOrbit() {
             state.onCall = !state.onCall;
             const btn = document.getElementById('voice-btn');
@@ -450,6 +496,7 @@
 
         function updateMicVolume(val) { if (gainNode) gainNode.gain.value = val / 100; document.getElementById('vol-value').innerText = val + "%"; }
         async function toggleIsolation() { if (!localStream) return; const track = localStream.getAudioTracks()[0]; await track.applyConstraints({ noiseSuppression: document.getElementById('iso-toggle').checked }); }
+        
         function toggleAudioTest() {
             const testBtn = document.getElementById('test-mic-btn'); const testAudio = document.getElementById('self-test-audio'); const indicator = document.getElementById('self-test-indicator');
             isAudioTesting = !isAudioTesting;
@@ -494,7 +541,7 @@
                 case 'todo': html = `<div class="flex items-start gap-3 py-1 flex-1"><input type="checkbox" onchange="toggleTodoState('${block.id}')" ${block.checked ? 'checked' : ''} class="mt-1.5 h-4 w-4 rounded border-gray-300 cursor-pointer" /><div contenteditable="true" class="flex-1 outline-none text-[var(--text-main)] ${block.checked ? 'line-through opacity-50' : ''}" placeholder="To-do">${block.content || ''}</div></div>`; break;
                 case 'quote': html = `<div contenteditable="true" class="quote-block flex-1 outline-none text-[var(--text-main)]" placeholder="Quote">${block.content || ''}</div>`; break;
                 case 'callout': html = `<div class="callout-block flex-1"><div class="text-xl">💡</div><div contenteditable="true" class="flex-1 outline-none text-[var(--text-main)]" placeholder="Callout">${block.content || ''}</div></div>`; break;
-                case 'playground': html = `<div class="playground-block flex-1"><div class="playground-header"><span class="text-[9px] font-bold text-gray-500 uppercase">Sandbox</span><button onclick="runPlayground('${block.id}')" class="bg-blue-600 text-white text-[9px] font-bold px-3 py-1 rounded-md">RUN</button></div><textarea class="playground-code outline-none" oninput="updatePlaygroundCode('${block.id}', this.value)">${block.content || ''}</textarea><iframe id="pg-preview-${block.id}" class="playground-preview"></iframe></div>`; break;
+                case 'playground': html = `<div class="playground-block flex-1"><div class="playground-header"><span class="text-[9px] font-bold text-gray-500 uppercase">Sandbox</span><button onclick="runPlayground('${block.id}')" class="bg-blue-600 text-white text-[9px] font-bold px-3 py-1 rounded-md hover:bg-blue-700">RUN</button></div><textarea class="playground-code outline-none" oninput="updatePlaygroundCode('${block.id}', this.value)">${block.content || ''}</textarea><iframe id="pg-preview-${block.id}" class="playground-preview"></iframe></div>`; break;
                 case 'divider': html = `<hr class="w-full my-6 border-[var(--border-color)]" />`; break;
                 case 'math': html = `<div class="w-full my-4 text-center text-xl" id="math-${block.id}"></div>`; break;
                 default: html = `<div contenteditable="true" class="flex-1 outline-none py-1.5 leading-relaxed text-[var(--text-main)]" placeholder="Type '/' for commands...">${block.content || ''}</div>`;
@@ -528,14 +575,15 @@
             state.activeBlockIdForMenu = id; const menu = document.getElementById('slash-menu'), container = document.getElementById('main-scroll-container');
             const selection = window.getSelection(); let rect = (selection.rangeCount > 0) ? selection.getRangeAt(0).getBoundingClientRect() : el.getBoundingClientRect();
             const cRect = container.getBoundingClientRect(); menu.style.display = 'flex'; menu.style.top = (rect.top - cRect.top + container.scrollTop) + 'px'; 
-            let rightOffset = state.sidebarOpen ? 350 : 240; menu.style.left = (rect.left - cRect.left + rightOffset) + 'px'; 
+            let rightOffset = state.sidebarOpen ? 420 : 240; 
+            menu.style.left = (rect.left - cRect.left + rightOffset) + 'px'; 
             if (parseInt(menu.style.left) + 240 > cRect.width) menu.style.left = (cRect.width - 250) + 'px';
             lucide.createIcons(); 
         }
 
         function setupSlashMenu() {
             const items = [
-                { type: 'text', icon: 'type', label: 'Plain Text' }, { type: 'h1', icon: 'heading-1', label: 'H1' }, { type: 'h2', icon: 'heading-2', label: 'H2' }, { type: 'todo', icon: 'check-square', label: 'To-do' }, 
+                { type: 'text', icon: 'type', label: 'Plain Text' }, { type: 'h1', icon: 'heading-1', label: 'Heading 1' }, { type: 'h2', icon: 'heading-2', label: 'Heading 2' }, { type: 'todo', icon: 'check-square', label: 'To-do' }, 
                 { type: 'quote', icon: 'quote', label: 'Quote' }, { type: 'highlight', icon: 'highlighter', label: 'Highlight' }, { type: 'playground', icon: 'code', label: 'Sandbox' }, { type: 'math', icon: 'sigma', label: 'LaTeX' }, { type: 'divider', icon: 'minus', label: 'Divider' }
             ];
             document.getElementById('slash-menu-items').innerHTML = items.map(i => `
@@ -620,8 +668,40 @@
         function deletePage(id) { if(state.pages.length > 1) { state.pages = state.pages.filter(p => p.id !== id); if(state.activePageId === id) setActivePage(state.pages[0].id); else renderSidebar(); saveState(true); } }
         function addBlockBelow(id) { const p = state.pages.find(pg => pg.id === state.activePageId); const idx = p.blocks.findIndex(b => b.id === id); const nb = { id: 'b' + Math.random().toString(36).substr(2, 6), type: 'text', content: '' }; p.blocks.splice(idx + 1, 0, nb); renderActivePage(); saveState(); setTimeout(() => { const el = document.querySelector(`[data-id="${nb.id}"] [contenteditable]`); if(el) el.focus(); }, 10); }
         function deleteBlock(id) { const p = state.pages.find(pg => pg.id === state.activePageId); if (p.blocks.length > 1) p.blocks = p.blocks.filter(b => b.id !== id); saveState(); renderActivePage(); }
-        function handleWorkspaceClick(e) { if (e.target.id === 'main-scroll-container' || e.target.id === 'bottom-click-trigger' || e.target.id === 'editor-blocks') addBlockBelow(state.pages.find(p => p.id === state.activePageId).blocks.slice(-1)[0]?.id); }
-        function initDragAndDrop() { if (sortableMain) sortableMain.destroy(); if (sortableClipboard) sortableClipboard.destroy(); sortableMain = Sortable.create(document.getElementById('editor-blocks'), { group: 'blocks', handle: '.drag-handle', animation: 150, onEnd: (e) => { const p = state.pages.find(x => x.id === state.activePageId); const b = p.blocks.splice(e.oldIndex, 1)[0]; p.blocks.splice(e.newIndex, 0, b); saveState(); }}); sortableClipboard = Sortable.create(document.getElementById('block-clipboard'), { group: 'blocks', animation: 150 }); }
+        
+        function handleWorkspaceClick(e) { 
+            const p = state.pages.find(pg => pg.id === state.activePageId);
+            if (e.target.id === 'main-scroll-container' || e.target.id === 'bottom-click-trigger' || e.target.id === 'editor-blocks') {
+                if (p.blocks.length === 0 || p.blocks[p.blocks.length-1].content.trim() !== '') {
+                    addBlockBelow(p.blocks[p.blocks.length - 1]?.id);
+                }
+            }
+        }
+
+        function initDragAndDrop() {
+            if (sortableMain) sortableMain.destroy(); if (sortableClipboard) sortableClipboard.destroy();
+            sortableMain = Sortable.create(document.getElementById('editor-blocks'), { 
+                group: 'blocks', 
+                handle: '.drag-handle', 
+                animation: 150, 
+                onEnd: (e) => {
+                    const p = state.pages.find(x => x.id === state.activePageId);
+                    if (e.to.id === 'block-clipboard') {
+                        const b = p.blocks.splice(e.oldIndex, 1)[0];
+                        state.clipboard.splice(e.newIndex, 0, b);
+                    } else if (e.from.id === 'block-clipboard') {
+                        const b = state.clipboard.splice(e.oldIndex, 1)[0];
+                        p.blocks.splice(e.newIndex, 0, b);
+                    } else {
+                        const b = p.blocks.splice(e.oldIndex, 1)[0];
+                        p.blocks.splice(e.newIndex, 0, b);
+                    }
+                    saveState(); renderActivePage();
+                }
+            });
+            sortableClipboard = Sortable.create(document.getElementById('block-clipboard'), { group: 'blocks', animation: 150 });
+        }
+
         function toggleSidebar() { state.sidebarOpen = !state.sidebarOpen; const sb = document.getElementById('sidebar'); const reopenBtn = document.getElementById('reopen-sidebar-btn'); sb.style.width = state.sidebarOpen ? '256px' : '0px'; sb.style.opacity = state.sidebarOpen ? '1' : '0'; reopenBtn.style.display = state.sidebarOpen ? 'none' : 'block'; updateEditorStats(); }
         function openCollabModal() { document.getElementById('collab-modal').classList.remove('hidden'); }
         function toggleEmojiPicker(e) { e.stopPropagation(); document.getElementById('emoji-picker').classList.toggle('hidden'); }
