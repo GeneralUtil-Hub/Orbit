@@ -45,14 +45,14 @@
 
         .scrollbar-hide::-webkit-scrollbar { display: none; }
         
-        .block-container { transition: background-color 0.2s ease; border-radius: 4px; padding: 4px 8px; position: relative; margin: 1px 0; }
+        .block-container { transition: background-color 0.2s ease; border-radius: 6px; padding: 4px 8px; position: relative; margin: 2px 0; }
         .block-container:hover { background-color: var(--block-hover); }
         input:focus, textarea:focus { outline: none; }
         
-        .drag-handle { cursor: grab; padding: 4px; border-radius: 4px; color: var(--text-secondary); opacity: 0; transition: opacity 0.2s; position: absolute; left: -28px; top: 4px; }
+        .drag-handle { cursor: grab; padding: 4px; border-radius: 4px; color: var(--text-secondary); opacity: 0; transition: opacity 0.2s; position: absolute; left: -32px; top: 4px; }
         .block-container:hover .drag-handle { opacity: 0.5; }
         
-        .sidebar-item-active { background-color: var(--block-hover); color: var(--text-main); font-weight: 600; border-left: 2px solid var(--brand-color); }
+        .sidebar-item-active { background-color: var(--block-hover); color: var(--text-main); font-weight: 600; border-left: 3px solid var(--brand-color); }
         [contenteditable]:empty:before { content: attr(placeholder); color: var(--text-secondary); opacity: 0.4; pointer-events: none; }
 
         #editor-blocks:empty::after {
@@ -81,10 +81,8 @@
             color: var(--text-main);
         }
 
-        /* Improved Hover Contrast */
         .slash-item:hover { background-color: var(--brand-color) !important; color: #ffffff !important; }
         .slash-item:hover .icon-box { background-color: rgba(255, 255, 255, 0.3) !important; color: #ffffff !important; border-color: transparent !important; }
-        .slash-item:hover .icon-box i { color: #ffffff !important; }
 
         .playground-block { background: var(--input-bg); border-radius: 12px; overflow: hidden; border: 1px solid var(--border-color); margin: 1rem 0; }
         .playground-header { background: rgba(0,0,0,0.05); padding: 8px 12px; display: flex; justify-content: space-between; align-items: center; }
@@ -97,76 +95,54 @@
             padding: 12px 4px; border-radius: 0 8px 8px 0; display: none; box-shadow: 2px 0 10px rgba(0,0,0,0.05);
         }
 
-        .orbit-logo { width: 22px; height: 22px; }
-
         .banner-btn {
-            background: rgba(255, 255, 255, 0.9);
+            background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(8px);
             color: #111827 !important;
-            padding: 8px 14px;
+            padding: 8px 16px;
             border-radius: 10px;
             font-size: 11px;
-            font-weight: 700;
-            border: 1px solid rgba(0,0,0,0.15);
+            font-weight: 800;
+            border: 1px solid rgba(0,0,0,0.1);
             box-shadow: 0 4px 6px rgba(0,0,0,0.05);
             transition: all 0.2s;
         }
         .dark-mode .banner-btn {
-            background: rgba(30, 30, 40, 0.85);
+            background: rgba(40, 40, 50, 0.9);
             color: #efeff1 !important;
             border-color: rgba(255,255,255,0.2);
         }
-        .banner-btn:hover { transform: translateY(-1px); box-shadow: 0 6px 12px rgba(0,0,0,0.1); }
+        .banner-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 15px rgba(0,0,0,0.15); }
         
-        #progress-bar { position: fixed; top: 0; left: 0; width: 0%; height: 3px; background: var(--brand-color); z-index: 100; }
+        #progress-bar { position: fixed; top: 0; left: 0; width: 0%; height: 3px; background: var(--brand-color); z-index: 100; transition: width 0.1s ease; }
         
-        .switch { position: relative; display: inline-block; width: 32px; height: 18px; }
-        .switch input { opacity: 0; width: 0; height: 0; }
-        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .4s; border-radius: 34px; }
-        .slider:before { position: absolute; content: ""; height: 12px; width: 12px; left: 3px; bottom: 3px; background-color: white; transition: .4s; border-radius: 50%; }
-        input:checked + .slider { background-color: var(--brand-color); }
-        input:checked + .slider:before { transform: translateX(14px); }
-
-        #exit-focus-btn { position: fixed; top: 20px; right: 20px; z-index: 200; display: none; background: var(--bg-primary); border: 1px solid var(--border-color); padding: 8px 16px; border-radius: 12px; font-size: 11px; font-weight: 700; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
-        .focus-mode #sidebar, .focus-mode #header, .focus-mode #editor-stats { display: none !important; }
-        .focus-mode #exit-focus-btn { display: flex !important; }
-
         #editor-stats {
-            position: fixed;
-            bottom: 24px;
-            right: 24px;
-            background: var(--bg-primary);
-            border: 1px solid var(--border-color);
-            padding: 4px;
-            border-radius: 12px;
-            display: flex;
-            gap: 4px;
-            box-shadow: 0 8px 30px rgba(0,0,0,0.12);
-            z-index: 40;
-            backdrop-filter: blur(12px);
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            opacity: 0; 
+            position: fixed; bottom: 24px; right: 24px; background: var(--bg-primary); border: 1px solid var(--border-color);
+            padding: 4px; border-radius: 12px; display: flex; gap: 4px; box-shadow: 0 8px 30px rgba(0,0,0,0.12); z-index: 40; backdrop-filter: blur(12px); opacity: 0; transition: opacity 0.3s;
         }
-        .stat-pill {
-            display: flex; align-items: center; gap: 6px; padding: 6px 10px; border-radius: 8px;
-            background: var(--block-hover); color: var(--text-secondary); font-size: 10px; font-weight: 700;
-            transition: all 0.2s; cursor: default;
-        }
-        .stat-pill i { width: 12px; height: 12px; opacity: 0.6; }
+        .stat-pill { display: flex; align-items: center; gap: 6px; padding: 6px 10px; border-radius: 8px; background: var(--block-hover); color: var(--text-secondary); font-size: 10px; font-weight: 700; cursor: default; }
 
-        .toc-item { font-size: 11px; padding: 4px 12px; color: var(--text-secondary); cursor: pointer; border-radius: 6px; transition: all 0.2s; }
+        .math-block { cursor: pointer; transition: background 0.2s; padding: 12px; border-radius: 8px; }
+        .math-block:hover { background: var(--block-hover); }
+        .math-editor { width: 100%; font-family: 'Roboto Mono', monospace; font-size: 13px; background: var(--input-bg); border-radius: 8px; padding: 10px; border: 1px solid var(--border-color); margin-top: 8px; }
+
+        .media-block { border-radius: 12px; overflow: hidden; margin: 1rem 0; border: 1px solid var(--border-color); }
+        .media-block iframe { width: 100%; aspect-ratio: 16/9; }
+        .media-block img { width: 100%; height: auto; display: block; }
+
+        .toc-item { font-size: 11px; padding: 4px 12px; color: var(--text-secondary); cursor: pointer; border-radius: 6px; transition: all 0.2s; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .toc-item:hover { color: var(--brand-color); background: var(--block-hover); }
         .toc-h2 { margin-left: 12px; }
 
-        .bg-highlight-blue { background-color: rgba(37, 99, 235, 0.1) !important; }
-        .bg-highlight-green { background-color: rgba(34, 197, 94, 0.1) !important; }
-        .bg-highlight-yellow { background-color: rgba(234, 179, 8, 0.1) !important; }
-        .bg-highlight-red { background-color: rgba(239, 68, 68, 0.1) !important; }
+        .bg-highlight-blue { background-color: rgba(37, 99, 235, 0.12) !important; border-left: 3px solid #2563eb; }
+        .bg-highlight-green { background-color: rgba(34, 197, 94, 0.12) !important; border-left: 3px solid #22c55e; }
+        .bg-highlight-yellow { background-color: rgba(234, 179, 8, 0.12) !important; border-left: 3px solid #eab308; }
+        .bg-highlight-red { background-color: rgba(239, 68, 68, 0.12) !important; border-left: 3px solid #ef4444; }
     </style>
 </head>
 <body class="overflow-hidden">
     <div id="progress-bar"></div>
-    <button id="exit-focus-btn" onclick="toggleFocusMode()" class="items-center gap-2 text-[var(--text-main)]">
+    <button id="exit-focus-btn" onclick="toggleFocusMode()" class="items-center gap-2 text-[var(--text-main)] transition-all">
         <i data-lucide="minimize-2" class="w-3.5 h-3.5"></i> Exit Focus
     </button>
     <button id="reopen-sidebar-btn" onclick="toggleSidebar()"><i data-lucide="chevron-right" class="w-4 h-4 text-gray-400"></i></button>
@@ -205,7 +181,7 @@
 
                 <div id="toc-container" class="hidden">
                     <div class="px-3 py-1 text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">Navigation</div>
-                    <div id="toc-list" class="space-y-1"></div>
+                    <div id="toc-list" class="space-y-1 px-1"></div>
                 </div>
 
                 <div class="px-3">
@@ -215,12 +191,14 @@
             </div>
 
             <div class="p-4 border-t border-[var(--border-color)] space-y-1 min-w-[256px]">
-                <button onclick="exportToMarkdown()" class="w-full flex items-center gap-3 px-3 py-2 text-xs text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/10 rounded-xl transition-colors font-semibold">
-                    <i data-lucide="download" class="w-4 h-4"></i> Export .md
-                </button>
-                <button onclick="document.getElementById('import-md-input').click()" class="w-full flex items-center gap-3 px-3 py-2 text-xs text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-900/10 rounded-xl transition-colors font-semibold">
-                    <i data-lucide="file-up" class="w-4 h-4"></i> Import .md
-                </button>
+                <div class="flex gap-1 mb-2">
+                    <button onclick="exportToMarkdown()" class="flex-1 flex items-center justify-center gap-2 py-2 text-[10px] text-blue-600 bg-blue-50 dark:bg-blue-900/10 rounded-lg font-bold">
+                        <i data-lucide="download" class="w-3 h-3"></i> Export
+                    </button>
+                    <button onclick="document.getElementById('import-md-input').click()" class="flex-1 flex items-center justify-center gap-2 py-2 text-[10px] text-indigo-600 bg-indigo-50 dark:bg-indigo-900/10 rounded-lg font-bold">
+                        <i data-lucide="file-up" class="w-3 h-3"></i> Import
+                    </button>
+                </div>
                 <button onclick="openCollabModal()" class="w-full flex items-center gap-3 px-3 py-2 text-xs text-orange-600 hover:bg-orange-50 dark:hover:bg-orange-900/10 rounded-xl transition-colors font-semibold">
                     <i data-lucide="users" class="w-4 h-4"></i> Join Workspace
                 </button>
@@ -237,7 +215,7 @@
                     <i data-lucide="chevron-right" class="w-3 h-3"></i>
                     <span id="header-title" class="text-[var(--text-main)] font-bold truncate max-w-[150px]">Home</span>
                     <div id="save-status" class="ml-4 opacity-0 transition-opacity flex items-center gap-1.5 text-emerald-500 font-bold">
-                        <i data-lucide="check-circle" class="w-3 h-3"></i> Saved
+                        <i data-lucide="check-circle" class="w-3 h-3"></i> Sync
                     </div>
                 </div>
                 <div class="flex items-center gap-3">
@@ -266,28 +244,29 @@
                     <div id="editor-blocks" class="space-y-0.5 min-h-[100px]"></div>
                     <div id="bottom-click-trigger" class="h-64 w-full cursor-text"></div>
                     
+                    <!-- Slash Menu -->
                     <div id="slash-menu">
                         <div class="slash-drag-handle" id="slash-menu-drag"></div>
-                        <div class="px-4 py-3 text-[10px] font-bold text-gray-400 uppercase tracking-widest border-b border-[var(--border-color)]">Blocks & Actions</div>
+                        <div class="px-4 py-3 text-[10px] font-bold text-gray-400 uppercase tracking-widest border-b border-[var(--border-color)]">Insert Blocks</div>
                         <div id="slash-menu-items" class="py-1"></div>
                     </div>
                 </div>
 
                 <div id="editor-stats">
-                    <div class="stat-pill" title="Total Word Count"><i data-lucide="type"></i><span id="stat-words">0</span></div>
-                    <div class="stat-pill" title="Total Character Count"><i data-lucide="hash"></i><span id="stat-chars">0</span></div>
-                    <div class="stat-pill" title="Estimated Reading Time"><i data-lucide="timer"></i><span id="stat-read">0m</span></div>
+                    <div class="stat-pill" title="Words"><i data-lucide="type"></i><span id="stat-words">0</span></div>
+                    <div class="stat-pill" title="Chars"><i data-lucide="hash"></i><span id="stat-chars">0</span></div>
+                    <div class="stat-pill" title="Read Time"><i data-lucide="timer"></i><span id="stat-read">0m</span></div>
                 </div>
             </div>
         </main>
     </div>
 
-    <!-- Voice Overlay -->
+    <!-- Voice Room -->
     <div id="voice-overlay" class="bg-[var(--bg-primary)] border border-[var(--border-color)] rounded-2xl p-4 shadow-2xl w-64 fade-in" style="position: fixed; bottom: 24px; right: 24px; z-index: 100; display: none;">
-        <div class="flex items-center justify-between mb-4"><div class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Voice Room</div><div class="w-1.5 h-1.5 bg-orange-500 rounded-full animate-ping"></div></div>
+        <div class="flex items-center justify-between mb-4"><div class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Voice Orbit</div><div class="w-1.5 h-1.5 bg-orange-500 rounded-full animate-ping"></div></div>
         <div id="voice-participants" class="space-y-3 mb-4"></div>
         <div class="space-y-4 pt-4 border-t border-[var(--border-color)]">
-            <div class="space-y-2"><div class="flex justify-between text-[9px] font-bold text-gray-500 uppercase"><span>Mic Gain</span><span id="vol-value">100%</span></div><input type="range" min="0" max="200" value="100" class="w-full accent-blue-600" oninput="updateMicVolume(this.value)"></div>
+            <div class="space-y-2"><div class="flex justify-between text-[9px] font-bold text-gray-500 uppercase"><span>Gain Control</span><span id="vol-value">100%</span></div><input type="range" min="0" max="200" value="100" class="w-full accent-blue-600" oninput="updateMicVolume(this.value)"></div>
             <div class="flex items-center justify-between"><span class="text-[9px] font-bold text-gray-500 uppercase">Isolation</span><label class="switch"><input type="checkbox" id="iso-toggle" checked onchange="toggleIsolation()"><span class="slider"></span></label></div>
             <div class="flex gap-2"><button onclick="toggleAudioTest()" id="test-mic-btn" class="flex-1 py-2 bg-blue-600/10 text-blue-600 text-[9px] font-bold uppercase rounded-lg border border-blue-500/20">Test Mic</button></div>
         </div>
@@ -295,20 +274,18 @@
         <button onclick="toggleVoiceOrbit()" class="w-full mt-4 py-2 bg-red-500/10 text-red-500 text-[10px] font-bold uppercase rounded-lg">Disconnect</button>
     </div>
 
+    <!-- Modals -->
     <div id="collab-modal" class="hidden fixed inset-0 z-[100] bg-black/50 flex items-center justify-center backdrop-blur-sm">
         <div class="bg-white dark:bg-[#1e1e1e] w-80 rounded-2xl p-6 shadow-2xl text-center">
-            <h3 class="font-bold mb-4 dark:text-white">Join Workspace</h3>
-            <input id="friend-page-code" type="text" placeholder="Workspace Code" class="w-full bg-gray-50 dark:bg-gray-800 dark:text-white text-black border border-gray-200 dark:border-gray-700 rounded-xl px-4 py-3 text-sm outline-none mb-4 font-mono" />
-            <div class="flex gap-2">
-                <button onclick="document.getElementById('collab-modal').classList.add('hidden')" class="flex-1 py-3 bg-gray-100 dark:bg-gray-800 rounded-xl text-sm font-bold text-gray-500">Cancel</button>
-                <button onclick="joinFriendPage()" class="flex-1 py-3 bg-blue-600 rounded-xl text-sm font-bold text-white shadow-lg">Connect</button>
-            </div>
+            <h3 class="font-bold mb-4 dark:text-white">Join Space</h3>
+            <input id="friend-page-code" type="text" placeholder="Space Code" class="w-full bg-white dark:bg-gray-800 dark:text-white border border-gray-200 dark:border-gray-700 rounded-xl px-4 py-3 text-sm outline-none mb-4 font-mono" />
+            <button onclick="joinFriendPage()" class="w-full py-3 bg-blue-600 rounded-xl text-sm font-bold text-white shadow-lg">Connect</button>
         </div>
     </div>
 
     <div id="name-modal" class="hidden fixed inset-0 z-[200] bg-black/60 flex items-center justify-center backdrop-blur-md">
         <div class="bg-white dark:bg-gray-900 w-72 rounded-2xl p-6 shadow-2xl">
-            <h3 class="font-bold mb-4 dark:text-white">Orbit Hello</h3>
+            <h3 class="font-bold mb-4 dark:text-white text-center">Orbit Identity</h3>
             <input id="initial-name" type="text" class="w-full bg-gray-50 dark:bg-gray-800 dark:text-white border rounded-xl px-4 py-3 text-sm outline-none mb-4" placeholder="Your name" />
             <button onclick="window.saveInitialName()" class="w-full py-3 bg-blue-600 rounded-xl text-sm font-bold text-white shadow-xl">Launch</button>
         </div>
@@ -329,11 +306,11 @@
         const ROOT_ABLY_KEY = "LJhgHg.rF2whQ:Imz-F_d5gOcMGAiJNWIGjhaAXXba8Hpbefj3LtPaT0s"; 
         const DEFAULT_COVERS = ['https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&q=80&w=2000', 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&q=80&w=2000', 'https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?auto=format&fit=crop&q=80&w=2000'];
         const EMOJI_LIST = ['🚀', '🪐', '✨', '🛸', '🌍', '☄️', '🔭', '🎨', '📝', '🛠️', '🎯', '💡'];
-        const STORAGE_KEY = 'orbit_v22_final_sync';
+        const STORAGE_KEY = 'orbit_v22_interactive_pro';
 
         let state = {
             username: '', darkMode: false, onCall: false, activePageId: '1', searchQuery: '', focusMode: false,
-            pages: [{ id: '1', title: 'Home', icon: '🚀', cover: DEFAULT_COVERS[0], isShared: false, blocks: [{ id: 'b1', type: 'h1', content: 'Orbit Workspace' }, { id: 'b2', type: 'text', content: 'Sync active. Type / for commands.' }] }],
+            pages: [{ id: '1', title: 'Workspace Home', icon: '🚀', cover: DEFAULT_COVERS[0], isShared: false, blocks: [{ id: 'b1', type: 'h1', content: 'Orbit Workspace' }, { id: 'b2', type: 'text', content: 'Welcome. Click math blocks to edit them live.' }] }],
             clipboard: [], sidebarOpen: true
         };
 
@@ -341,13 +318,9 @@
         let localStream = null, peerConnections = {}, audioCtx = null, gainNode = null, isAudioTesting = false;
         let saveTimeout = null;
 
-        // Ensure setActivePage is defined early for global access
+        // Early defined for global sidebar access
         const setActivePage = (id) => { 
-            state.activePageId = id; 
-            saveState(true); 
-            renderSidebar(); 
-            renderActivePage(); 
-            if(ably) joinChannel(id); 
+            state.activePageId = id; saveState(true); renderSidebar(); renderActivePage(); if(ably) joinChannel(id); 
         };
 
         window.saveInitialName = function() {
@@ -377,16 +350,10 @@
         function saveState(skipBroadcast = false) {
             localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
             const activePage = state.pages.find(p => p.id === state.activePageId);
-            if (!skipBroadcast && channel && activePage?.isShared) {
-                channel.publish('update', { pages: state.pages });
-            }
+            if (!skipBroadcast && channel && activePage?.isShared) channel.publish('update', { pages: state.pages });
             
             const status = document.getElementById('save-status');
-            if(status) {
-                status.style.opacity = '1';
-                clearTimeout(saveTimeout);
-                saveTimeout = setTimeout(() => status.style.opacity = '0', 2000);
-            }
+            if(status) { status.style.opacity = '1'; clearTimeout(saveTimeout); saveTimeout = setTimeout(() => status.style.opacity = '0', 2000); }
             updateEditorStats(); renderTOC();
         }
 
@@ -447,19 +414,16 @@
         }
 
         function handleImportFile(input) {
-            const file = input.files[0];
-            if (!file) return;
+            const file = input.files[0]; if (!file) return;
             const reader = new FileReader();
             reader.onload = (e) => {
-                const text = e.target.result;
-                const lines = text.split('\n');
+                const text = e.target.result; const lines = text.split('\n');
                 const newBlocks = lines.filter(l => l.trim()).map(line => {
                     let type = 'text', content = line.trim();
                     if (line.startsWith('# ')) { type = 'h1'; content = line.substring(2); }
                     else if (line.startsWith('## ')) { type = 'h2'; content = line.substring(3); }
                     else if (line.startsWith('> ')) { type = 'quote'; content = line.substring(2); }
                     else if (line.startsWith('- [ ] ')) { type = 'todo'; content = line.substring(6); }
-                    else if (line.startsWith('- [x] ')) { type = 'todo'; content = line.substring(6); }
                     return { id: 'b' + Math.random().toString(36).substr(2, 6), type, content };
                 });
                 const p = state.pages.find(pg => pg.id === state.activePageId);
@@ -469,7 +433,7 @@
             reader.readAsText(file);
         }
 
-        // --- Audio Logic ---
+        // --- Voice Logic ---
         async function toggleVoiceOrbit() {
             state.onCall = !state.onCall;
             const btn = document.getElementById('voice-btn');
@@ -529,7 +493,7 @@
             else if (type === 'hello' && state.onCall) { const offer = await pc.createOffer(); await pc.setLocalDescription(offer); channel.publish('signal', { to: from, from: ably.auth.clientId, type: 'offer', data: offer }); }
         }
 
-        // --- Block Logic ---
+        // --- Core Block Logic ---
         function createBlockElement(block, isFirst) {
             const div = document.createElement('div');
             div.className = `group relative w-full block-container fade-in ${block.highlight || ''}`;
@@ -543,10 +507,14 @@
                 case 'callout': html = `<div class="callout-block flex-1"><div class="text-xl">💡</div><div contenteditable="true" class="flex-1 outline-none text-[var(--text-main)]" placeholder="Callout">${block.content || ''}</div></div>`; break;
                 case 'playground': html = `<div class="playground-block flex-1"><div class="playground-header"><span class="text-[9px] font-bold text-gray-500 uppercase">Sandbox</span><button onclick="runPlayground('${block.id}')" class="bg-blue-600 text-white text-[9px] font-bold px-3 py-1 rounded-md hover:bg-blue-700">RUN</button></div><textarea class="playground-code outline-none" oninput="updatePlaygroundCode('${block.id}', this.value)">${block.content || ''}</textarea><iframe id="pg-preview-${block.id}" class="playground-preview"></iframe></div>`; break;
                 case 'divider': html = `<hr class="w-full my-6 border-[var(--border-color)]" />`; break;
-                case 'math': html = `<div class="w-full my-4 text-center text-xl" id="math-${block.id}"></div>`; break;
+                case 'math': html = `<div class="w-full my-2"><div class="math-block" id="math-render-${block.id}" onclick="editMath('${block.id}')"></div><textarea class="math-editor hidden" id="math-editor-${block.id}" oninput="syncMath('${block.id}', this.value)" onblur="finishEditMath('${block.id}')">${block.content || 'e=mc^2'}</textarea></div>`; break;
+                case 'image': html = `<div class="media-block"><img src="${block.content}" onerror="this.src='https://via.placeholder.com/800x400?text=Invalid+Image+URL'" /></div>`; break;
+                case 'video': 
+                    const videoId = block.content.includes('v=') ? block.content.split('v=')[1].split('&')[0] : block.content.split('/').pop();
+                    html = `<div class="media-block"><iframe src="https://www.youtube.com/embed/${videoId}" frameborder="0" allowfullscreen></iframe></div>`; break;
                 default: html = `<div contenteditable="true" class="flex-1 outline-none py-1.5 leading-relaxed text-[var(--text-main)]" placeholder="Type '/' for commands...">${block.content || ''}</div>`;
             }
-            div.innerHTML = `<div class="drag-handle opacity-0 group-hover:opacity-100 transition-opacity absolute -left-8 top-1 flex flex-col gap-1"><i data-lucide="grip-vertical" class="w-4 h-4"></i><button onclick="deleteBlock('${block.id}')" class="hover:text-red-500"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button></div>${html}`;
+            div.innerHTML = `<div class="drag-handle opacity-0 group-hover:opacity-100 transition-opacity absolute -left-10 top-1 flex flex-col gap-1"><i data-lucide="grip-vertical" class="w-4 h-4"></i><button onclick="deleteBlock('${block.id}')" class="hover:text-red-500"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button></div>${html}`;
             const edit = div.querySelector('[contenteditable="true"]');
             if (edit) {
                 edit.addEventListener('input', () => { 
@@ -563,14 +531,31 @@
                 });
             }
             if(block.type === 'playground') setTimeout(() => runPlayground(block.id), 50);
-            if(block.type === 'math') setTimeout(() => katex.render(block.content || 'e=mc^2', document.getElementById(`math-${block.id}`)), 50);
+            if(block.type === 'math') setTimeout(() => renderMath(block.id, block.content), 50);
             return div;
         }
 
-        function toggleTodoState(id) { const p = state.pages.find(pg => pg.id === state.activePageId); const b = p.blocks.find(bk => bk.id === id); if (b) { b.checked = !b.checked; renderActivePage(); saveState(); } }
-        function runPlayground(id) { const b = state.pages.find(pg => pg.id === state.activePageId).blocks.find(bk => bk.id === id); const preview = document.getElementById(`pg-preview-${id}`); if(!preview) return; const doc = preview.contentWindow.document; doc.open(); doc.write(b.content || ''); doc.close(); }
-        function updatePlaygroundCode(id, val) { const p = state.pages.find(pg => pg.id === state.activePageId); const b = p.blocks.find(bk => bk.id === id); if(b) { b.content = val; saveState(); } }
+        // --- Math Logic ---
+        function renderMath(id, content) {
+            const el = document.getElementById(`math-render-${id}`);
+            if(el) katex.render(content || 'e^{i\\pi} + 1 = 0', el, { throwOnError: false, displayMode: true });
+        }
+        function editMath(id) {
+            document.getElementById(`math-render-${id}`).classList.add('hidden');
+            const ed = document.getElementById(`math-editor-${id}`);
+            ed.classList.remove('hidden'); ed.focus();
+        }
+        function syncMath(id, val) {
+            const p = state.pages.find(pg => pg.id === state.activePageId);
+            const b = p.blocks.find(bk => bk.id === id);
+            if(b) { b.content = val; renderMath(id, val); saveState(); }
+        }
+        function finishEditMath(id) {
+            document.getElementById(`math-render-${id}`).classList.remove('hidden');
+            document.getElementById(`math-editor-${id}`).classList.add('hidden');
+        }
 
+        // --- Slash Menu ---
         function openSlashMenu(el, id) { 
             state.activeBlockIdForMenu = id; const menu = document.getElementById('slash-menu'), container = document.getElementById('main-scroll-container');
             const selection = window.getSelection(); let rect = (selection.rangeCount > 0) ? selection.getRangeAt(0).getBoundingClientRect() : el.getBoundingClientRect();
@@ -583,8 +568,9 @@
 
         function setupSlashMenu() {
             const items = [
-                { type: 'text', icon: 'type', label: 'Plain Text' }, { type: 'h1', icon: 'heading-1', label: 'Heading 1' }, { type: 'h2', icon: 'heading-2', label: 'Heading 2' }, { type: 'todo', icon: 'check-square', label: 'To-do' }, 
-                { type: 'quote', icon: 'quote', label: 'Quote' }, { type: 'highlight', icon: 'highlighter', label: 'Highlight' }, { type: 'playground', icon: 'code', label: 'Sandbox' }, { type: 'math', icon: 'sigma', label: 'LaTeX' }, { type: 'divider', icon: 'minus', label: 'Divider' }
+                { type: 'text', icon: 'type', label: 'Plain Text' }, { type: 'h1', icon: 'heading-1', label: 'H1' }, { type: 'h2', icon: 'heading-2', label: 'H2' }, { type: 'todo', icon: 'check-square', label: 'To-do' }, 
+                { type: 'quote', icon: 'quote', label: 'Quote' }, { type: 'highlight', icon: 'highlighter', label: 'Highlight' }, { type: 'playground', icon: 'code', label: 'Sandbox' }, { type: 'math', icon: 'sigma', label: 'LaTeX' }, 
+                { type: 'image', icon: 'image', label: 'Image URL' }, { type: 'video', icon: 'youtube', label: 'Video URL' }, { type: 'divider', icon: 'minus', label: 'Divider' }
             ];
             document.getElementById('slash-menu-items').innerHTML = items.map(i => `
                 <button onclick="handleSlashAction('${i.type}')" class="slash-item w-full flex items-center gap-3 px-3 py-2.5 transition-all text-left group">
@@ -599,6 +585,14 @@
                 const colors = ['', 'bg-highlight-blue', 'bg-highlight-green', 'bg-highlight-yellow', 'bg-highlight-red'];
                 b.highlight = colors[(colors.indexOf(b.highlight || '') + 1) % colors.length];
                 renderActivePage(); saveState(); hideSlashMenu();
+            } else if (type === 'image' || type === 'video') {
+                const url = prompt(`Enter ${type} URL:`);
+                if(url) {
+                    const p = state.pages.find(pg => pg.id === state.activePageId);
+                    const b = p.blocks.find(bk => bk.id === state.activeBlockIdForMenu);
+                    b.type = type; b.content = url; renderActivePage(); saveState();
+                }
+                hideSlashMenu();
             } else selectSlashItem(type);
         }
 
@@ -647,7 +641,7 @@
 
         function joinChannel(id) {
             if (channel) { channel.presence.leave(); channel.unsubscribe(); }
-            channel = ably.channels.get('orbit-v19-' + id, { params: { rewind: '1' } });
+            channel = ably.channels.get('orbit-v22-' + id, { params: { rewind: '1' } });
             channel.subscribe('update', (m) => { if (m.clientId === ably.auth.clientId) return; const remote = m.data.pages.find(p => p.id === id); if (remote) { state.pages = state.pages.map(p => p.id === id ? remote : p); renderActivePage(); } });
             channel.subscribe('signal', handleSignal);
             channel.presence.enter({ onCall: state.onCall });
@@ -672,7 +666,7 @@
         function handleWorkspaceClick(e) { 
             const p = state.pages.find(pg => pg.id === state.activePageId);
             if (e.target.id === 'main-scroll-container' || e.target.id === 'bottom-click-trigger' || e.target.id === 'editor-blocks') {
-                if (p.blocks.length === 0 || p.blocks[p.blocks.length-1].content.trim() !== '') {
+                if (p.blocks.length === 0 || (p.blocks[p.blocks.length-1].content.trim() !== '' && p.blocks[p.blocks.length-1].type === 'text')) {
                     addBlockBelow(p.blocks[p.blocks.length - 1]?.id);
                 }
             }
@@ -681,24 +675,11 @@
         function initDragAndDrop() {
             if (sortableMain) sortableMain.destroy(); if (sortableClipboard) sortableClipboard.destroy();
             sortableMain = Sortable.create(document.getElementById('editor-blocks'), { 
-                group: 'blocks', 
-                handle: '.drag-handle', 
-                animation: 150, 
-                onEnd: (e) => {
-                    const p = state.pages.find(x => x.id === state.activePageId);
-                    if (e.to.id === 'block-clipboard') {
-                        const b = p.blocks.splice(e.oldIndex, 1)[0];
-                        state.clipboard.splice(e.newIndex, 0, b);
-                    } else if (e.from.id === 'block-clipboard') {
-                        const b = state.clipboard.splice(e.oldIndex, 1)[0];
-                        p.blocks.splice(e.newIndex, 0, b);
-                    } else {
-                        const b = p.blocks.splice(e.oldIndex, 1)[0];
-                        p.blocks.splice(e.newIndex, 0, b);
-                    }
-                    saveState(); renderActivePage();
-                }
-            });
+                group: 'blocks', handle: '.drag-handle', animation: 150, onEnd: (e) => {
+                const p = state.pages.find(x => x.id === state.activePageId);
+                const b = p.blocks.splice(e.oldIndex, 1)[0]; p.blocks.splice(e.newIndex, 0, b);
+                saveState(); renderActivePage();
+            }});
             sortableClipboard = Sortable.create(document.getElementById('block-clipboard'), { group: 'blocks', animation: 150 });
         }
 
