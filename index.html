@@ -74,9 +74,6 @@
         .toolbar-btn { padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: 700; color: var(--text-main); transition: background 0.2s; }
         .toolbar-btn:hover { background: var(--block-hover); }
 
-        #block-clipboard { min-height: 100px; border: 2px dashed var(--border-color); border-radius: 12px; transition: all 0.3s ease; }
-        #block-clipboard:empty::after { content: 'Clipboard'; display: block; text-align: center; margin-top: 40px; font-size: 10px; color: var(--text-secondary); opacity: 0.4; }
-
         .sidebar-item-active { background-color: var(--block-hover); color: var(--text-main); font-weight: 600; border-left: 2px solid var(--brand-color); }
         
         [contenteditable]:empty:before { content: attr(placeholder); color: var(--text-secondary); opacity: 0.4; pointer-events: none; }
@@ -87,8 +84,6 @@
         .slider:before { position: absolute; content: ""; height: 14px; width: 14px; left: 3px; bottom: 3px; background-color: white; transition: .3s; border-radius: 50%; }
         input:checked + .slider { background-color: var(--brand-color); }
         input:checked + .slider:before { transform: translateX(14px); }
-
-        .orbit-logo { width: 28px; height: 28px; }
 
         #slash-menu { 
             position: absolute; 
@@ -254,7 +249,7 @@
         <button onclick="toggleVoiceOrbit()" class="w-full mt-4 py-2 bg-red-500/10 text-red-500 text-[10px] font-bold uppercase rounded-lg hover:bg-red-500/20 transition-all">Leave Room</button>
     </div>
 
-    <!-- Modals (Theme, Collab, etc.) -->
+    <!-- Modals -->
     <div id="theme-modal" class="hidden fixed inset-0 z-[200] bg-black/60 flex items-center justify-center backdrop-blur-md">
         <div class="bg-white dark:bg-[#1e1e1e] w-96 rounded-3xl p-8 shadow-2xl fade-in text-center">
             <h3 class="text-xl font-bold mb-8 dark:text-white">Workspace Design</h3>
@@ -297,7 +292,7 @@
         const ROOT_ABLY_KEY = "LJhgHg.rF2whQ:Imz-F_d5gOcMGAiJNWIGjhaAXXba8Hpbefj3LtPaT0s"; 
         const DEFAULT_COVERS = ['https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&q=80&w=2000', 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&q=80&w=2000', 'https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?auto=format&fit=crop&q=80&w=2000'];
         const EMOJI_LIST = ['🚀', '🪐', '🌑', '✨', '🛸', '🛰️', '🌍', '☄️', '🔭', '🎨', '📝', '🛠️', '🌐', '📊', '💻', '⚡', '📦', '🎯'];
-        const STORAGE_KEY = 'orbit_workspace_v8_final';
+        const STORAGE_KEY = 'orbit_workspace_v9_ultimate';
 
         let state = {
             username: '',
@@ -310,13 +305,15 @@
                 id: '1', title: 'Welcome to Orbit', icon: '🚀', isFavorite: true, cover: DEFAULT_COVERS[1], isShared: false, 
                 blocks: [
                     { id: 'b1', type: 'h1', content: 'Orbit Workspace' }, 
-                    { id: 'b2', type: 'text', content: 'Type <b>/</b> to open the command menu. Try scrolling through it—it won\'t glitch now.' },
-                    { id: 'b3', type: 'callout', content: 'Voice rooms are now strictly tied to the room you are in.' }
+                    { id: 'b2', type: 'text', content: 'Type <b>/</b> for commands.' },
+                    { id: 'b3', type: 'callout', content: 'Voice rooms are now active! Click the mic to start a Discord-style call.' }
                 ] 
             }],
         };
 
         let ably = null, channel = null, sortableMain = null;
+        let localStream = null;
+        let peerConnections = {}; // Map of clientId -> RTCPeerConnection
 
         window.saveInitialName = function() {
             const name = document.getElementById('initial-name').value.trim();
@@ -342,11 +339,9 @@
             setupFormatListener();
             setupMenuDragging();
             
-            // Global click to close menu
             document.addEventListener('mousedown', (e) => {
                 const menu = document.getElementById('slash-menu');
                 if (menu && menu.style.display === 'flex' && !menu.contains(e.target)) {
-                    // Small timeout to allow potential interaction with the menu itself
                     setTimeout(() => hideSlashMenu(), 50);
                 }
             });
@@ -387,17 +382,33 @@
             saveState(true); 
         }
 
-        function toggleVoiceOrbit() {
+        async function toggleVoiceOrbit() {
             state.onCall = !state.onCall;
             const btn = document.getElementById('voice-btn');
             const overlay = document.getElementById('voice-overlay');
             
             if (state.onCall) {
-                btn.classList.add('voice-active');
-                overlay.style.display = 'block';
+                try {
+                    localStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                    btn.classList.add('voice-active');
+                    overlay.style.display = 'block';
+                } catch (e) {
+                    console.error("Mic access denied", e);
+                    state.onCall = false;
+                    return;
+                }
             } else {
                 btn.classList.remove('voice-active');
                 overlay.style.display = 'none';
+                if (localStream) {
+                    localStream.getTracks().forEach(track => track.stop());
+                    localStream = null;
+                }
+                // Cleanup peer connections
+                Object.keys(peerConnections).forEach(id => {
+                    peerConnections[id].close();
+                    delete peerConnections[id];
+                });
             }
             
             if (channel) channel.presence.update({ onCall: state.onCall });
@@ -419,6 +430,52 @@
             document.addEventListener('mouseup', () => { isDown = false; });
         }
 
+        // WebRTC Signaling Handlers
+        async function handleSignal(m) {
+            const { from, type, data } = m.data;
+            if (m.clientId === ably.auth.clientId) return;
+
+            let pc = peerConnections[from];
+            if (!pc) pc = createPeerConnection(from);
+
+            if (type === 'offer') {
+                await pc.setRemoteDescription(new RTCSessionDescription(data));
+                const answer = await pc.createAnswer();
+                await pc.setLocalDescription(answer);
+                channel.publish('signal', { to: from, type: 'answer', data: answer });
+            } else if (type === 'answer') {
+                await pc.setRemoteDescription(new RTCSessionDescription(data));
+            } else if (type === 'ice') {
+                await pc.addIceCandidate(new RTCIceCandidate(data));
+            }
+        }
+
+        function createPeerConnection(remoteClientId) {
+            const pc = new RTCPeerConnection({
+                iceServers: [{ urls: 'stun:stun.l.google.com:19302' }]
+            });
+
+            if (localStream) {
+                localStream.getTracks().forEach(track => pc.addTrack(track, localStream));
+            }
+
+            pc.onicecandidate = (event) => {
+                if (event.candidate) {
+                    channel.publish('signal', { to: remoteClientId, type: 'ice', data: event.candidate });
+                }
+            };
+
+            pc.ontrack = (event) => {
+                const remoteAudio = new Audio();
+                remoteAudio.srcObject = event.streams[0];
+                remoteAudio.autoplay = true;
+            };
+
+            peerConnections[remoteClientId] = pc;
+            return pc;
+        }
+
+        // Modified createBlockElement to prevent jitter
         function createBlockElement(block, isFirst) {
             const div = document.createElement('div');
             div.className = 'group relative w-full px-2 py-0.5 min-h-[30px] flex items-start gap-1 block-container fade-in';
@@ -432,7 +489,6 @@
                 case 'bullet': html = `<div class="flex items-start gap-3 py-1 flex-1"><div class="w-1.5 h-1.5 rounded-full bg-gray-400 mt-2.5 shrink-0"></div><div contenteditable="true" class="flex-1 outline-none text-[var(--text-main)]" placeholder="List item">${block.content || ''}</div></div>`; break;
                 case 'quote': html = `<div contenteditable="true" class="quote-block flex-1 outline-none" placeholder="Quote">${block.content || ''}</div>`; break;
                 case 'callout': html = `<div class="callout-block flex-1"><div class="text-xl">💡</div><div contenteditable="true" class="flex-1 outline-none" placeholder="Callout">${block.content || ''}</div></div>`; break;
-                case 'toggle': html = `<details class="toggle-block flex-1"><summary><div class="w-4 h-4 flex items-center justify-center"><i data-lucide="chevron-right" class="w-3 h-3"></i></div><div contenteditable="true" class="outline-none font-bold" placeholder="Toggle">${block.content || ''}</div></summary><div class="toggle-content" id="toggle-content-${block.id}"></div></details>`; break;
                 case 'table': html = `<table class="orbit-table"><tbody><tr><td contenteditable="true">Item</td><td contenteditable="true">Value</td></tr><tr><td contenteditable="true"></td><td contenteditable="true"></td></tr></tbody></table>`; break;
                 case 'code': html = `<div class="code-block p-4 bg-gray-500/5 rounded-xl font-mono text-sm"><div contenteditable="true" class="outline-none block-textarea" style="white-space: pre-wrap;" placeholder="// Code here">${block.content || ''}</div></div>`; break;
                 case 'divider': html = `<hr class="w-full my-6 border-[var(--border-color)]" />`; break;
@@ -452,12 +508,8 @@
                 editable.addEventListener('input', () => { 
                     block.content = editable.innerHTML; 
                     saveState(); 
-
-                    // Less sensitive menu hiding
                     const text = editable.innerText;
-                    if (text.length > 5 && !text.startsWith("/")) {
-                        hideSlashMenu();
-                    }
+                    if (text.length > 5 && !text.startsWith("/")) hideSlashMenu();
                 });
                 
                 editable.addEventListener('keydown', (e) => {
@@ -472,16 +524,9 @@
                         addBlockBelow(block.id, nextType); 
                         hideSlashMenu();
                     } else if (e.key === 'Backspace') {
-                        if (editable.innerText === "/") {
-                            hideSlashMenu();
-                        }
-                        if (!editable.innerText.trim() && !isFirst) {
-                            e.preventDefault(); 
-                            deleteBlock(block.id); 
-                        }
-                    } else if (e.key === 'Escape') {
-                        hideSlashMenu();
-                    }
+                        if (editable.innerText === "/") hideSlashMenu();
+                        if (!editable.innerText.trim() && !isFirst) { e.preventDefault(); deleteBlock(block.id); }
+                    } else if (e.key === 'Escape') hideSlashMenu();
                 });
             }
 
@@ -492,35 +537,22 @@
             state.activeBlockIdForMenu = id; 
             const menu = document.getElementById('slash-menu'); 
             const container = document.getElementById('main-scroll-container');
-            
-            // PRECISION POSITIONING USING SELECTION CARET
             const selection = window.getSelection();
             let rect;
             if (selection.rangeCount > 0) {
                 const range = selection.getRangeAt(0).cloneRange();
                 range.collapse(false);
                 rect = range.getBoundingClientRect();
-                
-                // If rect has no width/height (empty text), fallback to element rect
-                if (rect.top === 0 && rect.left === 0) {
-                    rect = el.getBoundingClientRect();
-                }
-            } else {
-                rect = el.getBoundingClientRect();
-            }
+                if (rect.top === 0 && rect.left === 0) rect = el.getBoundingClientRect();
+            } else rect = el.getBoundingClientRect();
 
             const containerRect = container.getBoundingClientRect();
             menu.style.display = 'flex'; 
-            
-            // Positioning a tiny bit below the cursor
             let top = (rect.top - containerRect.top + container.scrollTop + 24);
             let left = (rect.left - containerRect.left);
-            
             if (left + 280 > containerRect.width) left = containerRect.width - 300;
             if (left < 40) left = 40;
-            
-            menu.style.top = top + 'px'; 
-            menu.style.left = left + 'px'; 
+            menu.style.top = top + 'px'; menu.style.left = left + 'px'; 
             lucide.createIcons(); 
         }
 
@@ -553,11 +585,8 @@
             const p = state.pages.find(pg => pg.id === state.activePageId); 
             const b = p.blocks.find(bk => bk.id === state.activeBlockIdForMenu); 
             if (b) { 
-                b.type = t; 
-                b.content = ''; 
-                renderActivePage(); 
-                saveState(); 
-                
+                b.type = t; b.content = ''; 
+                renderActivePage(); saveState(); 
                 setTimeout(() => {
                     const blockEl = document.querySelector(`[data-id="${b.id}"] [contenteditable="true"]`);
                     if (blockEl) blockEl.focus();
@@ -575,8 +604,26 @@
             document.getElementById('sync-status').classList.toggle('hidden', !page.isShared);
             
             const container = document.getElementById('editor-blocks'); 
-            container.innerHTML = '';
-            page.blocks.forEach((b, i) => container.appendChild(createBlockElement(b, i === 0)));
+            const focusedId = document.activeElement?.closest('.block-container')?.dataset.id;
+            
+            // Selective re-rendering to prevent jitter
+            page.blocks.forEach((b) => {
+                const existing = container.querySelector(`[data-id="${b.id}"]`);
+                if (existing) {
+                    if (b.id === focusedId) return; // Don't touch the focused block
+                    const editable = existing.querySelector('[contenteditable="true"]');
+                    if (editable && editable.innerHTML !== b.content) {
+                        editable.innerHTML = b.content || '';
+                    }
+                } else {
+                    container.appendChild(createBlockElement(b, page.blocks[0].id === b.id));
+                }
+            });
+
+            // Cleanup removed blocks
+            container.querySelectorAll('.block-container').forEach(el => {
+                if (!page.blocks.find(b => b.id === el.dataset.id)) el.remove();
+            });
             
             lucide.createIcons(); 
             initDragAndDrop();
@@ -592,29 +639,23 @@
         }
 
         function setActivePage(id) { 
-            state.activePageId = id; 
-            saveState(true); 
-            renderSidebar(); 
-            renderActivePage(); 
+            state.activePageId = id; saveState(true); 
+            renderSidebar(); renderActivePage(); 
             if(ably) joinChannel(id); 
         }
 
         function initAbly() {
             if (!ROOT_ABLY_KEY || ably) return;
-            ably = new Ably.Realtime({ key: ROOT_ABLY_KEY, clientId: state.username });
+            ably = new Ably.Realtime({ key: ROOT_ABLY_KEY, clientId: state.username + '_' + Math.random().toString(36).substr(2, 4) });
             const page = state.pages.find(p => p.id === state.activePageId);
             if (page && page.isShared) joinChannel(state.activePageId);
         }
 
         function joinChannel(id) {
             if (!ably) return; 
-            if (channel) { 
-                // Explicitly leave presence in the old room
-                channel.presence.leave(); 
-                channel.unsubscribe(); 
-            }
+            if (channel) { channel.presence.leave(); channel.unsubscribe(); }
             
-            channel = ably.channels.get('orbit-v8-' + id, { params: { rewind: '1' } });
+            channel = ably.channels.get('orbit-v9-' + id, { params: { rewind: '1' } });
             
             channel.subscribe('update', (m) => {
                 if (m.clientId === ably.auth.clientId) return;
@@ -623,30 +664,40 @@
                     const currentPage = remoteData.find(p => p.id === id);
                     if (currentPage) {
                         state.pages = state.pages.map(p => p.id === id ? currentPage : p);
-                        renderSidebar();
                         renderActivePage();
                     }
                 }
             });
 
-            // Enter with the specific room status
+            channel.subscribe('signal', async (m) => {
+                if (m.data.to === ably.auth.clientId) handleSignal(m);
+                // Call anyone who just entered the room and is onCall
+                if (m.data.type === 'hello' && state.onCall) {
+                    const pc = createPeerConnection(m.clientId);
+                    const offer = await pc.createOffer();
+                    await pc.setLocalDescription(offer);
+                    channel.publish('signal', { to: m.clientId, type: 'offer', data: offer });
+                }
+            });
+
             channel.presence.enter({ onCall: state.onCall });
             channel.presence.subscribe(() => { 
                 channel.presence.get((err, m) => { if(!err) renderPresence(m); }); 
             });
+
+            // Greet room to trigger WebRTC
+            channel.publish('signal', { type: 'hello' });
             
             document.getElementById('sync-status').classList.remove('hidden');
         }
 
         function renderPresence(members) {
-            // Header collab circles
             document.getElementById('collaborators').innerHTML = members.map(m => `
                 <div class="w-7 h-7 rounded-full bg-blue-500 border-2 border-[var(--bg-primary)] flex items-center justify-center text-[10px] text-white font-bold" title="${m.clientId}">
                     ${m.clientId.charAt(0).toUpperCase()}
                 </div>
             `).join('');
 
-            // Voice room participant list
             const voiceList = document.getElementById('voice-participants');
             const onCallMembers = members.filter(m => m.data?.onCall);
             
@@ -656,17 +707,14 @@
                         ${m.clientId.charAt(0).toUpperCase()}
                     </div>
                     <div class="flex-1">
-                        <div class="text-[10px] font-bold text-[var(--text-main)]">${m.clientId}</div>
-                        <div class="text-[8px] text-gray-400">Live Audio</div>
-                    </div>
-                    <div class="w-3 h-3 flex items-center justify-center">
-                        <div class="w-1.5 h-1.5 bg-green-500 rounded-full animate-ping"></div>
+                        <div class="text-[10px] font-bold text-[var(--text-main)]">${m.clientId.split('_')[0]}</div>
+                        <div class="text-[8px] text-gray-400">Audio Active</div>
                     </div>
                 </div>
             `).join('');
 
             if (onCallMembers.length === 0) {
-                voiceList.innerHTML = '<div class="text-[10px] text-gray-500 italic py-2">No one is currently talking...</div>';
+                voiceList.innerHTML = '<div class="text-[10px] text-gray-500 italic py-2 text-center">Empty Room...</div>';
             }
         }
 
@@ -676,12 +724,9 @@
             state.activePageId = code;
             let existing = state.pages.find(p => p.id === code);
             if (!existing) {
-                state.pages.push({ id: code, title: 'Shared Space', icon: '🌐', isShared: true, blocks: [], cover: DEFAULT_COVERS[0] });
+                state.pages.push({ id: code, title: 'Remote Space', icon: '🌐', isShared: true, blocks: [], cover: DEFAULT_COVERS[0] });
             }
-            joinChannel(code);
-            renderSidebar();
-            renderActivePage();
-            closeCollabModal();
+            joinChannel(code); renderSidebar(); renderActivePage(); closeCollabModal();
         }
 
         function openSharePageModal() {
@@ -690,11 +735,9 @@
             p.isShared = true; 
             document.getElementById('share-code-display').innerText = p.id;
             document.getElementById('share-modal').classList.remove('hidden'); 
-            saveState(); 
-            initAbly();
+            saveState(); initAbly();
         }
 
-        // Standard Workspace Handlers
         function addPage() { 
             const id = 'p' + Math.random().toString(36).substr(2, 9);
             state.pages.push({ id, title: 'Untitled', icon: '📄', isFavorite: false, cover: DEFAULT_COVERS[0], blocks: [{ id: 'b' + Date.now(), type: 'text', content: '' }] }); 
@@ -709,8 +752,7 @@
         function toggleSidebar() { 
             state.sidebarOpen = !state.sidebarOpen; 
             const sb = document.getElementById('sidebar'); 
-            sb.style.width = state.sidebarOpen ? '256px' : '0px'; 
-            sb.style.opacity = state.sidebarOpen ? '1' : '0'; 
+            sb.style.width = state.sidebarOpen ? '256px' : '0px'; sb.style.opacity = state.sidebarOpen ? '1' : '0'; 
             document.getElementById('menu-btn').classList.toggle('hidden', state.sidebarOpen); 
         }
 
@@ -726,8 +768,7 @@
             const idx = id ? p.blocks.findIndex(b => b.id === id) : -1;
             const nb = { id: 'b' + Math.random().toString(36).substr(2, 9), type, content: '', checked: false };
             if (idx === -1) p.blocks.push(nb); else p.blocks.splice(idx + 1, 0, nb);
-            renderActivePage(); 
-            saveState();
+            renderActivePage(); saveState();
             setTimeout(() => { const el = document.querySelector(`[data-id="${nb.id}"] [contenteditable]`); if(el) el.focus(); }, 10);
         }
 
@@ -740,7 +781,8 @@
 
         function initDragAndDrop() {
             const main = document.getElementById('editor-blocks');
-            Sortable.create(main, { handle: '.drag-handle', animation: 200, onEnd: (evt) => {
+            if (sortableMain) sortableMain.destroy();
+            sortableMain = Sortable.create(main, { handle: '.drag-handle', animation: 200, onEnd: (evt) => {
                 const p = state.pages.find(x => x.id === state.activePageId);
                 const b = p.blocks.splice(evt.oldIndex, 1)[0];
                 p.blocks.splice(evt.newIndex, 0, b);
@@ -755,11 +797,9 @@
 
         function setupFormatListener() {
             document.addEventListener('selectionchange', () => {
-                const selection = window.getSelection(); 
-                const tb = document.getElementById('format-toolbar');
+                const selection = window.getSelection(); const tb = document.getElementById('format-toolbar');
                 if (selection && selection.toString().length > 0 && !selection.isCollapsed) {
-                    const r = selection.getRangeAt(0); 
-                    const rect = r.getBoundingClientRect();
+                    const r = selection.getRangeAt(0); const rect = r.getBoundingClientRect();
                     tb.style.display = 'flex'; tb.style.top = `${rect.top - 50}px`; tb.style.left = `${rect.left}px`;
                 } else tb.style.display = 'none';
             });
@@ -783,11 +823,6 @@
         function toggleEmojiPicker(e) { e.stopPropagation(); document.getElementById('emoji-picker').classList.toggle('hidden'); }
         function setupEmojiPicker() { document.getElementById('emoji-grid').innerHTML = EMOJI_LIST.map(e => `<button onclick="selectEmoji('${e}')" class="p-2 hover:bg-gray-500/10 rounded-2xl text-3xl transition-all hover:scale-110 active:scale-90">${e}</button>`).join(''); }
         function selectEmoji(e) { const p = state.pages.find(pg => pg.id === state.activePageId); if(p) { p.icon = e; renderSidebar(); renderActivePage(); saveState(); } document.getElementById('emoji-picker').classList.add('hidden'); }
-        function handleCoverFile(i) {
-            const f = i.files[0]; if(!f) return;
-            const r = new FileReader(); r.onload = (e) => { const p = state.pages.find(x => x.id === state.activePageId); if(p) { p.cover = e.target.result; document.getElementById('page-cover').src = p.cover; saveState(); } };
-            r.readAsDataURL(f);
-        }
 
         init();
     </script>
