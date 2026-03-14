@@ -58,7 +58,7 @@
         #editor-blocks:empty::after {
             content: 'Click here to start writing...';
             display: block;
-            padding: 1rem 0;
+            padding: 1.5rem 0;
             color: var(--text-secondary);
             opacity: 0.3;
             font-style: italic;
@@ -82,13 +82,13 @@
         }
 
         .slash-item:hover { background-color: var(--brand-color) !important; color: #ffffff !important; }
-        .slash-item:hover .icon-box { background-color: rgba(255, 255, 255, 0.2) !important; color: #ffffff !important; }
+        .slash-item:hover .icon-box { background-color: rgba(255, 255, 255, 0.2) !important; color: #ffffff !important; border-color: transparent !important; }
         .slash-item:hover .icon-box i { color: #ffffff !important; }
 
         .playground-block { background: var(--input-bg); border-radius: 12px; overflow: hidden; border: 1px solid var(--border-color); margin: 1rem 0; }
         .playground-header { background: rgba(0,0,0,0.05); padding: 8px 12px; display: flex; justify-content: space-between; align-items: center; }
-        .playground-code { font-family: 'Roboto Mono', monospace; font-size: 12px; padding: 12px; width: 100%; min-height: 120px; background: transparent; border: none; color: var(--text-main); }
-        .playground-preview { width: 100%; height: 200px; background: white; border-top: 1px solid var(--border-color); }
+        .playground-code { font-family: 'Roboto Mono', monospace; font-size: 12px; padding: 12px; width: 100%; min-height: 100px; background: transparent; border: none; color: var(--text-main); }
+        .playground-preview { width: 100%; height: 180px; background: white; border-top: 1px solid var(--border-color); }
 
         #reopen-sidebar-btn {
             position: fixed; left: 0; top: 50%; transform: translateY(-50%); z-index: 100;
@@ -129,12 +129,30 @@
         .focus-mode #sidebar, .focus-mode #header, .focus-mode #editor-stats { display: none !important; }
         .focus-mode #exit-focus-btn { display: flex !important; }
 
-        /* TOC Styles */
-        .toc-item { font-size: 11px; padding: 4px 12px; color: var(--text-secondary); cursor: pointer; border-radius: 6px; transition: all 0.2s; }
-        .toc-item:hover { color: var(--brand-color); background: var(--block-hover); }
-        .toc-h2 { margin-left: 12px; }
+        /* Refined Editor Stats */
+        #editor-stats {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            padding: 4px;
+            border-radius: 12px;
+            display: flex;
+            gap: 4px;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.12);
+            z-index: 40;
+            backdrop-filter: blur(12px);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            opacity: 0; 
+        }
+        .stat-pill {
+            display: flex; align-items: center; gap: 6px; padding: 6px 10px; border-radius: 8px;
+            background: var(--block-hover); color: var(--text-secondary); font-size: 10px; font-weight: 700;
+            transition: all 0.2s; cursor: default;
+        }
+        .stat-pill i { width: 12px; height: 12px; opacity: 0.6; }
 
-        /* Block Background Colors */
         .bg-highlight-blue { background-color: rgba(37, 99, 235, 0.1) !important; }
         .bg-highlight-green { background-color: rgba(34, 197, 94, 0.1) !important; }
         .bg-highlight-yellow { background-color: rgba(234, 179, 8, 0.1) !important; }
@@ -146,7 +164,7 @@
     <button id="exit-focus-btn" onclick="toggleFocusMode()" class="items-center gap-2 text-[var(--text-main)]">
         <i data-lucide="minimize-2" class="w-3.5 h-3.5"></i> Exit Focus
     </button>
-    <button id="reopen-sidebar-btn" onclick="toggleSidebar()"><i data-lucide="chevron-right" class="w-4 h-4"></i></button>
+    <button id="reopen-sidebar-btn" onclick="toggleSidebar()"><i data-lucide="chevron-right" class="w-4 h-4 text-gray-400"></i></button>
 
     <div id="app" class="flex h-screen w-full relative z-10">
         <aside id="sidebar" class="w-64 flex flex-col bg-[var(--sidebar-bg)] border-r border-[var(--border-color)] transition-all duration-300 shrink-0 z-20 overflow-hidden">
@@ -162,7 +180,10 @@
                     </div>
                     <button onclick="toggleSidebar()" class="text-gray-400 hover:text-gray-600 transition-colors"><i data-lucide="chevron-left" class="w-4 h-4"></i></button>
                 </div>
-                <input type="text" oninput="handleSearch(this.value)" class="w-full bg-[var(--input-bg)] rounded-xl py-2 px-3 text-xs outline-none focus:ring-1 focus:ring-blue-500/20 text-[var(--text-main)]" placeholder="Search pages..." />
+                <div class="relative">
+                    <i data-lucide="search" class="absolute left-3 top-2.5 w-3.5 h-3.5 text-gray-400"></i>
+                    <input type="text" id="search-input" oninput="handleSearch(this.value)" class="w-full bg-[var(--input-bg)] rounded-xl py-2 pl-9 pr-3 text-xs outline-none focus:ring-1 focus:ring-blue-500/20 text-[var(--text-main)]" placeholder="Search pages..." />
+                </div>
             </div>
 
             <div class="flex-1 overflow-y-auto px-2 space-y-6 scrollbar-hide min-w-[256px]">
@@ -175,7 +196,7 @@
                 </div>
 
                 <div id="toc-container" class="hidden">
-                    <div class="px-3 py-1 text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">Table of Contents</div>
+                    <div class="px-3 py-1 text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">Navigation</div>
                     <div id="toc-list" class="space-y-1"></div>
                 </div>
 
@@ -214,7 +235,7 @@
                     <button onclick="toggleVoiceOrbit()" id="voice-btn" class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-400 transition-all"><i data-lucide="mic" class="w-4 h-4"></i></button>
                     <div id="collaborators" class="flex -space-x-2"></div>
                     <div id="sync-status" class="hidden flex items-center gap-2 text-[10px] text-green-600 font-bold uppercase"><div class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div> Live</div>
-                    <button onclick="openSharePageModal()" class="text-[10px] font-bold text-white bg-blue-600 px-3 py-1.5 rounded-lg hover:bg-blue-700 transition-all shadow-md">Share</button>
+                    <button onclick="openSharePageModal()" class="text-[10px] font-bold text-white bg-blue-600 px-3 py-1.5 rounded-lg hover:bg-blue-700 active:scale-95 transition-all shadow-md">Share</button>
                 </div>
             </div>
 
@@ -242,24 +263,26 @@
                     </div>
                 </div>
 
+                <!-- Redesigned Stats Bar -->
                 <div id="editor-stats">
-                    <span id="stat-words">0 Words</span>
-                    <span id="stat-chars">0 Chars</span>
-                    <span id="stat-read">0m Reading</span>
+                    <div class="stat-pill" title="Total Word Count"><i data-lucide="type"></i><span id="stat-words">0</span></div>
+                    <div class="stat-pill" title="Total Character Count"><i data-lucide="hash"></i><span id="stat-chars">0</span></div>
+                    <div class="stat-pill" title="Estimated Reading Time"><i data-lucide="timer"></i><span id="stat-read">0m</span></div>
                 </div>
             </div>
         </main>
     </div>
 
-    <!-- Voice Overlay -->
+    <!-- Voice Room UI -->
     <div id="voice-overlay" class="bg-[var(--bg-primary)] border border-[var(--border-color)] rounded-2xl p-4 shadow-2xl w-64 fade-in" style="position: fixed; bottom: 24px; right: 24px; z-index: 100; display: none;">
         <div class="flex items-center justify-between mb-4"><div class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Voice Room</div><div class="w-1.5 h-1.5 bg-orange-500 rounded-full animate-ping"></div></div>
         <div id="voice-participants" class="space-y-3 mb-4"></div>
         <div class="space-y-4 pt-4 border-t border-[var(--border-color)]">
-            <div class="space-y-2"><div class="flex justify-between text-[9px] font-bold text-gray-500 uppercase"><span>Mic Gain</span><span id="vol-value">100%</span></div><input type="range" min="0" max="200" value="100" class="w-full accent-blue-600" oninput="updateMicVolume(this.value)"></div>
-            <div class="flex items-center justify-between"><span class="text-[9px] font-bold text-gray-500 uppercase">Noise Filter</span><label class="switch"><input type="checkbox" id="iso-toggle" checked onchange="toggleIsolation()"><span class="slider"></span></label></div>
+            <div class="space-y-2"><div class="flex justify-between text-[9px] font-bold text-gray-500 uppercase"><span>Mic Boost</span><span id="vol-value">100%</span></div><input type="range" min="0" max="200" value="100" class="w-full accent-blue-600" oninput="updateMicVolume(this.value)"></div>
+            <div class="flex items-center justify-between"><span class="text-[9px] font-bold text-gray-500 uppercase">Isolation</span><label class="switch"><input type="checkbox" id="iso-toggle" checked onchange="toggleIsolation()"><span class="slider"></span></label></div>
             <div class="flex gap-2"><button onclick="toggleAudioTest()" id="test-mic-btn" class="flex-1 py-2 bg-blue-600/10 text-blue-600 text-[9px] font-bold uppercase rounded-lg border border-blue-500/20">Test Mic</button></div>
         </div>
+        <div id="self-test-indicator" class="hidden mt-3 p-2 bg-blue-500/5 rounded-lg text-[9px] text-blue-600 font-medium flex items-center gap-2"><i data-lucide="ear" class="w-3 h-3"></i> Hearing self...</div>
         <button onclick="toggleVoiceOrbit()" class="w-full mt-4 py-2 bg-red-500/10 text-red-500 text-[10px] font-bold uppercase rounded-lg">Disconnect</button>
     </div>
 
@@ -274,7 +297,7 @@
 
     <div id="name-modal" class="hidden fixed inset-0 z-[200] bg-black/60 flex items-center justify-center backdrop-blur-md">
         <div class="bg-white dark:bg-gray-900 w-72 rounded-2xl p-6 shadow-2xl">
-            <h3 class="font-bold mb-4 dark:text-white">Orbit Login</h3>
+            <h3 class="font-bold mb-4 dark:text-white">Workspace Identity</h3>
             <input id="initial-name" type="text" class="w-full bg-gray-50 dark:bg-gray-800 dark:text-white border rounded-xl px-4 py-3 text-sm outline-none mb-4" placeholder="Your name" />
             <button onclick="window.saveInitialName()" class="w-full py-3 bg-blue-600 rounded-xl text-sm font-bold text-white shadow-xl">Launch</button>
         </div>
@@ -282,7 +305,7 @@
 
     <div id="share-modal" class="hidden fixed inset-0 z-[100] bg-black/40 flex items-center justify-center backdrop-blur-sm">
         <div class="bg-white dark:bg-gray-800 w-72 rounded-2xl p-6 shadow-2xl text-center">
-            <h3 class="font-bold mb-4 dark:text-white">Share Code</h3>
+            <h3 class="font-bold mb-4 dark:text-white">Workspace Code</h3>
             <div class="bg-gray-100 dark:bg-gray-900 p-4 rounded-xl mb-6 font-mono text-sm font-bold text-blue-600 select-all" id="share-code-display"></div>
             <button onclick="document.getElementById('share-modal').classList.add('hidden')" class="w-full py-2 text-xs font-bold text-gray-500 uppercase tracking-widest">Done</button>
         </div>
@@ -294,12 +317,12 @@
     <script>
         const ROOT_ABLY_KEY = "LJhgHg.rF2whQ:Imz-F_d5gOcMGAiJNWIGjhaAXXba8Hpbefj3LtPaT0s"; 
         const DEFAULT_COVERS = ['https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&q=80&w=2000', 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&q=80&w=2000', 'https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?auto=format&fit=crop&q=80&w=2000'];
-        const EMOJI_LIST = ['🚀', '🪐', '✨', '🛸', '🌍', '☄️', '🔭', '🎨', '📝', '🛠️', '🎯', '💡'];
-        const STORAGE_KEY = 'orbit_v19_pro_edition';
+        const EMOJI_LIST = ['🚀', '🪐', '✨', '🛸', '🌍', '☄️', '🔭', '🎨', '📝', '🛠️', '🎯', '💡', '📊', '💻'];
+        const STORAGE_KEY = 'orbit_v21_webrtc_targeted';
 
         let state = {
             username: '', darkMode: false, onCall: false, activePageId: '1', searchQuery: '', focusMode: false,
-            pages: [{ id: '1', title: 'Home', icon: '🚀', cover: DEFAULT_COVERS[0], isShared: false, blocks: [{ id: 'b1', type: 'h1', content: 'Orbit Workspace' }, { id: 'b2', type: 'text', content: 'Welcome to your collaborative sanctuary.' }] }],
+            pages: [{ id: '1', title: 'Home', icon: '🚀', cover: DEFAULT_COVERS[0], isShared: false, blocks: [{ id: 'b1', type: 'h1', content: 'Orbit Workspace' }, { id: 'b2', type: 'text', content: 'Ready for collaboration.' }] }],
             clipboard: [], sidebarOpen: true
         };
 
@@ -336,14 +359,13 @@
             const activePage = state.pages.find(p => p.id === state.activePageId);
             if (!skipBroadcast && channel && activePage?.isShared) channel.publish('update', { pages: state.pages });
             
-            // Visual saved status heartbeat
             const status = document.getElementById('save-status');
-            status.style.opacity = '1';
-            clearTimeout(saveTimeout);
-            saveTimeout = setTimeout(() => status.style.opacity = '0', 2000);
-            
-            updateEditorStats();
-            renderTOC();
+            if(status) {
+                status.style.opacity = '1';
+                clearTimeout(saveTimeout);
+                saveTimeout = setTimeout(() => status.style.opacity = '0', 2000);
+            }
+            updateEditorStats(); renderTOC();
         }
 
         function applyTheme() {
@@ -362,11 +384,13 @@
 
         function updateEditorStats() {
             const p = state.pages.find(pg => pg.id === state.activePageId); if (!p) return;
+            const statsBar = document.getElementById('editor-stats');
             let text = p.blocks.map(b => (b.content || '').replace(/<[^>]*>?/gm, '')).join(' ');
             let wordCount = text.trim() ? text.trim().split(/\s+/).length : 0;
-            document.getElementById('stat-words').innerText = `${wordCount} Words`;
-            document.getElementById('stat-chars').innerText = `${text.length} Chars`;
-            document.getElementById('stat-read').innerText = `${Math.max(1, Math.ceil(wordCount / 200))}m Read`;
+            document.getElementById('stat-words').innerText = wordCount;
+            document.getElementById('stat-chars').innerText = text.length;
+            document.getElementById('stat-read').innerText = `${Math.max(1, Math.ceil(wordCount / 200))}m`;
+            statsBar.style.opacity = (text.length > 0 || state.sidebarOpen) ? '1' : '0';
         }
 
         function renderTOC() {
@@ -374,17 +398,10 @@
             const list = document.getElementById('toc-list');
             const container = document.getElementById('toc-container');
             const headings = p.blocks.filter(b => b.type === 'h1' || b.type === 'h2');
-            
             if (headings.length > 0) {
                 container.classList.remove('hidden');
-                list.innerHTML = headings.map(h => `
-                    <div class="toc-item ${h.type === 'h2' ? 'toc-h2' : ''}" onclick="scrollToBlock('${h.id}')">
-                        ${h.content.replace(/<[^>]*>?/gm, '') || 'Untitled'}
-                    </div>
-                `).join('');
-            } else {
-                container.classList.add('hidden');
-            }
+                list.innerHTML = headings.map(h => `<div class="toc-item ${h.type === 'h2' ? 'toc-h2' : ''}" onclick="scrollToBlock('${h.id}')">${h.content.replace(/<[^>]*>?/gm, '') || 'Untitled'}</div>`).join('');
+            } else container.classList.add('hidden');
         }
 
         function scrollToBlock(id) {
@@ -403,14 +420,10 @@
                 else md += `${b.content}\n\n`;
             });
             const blob = new Blob([md], { type: 'text/markdown' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `${p.title.replace(/\s+/g, '_')}.md`;
-            a.click();
+            const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `${p.title}.md`; a.click();
         }
 
-        // --- Audio Logic ---
+        // --- Audio & WebRTC targeted signaling ---
         async function toggleVoiceOrbit() {
             state.onCall = !state.onCall;
             const btn = document.getElementById('voice-btn');
@@ -428,36 +441,30 @@
                 btn.classList.remove('voice-active'); overlay.style.display = 'none';
                 if (localStream) { localStream.getTracks().forEach(t => t.stop()); localStream = null; }
                 if (audioCtx) { audioCtx.close(); audioCtx = null; }
-                Object.values(peerConnections).forEach(pc => pc.close());
-                peerConnections = {}; stopAudioTest();
-                document.getElementById('remote-audio-container').innerHTML = '';
+                Object.values(peerConnections).forEach(pc => pc.close()); peerConnections = {};
+                document.getElementById('remote-audio-container').innerHTML = ''; stopAudioTest();
             }
-            if (channel) { channel.presence.update({ onCall: state.onCall }); channel.publish('signal', { type: 'hello' }); }
+            if (channel) { channel.presence.update({ onCall: state.onCall }); channel.publish('signal', { type: 'hello', from: ably.auth.clientId }); }
             lucide.createIcons();
         }
 
         function updateMicVolume(val) { if (gainNode) gainNode.gain.value = val / 100; document.getElementById('vol-value').innerText = val + "%"; }
         async function toggleIsolation() { if (!localStream) return; const track = localStream.getAudioTracks()[0]; await track.applyConstraints({ noiseSuppression: document.getElementById('iso-toggle').checked }); }
         function toggleAudioTest() {
-            if (!localStream) return;
-            const testBtn = document.getElementById('test-mic-btn');
-            const testAudio = document.getElementById('self-test-audio');
-            const indicator = document.getElementById('self-test-indicator');
+            const testBtn = document.getElementById('test-mic-btn'); const testAudio = document.getElementById('self-test-audio'); const indicator = document.getElementById('self-test-indicator');
             isAudioTesting = !isAudioTesting;
-            if (isAudioTesting) { testAudio.srcObject = localStream; testBtn.innerText = "Stop Test"; indicator.classList.remove('hidden'); }
+            if (isAudioTesting && localStream) { testAudio.srcObject = localStream; testBtn.innerText = "Stop Test"; indicator.classList.remove('hidden'); }
             else stopAudioTest();
         }
         function stopAudioTest() {
-            const testBtn = document.getElementById('test-mic-btn'); const testAudio = document.getElementById('self-test-audio');
-            const indicator = document.getElementById('self-test-indicator');
-            isAudioTesting = false; testAudio.srcObject = null;
-            if (testBtn) testBtn.innerText = "Test Mic"; if (indicator) indicator.classList.add('hidden');
+            const testBtn = document.getElementById('test-mic-btn'); const testAudio = document.getElementById('self-test-audio'); const indicator = document.getElementById('self-test-indicator');
+            isAudioTesting = false; testAudio.srcObject = null; if (testBtn) testBtn.innerText = "Test Mic"; if (indicator) indicator.classList.add('hidden');
         }
 
         function createPeerConnection(remoteId) {
             const pc = new RTCPeerConnection({ iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] });
             if (localStream) localStream.getTracks().forEach(track => pc.addTrack(track, localStream));
-            pc.onicecandidate = (e) => { if (e.candidate) channel.publish('signal', { to: remoteId, type: 'ice', data: e.candidate }); };
+            pc.onicecandidate = (e) => { if (e.candidate) channel.publish('signal', { to: remoteId, from: ably.auth.clientId, type: 'ice', data: e.candidate }); };
             pc.ontrack = (e) => {
                 let audio = document.createElement('audio'); audio.autoplay = true; audio.srcObject = e.streams[0];
                 document.getElementById('remote-audio-container').appendChild(audio);
@@ -467,14 +474,15 @@
 
         async function handleSignal(m) {
             const { from, to, type, data } = m.data;
-            if (m.clientId === ably.auth.clientId || (to && to !== ably.auth.clientId)) return;
+            if (from === ably.auth.clientId || (to && to !== ably.auth.clientId)) return;
             let pc = peerConnections[from] || createPeerConnection(from);
-            if (type === 'offer') { await pc.setRemoteDescription(new RTCSessionDescription(data)); const ans = await pc.createAnswer(); await pc.setLocalDescription(ans); channel.publish('signal', { to: from, type: 'answer', data: ans }); }
+            if (type === 'offer') { await pc.setRemoteDescription(new RTCSessionDescription(data)); const ans = await pc.createAnswer(); await pc.setLocalDescription(ans); channel.publish('signal', { to: from, from: ably.auth.clientId, type: 'answer', data: ans }); }
             else if (type === 'answer') await pc.setRemoteDescription(new RTCSessionDescription(data));
             else if (type === 'ice') await pc.addIceCandidate(new RTCIceCandidate(data));
+            else if (type === 'hello' && state.onCall) { const offer = await pc.createOffer(); await pc.setLocalDescription(offer); channel.publish('signal', { to: from, from: ably.auth.clientId, type: 'offer', data: offer }); }
         }
 
-        // --- Blocks ---
+        // --- Block Logic ---
         function createBlockElement(block, isFirst) {
             const div = document.createElement('div');
             div.className = `group relative w-full block-container fade-in ${block.highlight || ''}`;
@@ -489,11 +497,9 @@
                 case 'playground': html = `<div class="playground-block flex-1"><div class="playground-header"><span class="text-[9px] font-bold text-gray-500 uppercase">Sandbox</span><button onclick="runPlayground('${block.id}')" class="bg-blue-600 text-white text-[9px] font-bold px-3 py-1 rounded-md">RUN</button></div><textarea class="playground-code outline-none" oninput="updatePlaygroundCode('${block.id}', this.value)">${block.content || ''}</textarea><iframe id="pg-preview-${block.id}" class="playground-preview"></iframe></div>`; break;
                 case 'divider': html = `<hr class="w-full my-6 border-[var(--border-color)]" />`; break;
                 case 'math': html = `<div class="w-full my-4 text-center text-xl" id="math-${block.id}"></div>`; break;
-                case 'timestamp': html = `<div class="flex-1 text-[10px] font-mono text-blue-500 border border-blue-500/20 bg-blue-500/5 px-2 py-1 rounded inline-block my-2">${block.content}</div>`; break;
                 default: html = `<div contenteditable="true" class="flex-1 outline-none py-1.5 leading-relaxed text-[var(--text-main)]" placeholder="Type '/' for commands...">${block.content || ''}</div>`;
             }
             div.innerHTML = `<div class="drag-handle opacity-0 group-hover:opacity-100 transition-opacity absolute -left-8 top-1 flex flex-col gap-1"><i data-lucide="grip-vertical" class="w-4 h-4"></i><button onclick="deleteBlock('${block.id}')" class="hover:text-red-500"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button></div>${html}`;
-            
             const edit = div.querySelector('[contenteditable="true"]');
             if (edit) {
                 edit.addEventListener('input', () => { 
@@ -501,8 +507,7 @@
                     if (raw === '# ') { edit.innerText = ''; selectSlashItem('h1', block.id); return; }
                     if (raw === '[] ') { edit.innerText = ''; selectSlashItem('todo', block.id); return; }
                     if (raw === '---') { edit.innerText = ''; selectSlashItem('divider', block.id); return; }
-                    block.content = edit.innerHTML; saveState(); 
-                    if (raw.length > 5 && !raw.startsWith('/')) hideSlashMenu(); 
+                    block.content = edit.innerHTML; saveState(); if (raw.length > 5 && !raw.startsWith('/')) hideSlashMenu(); 
                 });
                 edit.addEventListener('keydown', (e) => {
                     if (e.key === '/') { if (!edit.innerText.trim()) { e.preventDefault(); openSlashMenu(div, block.id); } }
@@ -515,34 +520,23 @@
             return div;
         }
 
-        function toggleTodoState(id) {
-            const p = state.pages.find(pg => pg.id === state.activePageId);
-            const b = p.blocks.find(bk => bk.id === id);
-            if (b) { b.checked = !b.checked; renderActivePage(); saveState(); }
-        }
+        function toggleTodoState(id) { const p = state.pages.find(pg => pg.id === state.activePageId); const b = p.blocks.find(bk => bk.id === id); if (b) { b.checked = !b.checked; renderActivePage(); saveState(); } }
+        function runPlayground(id) { const b = state.pages.find(pg => pg.id === state.activePageId).blocks.find(bk => bk.id === id); const preview = document.getElementById(`pg-preview-${id}`); if(!preview) return; const doc = preview.contentWindow.document; doc.open(); doc.write(b.content || ''); doc.close(); }
+        function updatePlaygroundCode(id, val) { const p = state.pages.find(pg => pg.id === state.activePageId); const b = p.blocks.find(bk => bk.id === id); if(b) { b.content = val; saveState(); } }
 
-        // --- Slash Menu ---
         function openSlashMenu(el, id) { 
-            state.activeBlockIdForMenu = id; 
-            const menu = document.getElementById('slash-menu'), container = document.getElementById('main-scroll-container');
-            const selection = window.getSelection();
-            let rect = (selection.rangeCount > 0) ? selection.getRangeAt(0).getBoundingClientRect() : el.getBoundingClientRect();
-            const cRect = container.getBoundingClientRect();
-            menu.style.display = 'flex'; 
-            menu.style.top = (rect.top - cRect.top + container.scrollTop) + 'px'; 
-            let rightOffset = state.sidebarOpen ? 350 : 240; 
-            menu.style.left = (rect.left - cRect.left + rightOffset) + 'px'; 
+            state.activeBlockIdForMenu = id; const menu = document.getElementById('slash-menu'), container = document.getElementById('main-scroll-container');
+            const selection = window.getSelection(); let rect = (selection.rangeCount > 0) ? selection.getRangeAt(0).getBoundingClientRect() : el.getBoundingClientRect();
+            const cRect = container.getBoundingClientRect(); menu.style.display = 'flex'; menu.style.top = (rect.top - cRect.top + container.scrollTop) + 'px'; 
+            let rightOffset = state.sidebarOpen ? 350 : 240; menu.style.left = (rect.left - cRect.left + rightOffset) + 'px'; 
             if (parseInt(menu.style.left) + 240 > cRect.width) menu.style.left = (cRect.width - 250) + 'px';
             lucide.createIcons(); 
         }
 
         function setupSlashMenu() {
             const items = [
-                { type: 'text', icon: 'type', label: 'Plain Text' }, { type: 'h1', icon: 'heading-1', label: 'H1' }, 
-                { type: 'h2', icon: 'heading-2', label: 'H2' }, { type: 'todo', icon: 'check-square', label: 'To-do' }, 
-                { type: 'quote', icon: 'quote', label: 'Quote' }, { type: 'highlight', icon: 'highlighter', label: 'Highlight' },
-                { type: 'playground', icon: 'code', label: 'Sandbox' }, { type: 'math', icon: 'sigma', label: 'LaTeX' },
-                { type: 'divider', icon: 'minus', label: 'Divider' }
+                { type: 'text', icon: 'type', label: 'Plain Text' }, { type: 'h1', icon: 'heading-1', label: 'H1' }, { type: 'h2', icon: 'heading-2', label: 'H2' }, { type: 'todo', icon: 'check-square', label: 'To-do' }, 
+                { type: 'quote', icon: 'quote', label: 'Quote' }, { type: 'highlight', icon: 'highlighter', label: 'Highlight' }, { type: 'playground', icon: 'code', label: 'Sandbox' }, { type: 'math', icon: 'sigma', label: 'LaTeX' }, { type: 'divider', icon: 'minus', label: 'Divider' }
             ];
             document.getElementById('slash-menu-items').innerHTML = items.map(i => `
                 <button onclick="handleSlashAction('${i.type}')" class="slash-item w-full flex items-center gap-3 px-3 py-2.5 transition-all text-left group">
@@ -553,28 +547,16 @@
 
         function handleSlashAction(type) {
             if (type === 'highlight') {
-                const p = state.pages.find(pg => pg.id === state.activePageId);
-                const b = p.blocks.find(bk => bk.id === state.activeBlockIdForMenu);
+                const p = state.pages.find(pg => pg.id === state.activePageId); const b = p.blocks.find(bk => bk.id === state.activeBlockIdForMenu);
                 const colors = ['', 'bg-highlight-blue', 'bg-highlight-green', 'bg-highlight-yellow', 'bg-highlight-red'];
-                let cur = colors.indexOf(b.highlight || '');
-                b.highlight = colors[(cur + 1) % colors.length];
+                b.highlight = colors[(colors.indexOf(b.highlight || '') + 1) % colors.length];
                 renderActivePage(); saveState(); hideSlashMenu();
-            } else {
-                selectSlashItem(type);
-            }
+            } else selectSlashItem(type);
         }
 
         function selectSlashItem(t, targetId = null) { 
-            const p = state.pages.find(pg => pg.id === state.activePageId); 
-            const b = p.blocks.find(bk => bk.id === (targetId || state.activeBlockIdForMenu)); 
-            if (b) { 
-                b.type = t; 
-                if (t === 'playground') b.content = '<h1>Hello</h1>\n<style>h1{color:blue;}</style>';
-                else if (t === 'math') b.content = 'e^{i\\pi} + 1 = 0';
-                else b.content = '';
-                renderActivePage(); saveState();
-                setTimeout(() => { const el = document.querySelector(`[data-id="${b.id}"] [contenteditable="true"]`); if (el) el.focus(); }, 50);
-            }
+            const p = state.pages.find(pg => pg.id === state.activePageId); const b = p.blocks.find(bk => bk.id === (targetId || state.activeBlockIdForMenu)); 
+            if (b) { b.type = t; b.content = (t === 'playground' ? '<h1>Hi</h1>' : t === 'math' ? 'e^{i\\pi} + 1 = 0' : ''); renderActivePage(); saveState(); setTimeout(() => { const el = document.querySelector(`[data-id="${b.id}"] [contenteditable="true"]`); if (el) el.focus(); }, 50); }
             hideSlashMenu();
         }
 
@@ -582,41 +564,28 @@
 
         function renderActivePage() {
             const page = state.pages.find(p => p.id === state.activePageId) || state.pages[0];
-            document.getElementById('page-cover').src = page.cover;
-            document.getElementById('page-icon').innerText = page.icon;
-            document.getElementById('header-title').innerText = page.title || 'Untitled';
-            document.getElementById('main-title-input').value = page.title;
-            const container = document.getElementById('editor-blocks');
-            const focusedId = document.activeElement?.closest('.block-container')?.dataset.id;
-            const domMap = new Map();
-            container.querySelectorAll('.block-container').forEach(el => domMap.set(el.dataset.id, el));
+            document.getElementById('page-cover').src = page.cover; document.getElementById('page-icon').innerText = page.icon;
+            document.getElementById('header-title').innerText = page.title || 'Untitled'; document.getElementById('main-title-input').value = page.title;
+            const container = document.getElementById('editor-blocks'); const currentFocusedId = document.activeElement?.closest('.block-container')?.dataset.id;
+            const domMap = new Map(); container.querySelectorAll('.block-container').forEach(el => domMap.set(el.dataset.id, el));
             page.blocks.forEach((b, i) => {
                 let el = domMap.get(b.id);
                 if (el && el.dataset.type === b.type) {
-                    const edit = el.querySelector('[contenteditable="true"]');
-                    if (edit && b.id !== focusedId && edit.innerHTML !== b.content) edit.innerHTML = b.content || '';
-                    if (b.highlight) { el.classList.add(b.highlight); } else { el.classList.remove('bg-highlight-blue', 'bg-highlight-green', 'bg-highlight-yellow', 'bg-highlight-red'); }
+                    const edit = el.querySelector('[contenteditable="true"]'); if (edit && b.id !== currentFocusedId && edit.innerHTML !== b.content) edit.innerHTML = b.content || '';
+                    if (b.highlight) el.classList.add(b.highlight); else el.classList.remove('bg-highlight-blue', 'bg-highlight-green', 'bg-highlight-yellow', 'bg-highlight-red');
                     domMap.delete(b.id);
                 } else {
-                    if (el) el.remove();
-                    const newEl = createBlockElement(b, i === 0);
-                    container.insertBefore(newEl, container.children[i]);
+                    if (el) el.remove(); const newEl = createBlockElement(b, i === 0); container.insertBefore(newEl, container.children[i]);
                 }
             });
             domMap.forEach(el => el.remove());
-            const clip = document.getElementById('block-clipboard');
-            clip.innerHTML = state.clipboard.map(b => `<div class="p-2 bg-[var(--bg-primary)] border border-[var(--border-color)] rounded-lg text-[10px] truncate shadow-sm cursor-grab" data-id="${b.id}">${(b.content || b.type).replace(/<[^>]*>?/gm, '')}</div>`).join('');
+            const clip = document.getElementById('block-clipboard'); clip.innerHTML = state.clipboard.map(b => `<div class="p-2 bg-[var(--bg-primary)] border border-[var(--border-color)] rounded-lg text-[10px] truncate shadow-sm cursor-grab" data-id="${b.id}">${(b.content || b.type).replace(/<[^>]*>?/gm, '')}</div>`).join('');
             lucide.createIcons(); initDragAndDrop(); updateEditorStats(); updateProgressBar(); renderTOC();
         }
 
         function renderSidebar() {
-            const pList = document.getElementById('pages-list');
-            const filtered = state.pages.filter(p => p.title.toLowerCase().includes(state.searchQuery.toLowerCase()));
-            pList.innerHTML = filtered.map(p => `
-                <div class="flex items-center group/page">
-                    <button onclick="setActivePage('${p.id}')" class="flex-1 flex items-center gap-2 px-3 py-2 text-xs rounded-xl transition-all ${p.id === state.activePageId ? 'sidebar-item-active' : 'text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800'}"><span>${p.icon}</span><span class="truncate">${p.title || 'Untitled'}</span></button>
-                    <button onclick="deletePage('${p.id}')" class="opacity-0 group-hover/page:opacity-100 p-2 text-gray-400 hover:text-red-500 transition-opacity"><i data-lucide="trash-2" class="w-3 h-3"></i></button>
-                </div>`).join('');
+            const pList = document.getElementById('pages-list'); const filtered = state.pages.filter(p => p.title.toLowerCase().includes(state.searchQuery.toLowerCase()));
+            pList.innerHTML = filtered.map(p => `<div class="flex items-center group/page"><button onclick="setActivePage('${p.id}')" class="flex-1 flex items-center gap-2 px-3 py-2 text-xs rounded-xl transition-all ${p.id === state.activePageId ? 'sidebar-item-active' : 'text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800'}"><span>${p.icon}</span><span class="truncate">${p.title || 'Untitled'}</span></button><button onclick="deletePage('${p.id}')" class="opacity-0 group-hover/page:opacity-100 p-2 text-gray-400 hover:text-red-500 transition-opacity"><i data-lucide="trash-2" class="w-3 h-3"></i></button></div>`).join('');
             lucide.createIcons();
         }
 
@@ -631,11 +600,7 @@
         function joinChannel(id) {
             if (channel) { channel.presence.leave(); channel.unsubscribe(); }
             channel = ably.channels.get('orbit-v19-' + id, { params: { rewind: '1' } });
-            channel.subscribe('update', (m) => {
-                if (m.clientId === ably.auth.clientId) return;
-                const remote = m.data.pages.find(p => p.id === id);
-                if (remote) { state.pages = state.pages.map(p => p.id === id ? remote : p); renderActivePage(); }
-            });
+            channel.subscribe('update', (m) => { if (m.clientId === ably.auth.clientId) return; const remote = m.data.pages.find(p => p.id === id); if (remote) { state.pages = state.pages.map(p => p.id === id ? remote : p); renderActivePage(); } });
             channel.subscribe('signal', handleSignal);
             channel.presence.enter({ onCall: state.onCall });
             channel.presence.subscribe(() => channel.presence.get((err, m) => { if(!err) renderPresence(m); }));
@@ -648,51 +613,16 @@
             document.getElementById('voice-participants').innerHTML = onCall.map(m => `<div class="flex items-center gap-2"><div class="w-5 h-5 rounded-full bg-orange-500 flex items-center justify-center text-[8px] text-white font-bold">${m.clientId.charAt(0).toUpperCase()}</div><span class="text-[10px] font-bold dark:text-white">${m.clientId.split('_')[0]}</span></div>`).join('');
         }
 
-        async function joinFriendPage() {
-            const code = document.getElementById('friend-page-code').value.trim();
-            if (!code) return; state.activePageId = code;
-            if (!state.pages.find(p => p.id === code)) state.pages.push({ id: code, title: 'Shared Space', icon: '🌐', isShared: true, blocks: [], cover: DEFAULT_COVERS[0] });
-            setActivePage(code); document.getElementById('collab-modal').classList.add('hidden');
-        }
-
-        function openSharePageModal() {
-            const p = state.pages.find(p => p.id === state.activePageId); if(!p) return;
-            p.isShared = true; document.getElementById('share-code-display').innerText = p.id;
-            document.getElementById('share-modal').classList.remove('hidden'); saveState();
-        }
-
-        // --- Utils ---
+        async function joinFriendPage() { const code = document.getElementById('friend-page-code').value.trim(); if (!code) return; state.activePageId = code; if (!state.pages.find(p => p.id === code)) state.pages.push({ id: code, title: 'Shared Space', icon: '🌐', isShared: true, blocks: [], cover: DEFAULT_COVERS[0] }); setActivePage(code); document.getElementById('collab-modal').classList.add('hidden'); }
+        function openSharePageModal() { const p = state.pages.find(p => p.id === state.activePageId); if(!p) return; p.isShared = true; document.getElementById('share-code-display').innerText = p.id; document.getElementById('share-modal').classList.remove('hidden'); saveState(); }
         function changeCover() { const p = state.pages.find(pg => pg.id === state.activePageId); if (p) { p.cover = DEFAULT_COVERS[Math.floor(Math.random()*DEFAULT_COVERS.length)]; renderActivePage(); saveState(); } }
         function addPage() { const id = 'p' + Math.random().toString(36).substr(2, 6); state.pages.push({ id, title: 'Untitled', icon: '📄', cover: DEFAULT_COVERS[0], blocks: [{ id: 'b' + Date.now(), type: 'text', content: '' }] }); setActivePage(id); }
         function deletePage(id) { if(state.pages.length > 1) { state.pages = state.pages.filter(p => p.id !== id); if(state.activePageId === id) setActivePage(state.pages[0].id); else renderSidebar(); saveState(true); } }
-        function addBlockBelow(id) {
-            const p = state.pages.find(pg => pg.id === state.activePageId); const idx = p.blocks.findIndex(b => b.id === id);
-            const nb = { id: 'b' + Math.random().toString(36).substr(2, 6), type: 'text', content: '' };
-            p.blocks.splice(idx + 1, 0, nb); renderActivePage(); saveState();
-            setTimeout(() => { const el = document.querySelector(`[data-id="${nb.id}"] [contenteditable]`); if(el) el.focus(); }, 10);
-        }
+        function addBlockBelow(id) { const p = state.pages.find(pg => pg.id === state.activePageId); const idx = p.blocks.findIndex(b => b.id === id); const nb = { id: 'b' + Math.random().toString(36).substr(2, 6), type: 'text', content: '' }; p.blocks.splice(idx + 1, 0, nb); renderActivePage(); saveState(); setTimeout(() => { const el = document.querySelector(`[data-id="${nb.id}"] [contenteditable]`); if(el) el.focus(); }, 10); }
         function deleteBlock(id) { const p = state.pages.find(pg => pg.id === state.activePageId); if (p.blocks.length > 1) p.blocks = p.blocks.filter(b => b.id !== id); saveState(); renderActivePage(); }
-        
-        function handleWorkspaceClick(e) { 
-            const p = state.pages.find(pg => pg.id === state.activePageId);
-            if (e.target.id === 'main-scroll-container' || e.target.id === 'bottom-click-trigger' || e.target.id === 'editor-blocks') {
-                addBlockBelow(p.blocks[p.blocks.length - 1]?.id);
-            }
-        }
-
-        function initDragAndDrop() {
-            if (sortableMain) sortableMain.destroy(); if (sortableClipboard) sortableClipboard.destroy();
-            sortableMain = Sortable.create(document.getElementById('editor-blocks'), { group: 'blocks', handle: '.drag-handle', animation: 150, onEnd: (e) => {
-                const p = state.pages.find(x => x.id === state.activePageId);
-                const b = p.blocks.splice(e.oldIndex, 1)[0]; p.blocks.splice(e.newIndex, 0, b);
-                saveState(); renderActivePage();
-            }});
-            sortableClipboard = Sortable.create(document.getElementById('block-clipboard'), { group: 'blocks', animation: 150 });
-        }
-
-        function setActivePage(id) { state.activePageId = id; saveState(true); renderSidebar(); renderActivePage(); if(ably) joinChannel(id); }
-        function updatePageTitle(v) { const p = state.pages.find(pg => pg.id === state.activePageId); if(p) { p.title = v; document.getElementById('header-title').innerText = v || 'Untitled'; saveState(); renderSidebar(); } }
-        function toggleSidebar() { state.sidebarOpen = !state.sidebarOpen; const sb = document.getElementById('sidebar'); const reopenBtn = document.getElementById('reopen-sidebar-btn'); sb.style.width = state.sidebarOpen ? '256px' : '0px'; sb.style.opacity = state.sidebarOpen ? '1' : '0'; reopenBtn.style.display = state.sidebarOpen ? 'none' : 'block'; }
+        function handleWorkspaceClick(e) { if (e.target.id === 'main-scroll-container' || e.target.id === 'bottom-click-trigger' || e.target.id === 'editor-blocks') addBlockBelow(state.pages.find(p => p.id === state.activePageId).blocks.slice(-1)[0]?.id); }
+        function initDragAndDrop() { if (sortableMain) sortableMain.destroy(); if (sortableClipboard) sortableClipboard.destroy(); sortableMain = Sortable.create(document.getElementById('editor-blocks'), { group: 'blocks', handle: '.drag-handle', animation: 150, onEnd: (e) => { const p = state.pages.find(x => x.id === state.activePageId); const b = p.blocks.splice(e.oldIndex, 1)[0]; p.blocks.splice(e.newIndex, 0, b); saveState(); }}); sortableClipboard = Sortable.create(document.getElementById('block-clipboard'), { group: 'blocks', animation: 150 }); }
+        function toggleSidebar() { state.sidebarOpen = !state.sidebarOpen; const sb = document.getElementById('sidebar'); const reopenBtn = document.getElementById('reopen-sidebar-btn'); sb.style.width = state.sidebarOpen ? '256px' : '0px'; sb.style.opacity = state.sidebarOpen ? '1' : '0'; reopenBtn.style.display = state.sidebarOpen ? 'none' : 'block'; updateEditorStats(); }
         function openCollabModal() { document.getElementById('collab-modal').classList.remove('hidden'); }
         function toggleEmojiPicker(e) { e.stopPropagation(); document.getElementById('emoji-picker').classList.toggle('hidden'); }
         function setupEmojiPicker() { document.getElementById('emoji-grid').innerHTML = EMOJI_LIST.map(e => `<button onclick="selectEmoji('${e}')" class="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded text-2xl">${e}</button>`).join(''); }
