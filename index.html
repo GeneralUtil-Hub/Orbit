@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Orbit Workspace</title>
+    <title>Orbit Workspace | Pro</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
@@ -16,769 +16,824 @@
         
         :root {
             --bg-primary: #ffffff;
-            --sidebar-bg: #fbfbfa;
-            --text-main: #111827;
-            --text-secondary: #6b7280;
-            --brand-color: #2563eb;
-            --border-color: #e5e7eb;
-            --block-hover: rgba(55, 53, 47, 0.04);
-            --input-bg: #f3f4f6;
+            --sidebar-bg: #f7f7f5;
+            --text-main: #37352f;
+            --text-secondary: #7e7c78;
+            --brand-color: #2383e2;
+            --border-color: #e9e9e7;
+            --block-hover: rgba(55, 53, 47, 0.06);
+            --input-bg: #f1f1ef;
+            --callout-bg: #f1f1ef;
         }
 
         .dark-mode {
-            --bg-primary: #0f0f12;
-            --sidebar-bg: #16161a;
-            --text-main: #efeff1;
-            --text-secondary: #9ca3af;
-            --brand-color: #60a5fa;
-            --border-color: #26262a;
+            --bg-primary: #191919;
+            --sidebar-bg: #202020;
+            --text-main: #ebf1f5;
+            --text-secondary: #9b9b9b;
+            --brand-color: #2383e2;
+            --border-color: #2d2d2d;
             --block-hover: rgba(255, 255, 255, 0.05);
-            --input-bg: #1c1c21;
+            --input-bg: #252525;
+            --callout-bg: #252525;
         }
 
         body { 
             font-family: 'Inter', sans-serif; 
             background-color: var(--bg-primary); 
             color: var(--text-main);
-            transition: background-color 0.3s ease, color 0.3s ease;
+            transition: background-color 0.2s ease;
         }
 
         .scrollbar-hide::-webkit-scrollbar { display: none; }
         
-        .block-container { transition: background-color 0.2s ease; border-radius: 6px; padding: 4px 8px; position: relative; margin: 2px 0; }
+        .sidebar-transition { transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.2s ease; }
+        .block-container { transition: background 0.15s ease; border-radius: 4px; padding: 3px 10px; position: relative; display: flex; align-items: flex-start; }
         .block-container:hover { background-color: var(--block-hover); }
-        input:focus, textarea:focus { outline: none; }
         
-        .drag-handle { cursor: grab; padding: 4px; border-radius: 4px; color: var(--text-secondary); opacity: 0; transition: opacity 0.2s; position: absolute; left: -32px; top: 4px; }
-        .block-container:hover .drag-handle { opacity: 0.5; }
-        
-        .sidebar-item-active { background-color: var(--block-hover); color: var(--text-main); font-weight: 600; border-left: 2px solid var(--brand-color); }
-        
-        /* Empty State Prompt */
-        .empty-prompt {
-            padding: 3rem 0;
-            color: var(--text-secondary);
-            opacity: 0.5;
-            font-style: italic;
-            cursor: pointer;
-            font-size: 16px;
-            text-align: left;
-            width: 100%;
-        }
-
         #slash-menu { 
             position: absolute; 
-            max-height: 400px; 
-            width: 240px;
-            overflow: hidden;
+            width: 280px;
             z-index: 1000;
             background: var(--bg-primary); 
             border: 1px solid var(--border-color);
-            border-radius: 14px;
-            box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+            box-shadow: 0 12px 34px rgba(0,0,0,0.15);
             display: none;
             flex-direction: column;
-            color: var(--text-main);
+            overflow: hidden;
         }
 
-        .slash-item { transition: all 0.15s ease; color: var(--text-main); }
-        .slash-item:hover { background-color: var(--brand-color) !important; color: #ffffff !important; }
-        .slash-item:hover .icon-box { background-color: rgba(255, 255, 255, 0.2) !important; color: #ffffff !important; border-color: transparent !important; }
-        .slash-item:hover i { color: #ffffff !important; }
+        .workspace-highlight-blue { color: #2383e2; border-left: 2px solid #2383e2; padding-left: 8px !important; }
+        .workspace-highlight-orange { color: #d9730d; border-left: 2px solid #d9730d; padding-left: 8px !important; }
+        .workspace-highlight-green { color: #0f7b6c; border-left: 2px solid #0f7b6c; padding-left: 8px !important; }
 
-        .playground-block { background: var(--input-bg); border-radius: 12px; overflow: hidden; border: 1px solid var(--border-color); margin: 1rem 0; }
-        .playground-header { background: rgba(0,0,0,0.05); padding: 8px 12px; display: flex; justify-content: space-between; align-items: center; }
-        .playground-code { font-family: 'Roboto Mono', monospace; font-size: 12px; padding: 12px; width: 100%; min-height: 100px; background: transparent; border: none; color: var(--text-main); }
-        .playground-preview { width: 100%; height: 180px; background: white; border-top: 1px solid var(--border-color); }
-
-        #reopen-sidebar-btn {
-            position: fixed; left: 0; top: 50%; transform: translateY(-50%); z-index: 100;
-            background: var(--sidebar-bg); border: 1px solid var(--border-color); border-left: none;
-            padding: 12px 4px; border-radius: 0 8px 8px 0; display: none; box-shadow: 2px 0 10px rgba(0,0,0,0.05);
+        .sidebar-active { background: var(--block-hover); color: var(--text-main) !important; font-weight: 600; }
+        
+        #reopen-sidebar-trigger {
+            position: fixed; left: 0; top: 0; bottom: 0; width: 30px; z-index: 100;
+            cursor: pointer; transition: background 0.2s;
         }
+        #reopen-sidebar-trigger:hover { background: var(--block-hover); }
+        
+        .drag-handle { cursor: grab; opacity: 0; transition: opacity 0.2s; position: absolute; left: -45px; top: 10px; color: var(--text-secondary); display: flex; align-items: center; gap: 4px; }
+        .block-container:hover .drag-handle { opacity: 0.5; }
 
-        .banner-btn {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(8px);
-            color: #111827 !important;
-            padding: 8px 16px;
-            border-radius: 10px;
-            font-size: 11px;
-            font-weight: 800;
-            border: 1px solid rgba(0,0,0,0.1);
-            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        .quote-block { border-left: 3px solid var(--border-color); padding-left: 14px; font-style: italic; color: var(--text-secondary); }
+        .callout-block { background: var(--callout-bg); border-radius: 4px; padding: 12px; display: flex; gap: 12px; width: 100%; border: 1px solid var(--border-color); }
+        .code-block { font-family: 'Roboto Mono', monospace; background: var(--input-bg); padding: 12px; border-radius: 4px; font-size: 13px; width: 100%; white-space: pre-wrap; }
+        .math-display { text-align: center; padding: 1rem 0; width: 100%; cursor: pointer; }
+
+        .media-block { border-radius: 8px; overflow: hidden; margin: 1rem 0; border: 1px solid var(--border-color); background: #000; position: relative; }
+        .media-block img { max-width: 100%; cursor: default; }
+        
+        .image-drop-zone {
+            border: 2px dashed var(--border-color);
+            padding: 40px;
+            text-align: center;
+            border-radius: 8px;
+            cursor: pointer;
             transition: all 0.2s;
-        }
-        .dark-mode .banner-btn {
-            background: rgba(40, 40, 50, 0.9);
-            color: #efeff1 !important;
-            border-color: rgba(255,255,255,0.2);
-        }
-        .banner-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 15px rgba(0,0,0,0.15); }
-        
-        #progress-bar { position: fixed; top: 0; left: 0; width: 0%; height: 3px; background: var(--brand-color); z-index: 100; transition: width 0.1s ease; }
-        
-        #editor-stats {
-            position: fixed; bottom: 24px; right: 24px; background: var(--bg-primary); border: 1px solid var(--border-color);
-            padding: 4px; border-radius: 12px; display: flex; gap: 4px; box-shadow: 0 8px 30px rgba(0,0,0,0.12); z-index: 40; backdrop-filter: blur(12px); opacity: 0; transition: opacity 0.3s;
-        }
-        .stat-pill { display: flex; align-items: center; gap: 6px; padding: 6px 10px; border-radius: 8px; background: var(--block-hover); color: var(--text-secondary); font-size: 10px; font-weight: 700; cursor: default; }
-
-        .math-block { cursor: pointer; transition: background 0.2s; padding: 12px; border-radius: 8px; }
-        .math-editor { width: 100%; font-family: 'Roboto Mono', monospace; font-size: 13px; background: var(--input-bg); border-radius: 8px; padding: 10px; border: 1px solid var(--border-color); margin-top: 8px; color: var(--text-main); }
-
-        .media-block { border-radius: 12px; overflow: hidden; margin: 1rem 0; border: 1px solid var(--border-color); position: relative; background: #000; }
-        .media-block iframe { width: 100%; aspect-ratio: 16/9; }
-        .media-block img { width: 100%; height: auto; display: block; max-height: 600px; margin: 0 auto; }
-        .media-overlay { position: absolute; top: 8px; right: 8px; display: none; gap: 4px; }
-        .media-block:hover .media-overlay { display: flex; }
-        
-        .media-input-box { padding: 32px; text-align: center; background: var(--input-bg); border-radius: 16px; border: 2px dashed var(--border-color); }
-        .media-url-input {
-            color: var(--text-main) !important;
-            background: var(--bg-primary);
             width: 100%;
-            padding: 14px 18px;
-            border-radius: 10px;
-            border: 1px solid var(--border-color);
-            outline: none;
-            transition: all 0.2s;
-            font-size: 14px;
         }
+        .image-drop-zone.dragover { border-color: var(--brand-color); background: rgba(35, 131, 226, 0.05); }
 
-        .whiteboard-block { width: 100%; height: 350px; background: #fefefe; border: 1px solid var(--border-color); border-radius: 12px; position: relative; cursor: crosshair; touch-action: none; }
-        .whiteboard-controls { position: absolute; bottom: 10px; right: 10px; display: flex; gap: 6px; }
-
-        #exit-focus-btn { 
-            position: fixed; top: 20px; right: 20px; z-index: 200; display: none; 
-            background: var(--bg-primary); border: 1px solid var(--border-color); 
-            padding: 8px 16px; border-radius: 12px; font-size: 11px; font-weight: 700; 
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1); transition: all 0.2s;
-        }
-        .focus-mode #sidebar, .focus-mode #header, .focus-mode #editor-stats { display: none !important; }
-        .focus-mode #exit-focus-btn { display: flex !important; }
-
-        .present-mode .drag-handle, .present-mode .hover\:text-red-500 { display: none !important; }
+        [contenteditable]:focus { outline: none; }
+        [placeholder]:empty::before { content: attr(placeholder); color: var(--text-secondary); opacity: 0.3; }
     </style>
 </head>
 <body class="overflow-hidden">
-    <div id="progress-bar"></div>
-    <button id="exit-focus-btn" onclick="toggleFocusMode()" class="items-center gap-2 text-[var(--text-main)] hover:scale-105">
-        <i data-lucide="minimize-2" class="w-3.5 h-3.5"></i> Exit Focus
-    </button>
-    <button id="reopen-sidebar-btn" onclick="toggleSidebar()"><i data-lucide="chevron-right" class="w-4 h-4 text-gray-400"></i></button>
+    <div id="progress-bar" class="fixed top-0 left-0 h-0.5 bg-blue-500 z-[2000] transition-all duration-150" style="width: 0%"></div>
 
-    <div id="app" class="flex h-screen w-full relative z-10">
-        <aside id="sidebar" class="w-64 flex flex-col bg-[var(--sidebar-bg)] border-r border-[var(--border-color)] transition-all duration-300 shrink-0 z-20 overflow-hidden">
-            <div class="p-4 flex flex-col gap-5 min-w-[256px]">
-                <div class="flex items-center justify-between font-bold text-sm">
-                    <div class="flex items-center gap-2 text-[var(--text-main)]">
-                         <svg class="orbit-logo text-blue-600" viewBox="0 0 24 24" width="22" height="22">
-                            <ellipse cx="12" cy="12" rx="10" ry="3.5" transform="rotate(-20 12 12)" stroke="currentColor" stroke-width="1.8" fill="none" />
-                            <circle cx="12" cy="12" r="7" fill="var(--sidebar-bg)" style="transition: fill 0.4s" />
-                            <circle cx="12" cy="12" r="5" fill="currentColor" />
-                        </svg>
-                        Orbit
+    <!-- Reopen Sidebar Trigger -->
+    <div id="reopen-sidebar-trigger" class="hidden flex items-center justify-center" onclick="toggleSidebar()">
+        <i data-lucide="chevron-right" class="w-4 h-4 text-gray-400"></i>
+    </div>
+
+    <div id="app" class="flex h-screen w-full relative">
+        <!-- Sidebar -->
+        <aside id="sidebar" class="sidebar-transition w-64 flex flex-col bg-[var(--sidebar-bg)] border-r border-[var(--border-color)] shrink-0 z-50 overflow-hidden relative">
+            <div class="p-4 flex flex-col gap-4 min-w-[256px]">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-2 overflow-hidden">
+                         <div class="w-6 h-6 rounded bg-blue-600 flex items-center justify-center text-white shrink-0">
+                            <i data-lucide="orbit" class="w-3.5 h-3.5"></i>
+                         </div>
+                        <span id="place-name-display" class="font-bold text-sm truncate">My Orbit</span>
                     </div>
-                    <button onclick="toggleSidebar()" class="text-gray-400 hover:text-gray-600 transition-colors"><i data-lucide="chevron-left" class="w-4 h-4"></i></button>
+                    <button onclick="toggleSidebar()" class="text-gray-400 hover:text-gray-600 transition-colors"><i data-lucide="chevrons-left" class="w-4 h-4"></i></button>
                 </div>
-                <div class="relative">
-                    <i data-lucide="search" class="absolute left-3 top-2.5 w-3.5 h-3.5 text-gray-400"></i>
-                    <input type="text" id="search-input" oninput="handleSearch(this.value)" class="w-full bg-[var(--input-bg)] rounded-xl py-2 pl-9 pr-3 text-xs outline-none focus:ring-1 focus:ring-blue-500/20 text-[var(--text-main)]" placeholder="Search pages..." />
+                
+                <div class="relative group">
+                    <i data-lucide="search" class="absolute left-2.5 top-2.5 w-3.5 h-3.5 text-gray-400"></i>
+                    <input type="text" oninput="handleSearch(this.value)" class="w-full bg-[var(--input-bg)] rounded-md py-1.5 pl-8 pr-3 text-xs outline-none text-[var(--text-main)]" placeholder="Quick Search" />
                 </div>
             </div>
 
-            <div class="flex-1 overflow-y-auto px-2 space-y-6 scrollbar-hide min-w-[256px]">
+            <div class="flex-1 overflow-y-auto px-2 space-y-4 scrollbar-hide min-w-[256px]">
                 <div>
                     <div class="px-3 py-1 text-[10px] font-bold text-gray-400 uppercase tracking-widest flex justify-between items-center group">
-                        Workspace
-                        <button onclick="addPage()" class="opacity-0 group-hover:opacity-100 text-gray-400 hover:text-blue-500 transition-all"><i data-lucide="plus" class="w-3.5 h-3.5"></i></button>
+                        Structure
+                        <div class="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <button onclick="openWorkspaceModal()" title="New Workspace Folder"><i data-lucide="folder-plus" class="w-3.5 h-3.5"></i></button>
+                            <button onclick="addPage()" title="New Page"><i data-lucide="file-plus" class="w-3.5 h-3.5"></i></button>
+                        </div>
                     </div>
-                    <div id="pages-list" class="space-y-0.5 mt-2"></div>
-                </div>
-
-                <div id="toc-container" class="hidden px-1">
-                    <div class="px-2 py-1 text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">Navigation</div>
-                    <div id="toc-list" class="space-y-1"></div>
-                </div>
-
-                <div class="px-3">
-                    <div class="text-[10px] font-bold text-gray-400 uppercase tracking-widest flex items-center gap-2"><i data-lucide="archive" class="w-3 h-3"></i> Clipboard</div>
-                    <div id="block-clipboard" class="p-2 space-y-2"></div>
+                    <div id="structure-list" class="mt-2 space-y-0.5"></div>
                 </div>
             </div>
 
             <div class="p-4 border-t border-[var(--border-color)] space-y-1 min-w-[256px]">
-                <div class="flex gap-1 mb-2">
-                    <button onclick="exportToMarkdown()" class="flex-1 flex items-center justify-center gap-2 py-2 text-[10px] text-blue-600 bg-blue-50 dark:bg-blue-900/10 rounded-lg font-bold hover:bg-blue-100 transition-all">
-                        <i data-lucide="download" class="w-3 h-3"></i> Export
-                    </button>
-                    <button onclick="document.getElementById('import-md-input').click()" class="flex-1 flex items-center justify-center gap-2 py-2 text-[10px] text-indigo-600 bg-indigo-50 dark:bg-indigo-900/10 rounded-lg font-bold hover:bg-indigo-100 transition-all">
-                        <i data-lucide="file-up" class="w-3 h-3"></i> Import
-                    </button>
-                </div>
-                <button onclick="openCollabModal()" class="w-full flex items-center gap-3 px-3 py-2 text-xs text-orange-600 hover:bg-orange-50 dark:hover:bg-orange-900/10 rounded-xl transition-colors font-semibold">
-                    <i data-lucide="users" class="w-4 h-4"></i> Join Workspace
+                <button onclick="openJoinModal()" class="w-full flex items-center gap-2.5 px-3 py-1.5 text-xs text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/10 rounded-md font-semibold">
+                    <i data-lucide="users" class="w-3.5 h-3.5"></i> Join Space
                 </button>
-                <button onclick="togglePresentMode()" class="w-full flex items-center gap-3 px-3 py-2 text-xs text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-900/10 rounded-xl transition-colors font-semibold">
-                    <i data-lucide="monitor" class="w-4 h-4"></i> Present View
+                <button onclick="toggleDarkModeUI()" class="w-full flex items-center gap-2.5 px-3 py-1.5 text-xs text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-md font-medium">
+                    <i data-lucide="moon" class="w-3.5 h-3.5"></i> Dark Mode
                 </button>
-                <button onclick="toggleDarkModeUI()" class="w-full flex items-center gap-3 px-3 py-2 text-xs text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-xl transition-colors font-medium">
-                    <i data-lucide="moon" class="w-4 h-4"></i> Dark Mode
+                <button onclick="logout()" class="w-full flex items-center gap-2.5 px-3 py-1.5 text-xs text-red-500 hover:bg-red-50 dark:hover:bg-red-900/10 rounded-md font-medium">
+                    <i data-lucide="log-out" class="w-3.5 h-3.5"></i> Logout
                 </button>
             </div>
         </aside>
 
-        <main id="main-content" class="flex-1 flex flex-col h-full bg-[var(--bg-primary)] relative overflow-hidden" onclick="handleWorkspaceClick(event)">
-            <div id="header" class="h-14 border-b border-[var(--border-color)] flex items-center justify-between px-6 shrink-0 z-20 bg-[var(--bg-primary)]/80 backdrop-blur-md">
-                <div class="flex items-center gap-3 text-[10px] font-medium text-gray-400 uppercase tracking-tight">
-                    <span>Orbit</span>
-                    <i data-lucide="chevron-right" class="w-3 h-3"></i>
-                    <span id="header-title" class="text-[var(--text-main)] font-bold truncate max-w-[150px]">Home</span>
-                    <div id="save-status" class="ml-4 opacity-0 transition-opacity flex items-center gap-1.5 text-emerald-500 font-bold">
-                        <i data-lucide="check-circle" class="w-3 h-3"></i> Syncing
-                    </div>
-                </div>
+        <!-- Main Workspace -->
+        <main class="flex-1 flex flex-col h-full bg-[var(--bg-primary)] overflow-hidden relative" onclick="handleWorkspaceClick(event)">
+            <header class="h-12 flex items-center justify-between px-6 shrink-0 z-30">
+                <div id="breadcrumbs" class="flex items-center gap-2 text-xs text-gray-400 font-medium overflow-hidden"></div>
                 <div class="flex items-center gap-3">
-                    <button onclick="toggleVoiceOrbit()" id="voice-btn" class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-400 transition-all"><i data-lucide="mic" class="w-4 h-4"></i></button>
+                    <button onclick="toggleVoiceOrbit()" id="voice-btn" class="p-1.5 rounded hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-400 transition-all"><i data-lucide="mic" class="w-4 h-4"></i></button>
                     <div id="collaborators" class="flex -space-x-2"></div>
-                    <div id="sync-status" class="hidden flex items-center gap-2 text-[10px] text-green-600 font-bold uppercase"><div class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div> Live</div>
-                    <button onclick="openSharePageModal()" class="text-[10px] font-bold text-white bg-blue-600 px-3 py-1.5 rounded-lg hover:bg-blue-700 active:scale-95 transition-all shadow-md">Share</button>
+                    <button onclick="openShareActiveModal()" class="text-[11px] font-bold text-white bg-blue-600 px-3 py-1 rounded hover:bg-blue-700 transition-all">Share</button>
                 </div>
-            </div>
+            </header>
 
-            <div class="flex-1 overflow-y-auto scrollbar-hide relative" id="main-scroll-container" onscroll="updateProgressBar()" style="min-height: 100%;">
-                <div class="relative h-64 group overflow-hidden">
-                    <img id="page-cover" src="" alt="Cover" class="w-full h-full object-cover transition-all duration-700" />
-                    <div class="absolute bottom-4 right-4 flex gap-2 opacity-0 group-hover:opacity-100 transition-all transform translate-y-2 group-hover:translate-y-0">
-                        <button onclick="document.getElementById('cover-upload-input').click()" class="banner-btn">Upload</button>
-                        <button onclick="changeCover()" class="banner-btn">Random</button>
+            <div class="flex-1 overflow-y-auto scrollbar-hide" id="main-scroll-container" onscroll="updateProgressBar()">
+                <div class="relative h-56 group">
+                    <img id="page-cover" class="w-full h-full object-cover" />
+                    <div class="absolute bottom-4 right-8 opacity-0 group-hover:opacity-100 transition-opacity flex gap-2">
+                        <button onclick="changeCover()" class="bg-white/90 backdrop-blur px-3 py-1.5 rounded text-[10px] font-bold border border-gray-200 shadow-sm hover:bg-white">Random Cover</button>
                     </div>
                 </div>
-                <div class="max-w-3xl mx-auto px-8 lg:px-20 pb-64 relative">
-                    <div class="mt-[-40px] mb-8 relative z-10">
-                        <div id="page-icon" onclick="toggleEmojiPicker(event)" class="text-7xl cursor-pointer hover:scale-105 transition-transform select-none drop-shadow-xl">🚀</div>
-                        <div id="emoji-picker" class="hidden absolute top-full left-0 mt-2 p-4 bg-[var(--bg-primary)] border border-[var(--border-color)] rounded-2xl shadow-2xl z-50 w-64 backdrop-blur-md"><div class="grid grid-cols-5 gap-2" id="emoji-grid"></div></div>
-                        <input id="main-title-input" oninput="updatePageTitle(this.value)" class="w-full text-5xl font-black border-none outline-none mt-8 bg-transparent text-[var(--text-main)] placeholder-gray-400/20" placeholder="Untitled Workspace" />
+
+                <div class="max-w-3xl mx-auto px-12 pb-80">
+                    <div class="mt-[-48px] mb-10 relative z-10">
+                        <div id="page-icon" onclick="toggleEmojiPicker(event)" class="text-8xl cursor-pointer hover:scale-105 transition-transform select-none w-fit">🚀</div>
+                        <div id="emoji-picker" class="hidden absolute top-full left-0 mt-4 p-4 bg-[var(--bg-primary)] border border-[var(--border-color)] rounded-lg shadow-xl z-[100] w-64">
+                            <div class="grid grid-cols-5 gap-2" id="emoji-grid"></div>
+                        </div>
+                        <input id="main-title-input" oninput="updatePageTitle(this.value)" class="w-full text-5xl font-black border-none outline-none mt-8 bg-transparent placeholder-gray-200 tracking-tight" placeholder="Untitled Page" />
                     </div>
                     
-                    <div id="editor-blocks" class="space-y-0.5" style="min-height: 200px;"></div>
-                    <div id="bottom-click-trigger" class="h-64 w-full cursor-text" style="min-height: 40vh;"></div>
+                    <div id="editor-blocks" class="space-y-0.5"></div>
+                    <div id="bottom-click-trigger" class="h-64 w-full cursor-text"></div>
                     
                     <div id="slash-menu">
-                        <div class="slash-drag-handle" id="slash-menu-drag"></div>
-                        <div class="px-4 py-3 text-[10px] font-bold text-gray-400 uppercase tracking-widest border-b border-[var(--border-color)] text-center">Orbit Blocks</div>
-                        <div id="slash-menu-items" class="py-1 overflow-y-auto scrollbar-hide"></div>
+                        <div class="px-4 py-3 text-[9px] font-bold text-gray-400 uppercase tracking-widest border-b border-[var(--border-color)] bg-gray-50/50 dark:bg-black/20">Blocks</div>
+                        <div id="slash-menu-items" class="py-1 overflow-y-auto max-h-[300px]"></div>
                     </div>
-                </div>
-
-                <div id="editor-stats">
-                    <div class="stat-pill" title="Words"><i data-lucide="type"></i><span id="stat-words">0</span></div>
-                    <div class="stat-pill" title="Chars"><i data-lucide="hash"></i><span id="stat-chars">0</span></div>
-                    <div class="stat-pill" title="Read Time"><i data-lucide="timer"></i><span id="stat-read">0m</span></div>
                 </div>
             </div>
         </main>
     </div>
 
-    <!-- Voice Room UI -->
-    <div id="voice-overlay" class="bg-[var(--bg-primary)] border border-[var(--border-color)] rounded-2xl p-4 shadow-2xl w-64 fade-in" style="position: fixed; bottom: 24px; right: 24px; z-index: 100; display: none;">
-        <div class="flex items-center justify-between mb-4"><div class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Voice Room</div><div class="w-1.5 h-1.5 bg-orange-500 rounded-full animate-ping"></div></div>
-        <div id="voice-participants" class="space-y-3 mb-4"></div>
-        <div class="space-y-4 pt-4 border-t border-[var(--border-color)]">
-            <div class="space-y-2"><div class="flex justify-between text-[9px] font-bold text-gray-500 uppercase"><span>Gain Control</span><span id="vol-value">100%</span></div><input type="range" min="0" max="200" value="100" class="w-full accent-blue-600" oninput="updateMicVolume(this.value)"></div>
-            <div class="flex items-center justify-between"><span class="text-[9px] font-bold text-gray-500 uppercase">Isolation</span><label class="switch"><input type="checkbox" id="iso-toggle" checked onchange="toggleIsolation()"><span class="slider"></span></label></div>
-            <div class="flex gap-2"><button onclick="toggleAudioTest()" id="test-mic-btn" class="flex-1 py-2 bg-blue-600/10 text-blue-600 text-[9px] font-bold uppercase rounded-lg border border-blue-500/20">Test Mic</button></div>
-        </div>
-        <div id="self-test-indicator" class="hidden mt-3 p-2 bg-blue-500/5 rounded-lg text-[9px] text-blue-600 font-medium flex items-center gap-2"><i data-lucide="ear" class="w-3 h-3"></i> Hearing self...</div>
-        <button onclick="toggleVoiceOrbit()" class="w-full mt-4 py-2 bg-red-500/10 text-red-500 text-[10px] font-bold uppercase rounded-lg">Disconnect</button>
-    </div>
-
     <!-- Modals -->
-    <div id="collab-modal" class="hidden fixed inset-0 z-[100] bg-black/50 flex items-center justify-center backdrop-blur-sm">
-        <div class="bg-white dark:bg-[#1e1e1e] w-80 rounded-2xl p-6 shadow-2xl text-center">
-            <h3 class="font-bold mb-4 dark:text-white text-lg">Join Space</h3>
-            <input id="friend-page-code" type="text" placeholder="Workspace Code" class="w-full bg-white dark:bg-gray-800 dark:text-white border border-gray-200 dark:border-gray-700 rounded-xl px-4 py-3 text-sm outline-none mb-4 font-mono" />
-            <div class="flex gap-2">
-                <button onclick="document.getElementById('collab-modal').classList.add('hidden')" class="flex-1 py-3 bg-gray-100 dark:bg-gray-800 rounded-xl text-sm font-bold text-gray-500">Cancel</button>
-                <button onclick="joinFriendPage()" class="flex-1 py-3 bg-blue-600 rounded-xl text-sm font-bold text-white shadow-lg">Connect</button>
+    <div id="ws-modal" class="hidden fixed inset-0 z-[2000] modal-bg flex items-center justify-center p-6">
+        <div class="bg-[var(--bg-primary)] w-full max-w-xs rounded-xl p-6 shadow-2xl">
+            <h3 class="font-bold text-sm mb-4" id="ws-modal-title">Workspace Settings</h3>
+            <div class="space-y-4">
+                <input id="ws-modal-input" type="text" class="w-full bg-[var(--input-bg)] border border-[var(--border-color)] rounded-md px-3 py-2 text-sm outline-none" placeholder="Name..." />
+                <div>
+                    <label class="text-[10px] font-bold text-gray-400 uppercase mb-2 block">Accent Color</label>
+                    <div class="flex gap-3">
+                        <button onclick="setWSModalColor(null)" class="w-6 h-6 rounded-full border border-gray-300 bg-white" title="None"></button>
+                        <button onclick="setWSModalColor('blue')" class="w-6 h-6 rounded-full bg-[#2383e2]"></button>
+                        <button onclick="setWSModalColor('orange')" class="w-6 h-6 rounded-full bg-[#d9730d]"></button>
+                        <button onclick="setWSModalColor('green')" class="w-6 h-6 rounded-full bg-[#0f7b6c]"></button>
+                    </div>
+                </div>
+            </div>
+            <div class="flex gap-2 mt-8">
+                <button onclick="closeWSModal()" class="flex-1 py-2 text-xs font-medium text-gray-500">Cancel</button>
+                <button onclick="saveWSModal()" class="flex-1 py-2 bg-blue-600 rounded-md text-xs font-bold text-white shadow-lg">Done</button>
             </div>
         </div>
     </div>
 
-    <div id="name-modal" class="hidden fixed inset-0 z-[200] bg-black/60 flex items-center justify-center backdrop-blur-md">
-        <div class="bg-white dark:bg-gray-900 w-72 rounded-2xl p-6 shadow-2xl text-center">
-            <h3 class="font-bold mb-4 dark:text-white">Orbit Login</h3>
-            <input id="initial-name" type="text" class="w-full bg-gray-50 dark:bg-gray-800 dark:text-white border rounded-xl px-4 py-3 text-sm outline-none mb-4" placeholder="Your name" />
-            <button onclick="window.saveInitialName()" class="w-full py-3 bg-blue-600 rounded-xl text-sm font-bold text-white shadow-xl">Launch</button>
+    <div id="auth-modal" class="fixed inset-0 z-[1000] bg-white dark:bg-[#191919] flex items-center justify-center p-6">
+        <div class="w-full max-w-xs text-center">
+            <div class="w-16 h-16 bg-blue-600 rounded-2xl flex items-center justify-center text-white mx-auto mb-6 shadow-xl">
+                <i data-lucide="orbit" class="w-8 h-8"></i>
+            </div>
+            <h2 class="text-2xl font-black mb-2 tracking-tight">Orbit Workspace</h2>
+            <p class="text-xs text-gray-500 mb-8">Personal organization & collaboration.</p>
+            <input id="login-username" type="text" class="w-full bg-gray-50 dark:bg-[#252525] border border-gray-200 dark:border-gray-700 rounded-lg px-4 py-3 text-sm outline-none mb-4 font-bold" placeholder="Your Name" />
+            <button onclick="login()" class="w-full py-3 bg-blue-600 rounded-lg text-sm font-bold text-white shadow-lg hover:bg-blue-700">Enter Space</button>
         </div>
     </div>
 
-    <div id="share-modal" class="hidden fixed inset-0 z-[100] bg-black/40 flex items-center justify-center backdrop-blur-sm">
-        <div class="bg-white dark:bg-gray-800 w-72 rounded-2xl p-6 shadow-2xl text-center">
-            <h3 class="font-bold mb-4 dark:text-white">Workspace Code</h3>
-            <div class="bg-gray-100 dark:bg-gray-900 p-4 rounded-xl mb-6 font-mono text-sm font-bold text-blue-600 select-all" id="share-code-display"></div>
-            <button onclick="document.getElementById('share-modal').classList.add('hidden')" class="w-full py-2 text-xs font-bold text-gray-500 uppercase tracking-widest">Done</button>
+    <div id="join-modal" class="hidden fixed inset-0 z-[1000] bg-black/40 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-[var(--bg-primary)] w-full max-w-sm rounded-xl p-6 shadow-2xl">
+            <h3 class="font-bold text-lg mb-2">Connect to Space</h3>
+            <input id="join-code" type="text" class="w-full bg-gray-50 dark:bg-gray-800 border border-[var(--border-color)] rounded-lg px-4 py-3 text-sm outline-none mb-4 font-mono" placeholder="place_id_..." />
+            <div class="flex gap-2">
+                <button onclick="document.getElementById('join-modal').classList.add('hidden')" class="flex-1 py-2 text-sm text-gray-500">Cancel</button>
+                <button onclick="joinExternalSpace()" class="flex-1 py-2 bg-blue-600 rounded-lg text-sm font-bold text-white">Join</button>
+            </div>
         </div>
     </div>
+
+    <div id="share-modal" class="hidden fixed inset-0 z-[1000] bg-black/40 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-[var(--bg-primary)] w-full max-w-sm rounded-xl p-8 shadow-2xl text-center">
+            <h3 class="font-bold text-xl mb-4" id="share-title">Invite</h3>
+            <div class="bg-gray-100 dark:bg-gray-900 p-4 rounded-lg mb-6 font-mono text-sm font-bold text-blue-600 break-all select-all" id="share-code-display"></div>
+            <button onclick="copyShareCode()" class="w-full py-3 bg-blue-600 rounded-lg text-sm font-bold text-white shadow-xl mb-4">Copy Code</button>
+            <button onclick="document.getElementById('share-modal').classList.add('hidden')" class="text-xs font-bold text-gray-400 uppercase">Close</button>
+        </div>
+    </div>
+
+    <!-- Hidden block image upload -->
+    <input type="file" id="image-block-uploader" class="hidden" accept="image/*">
 
     <div id="remote-audio-container" class="hidden"></div>
-    <audio id="self-test-audio" class="hidden" autoplay></audio>
 
     <script>
-        const ROOT_ABLY_KEY = "LJhgHg.rF2whQ:Imz-F_d5gOcMGAiJNWIGjhaAXXba8Hpbefj3LtPaT0s"; 
-        const DEFAULT_COVERS = ['https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&q=80&w=2000', 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&q=80&w=2000', 'https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?auto=format&fit=crop&q=80&w=2000'];
-        const EMOJI_LIST = ['🚀', '🪐', '✨', '🛸', '🌍', '☄️', '🔭', '🎨', '📝', '🛠️', '🎯', '💡'];
-        const STORAGE_KEY = 'orbit_v28_final_media';
-
+        const STORAGE_KEY = 'orbit_notion_v3_final';
+        const ROOT_ABLY_KEY = "LJhgHg.rF2whQ:Imz-F_d5gOcMGAiJNWIGjhaAXXba8Hpbefj3LtPaT0s";
+        const DEFAULT_COVERS = ['https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&q=80&w=2000'];
+        const EMOJI_LIST = ['🚀', '🪐', '✨', '🌍', '🎨', '📝', '🎯', '💡', '🔥', '📂', '⚡', '📐', '🧬', '🍎', '💻', '💼', '📅', '🔍'];
+        
         let state = {
-            username: '', darkMode: false, onCall: false, activePageId: '1', searchQuery: '', focusMode: false, presentMode: false,
-            pages: [{ id: '1', title: 'Home', icon: '🚀', cover: DEFAULT_COVERS[0], isShared: false, blocks: [{ id: 'b1', type: 'h1', content: 'Orbit Workspace' }, { id: 'b2', type: 'text', content: 'Sync active. Paste Image/Video URLs below.' }] }],
-            clipboard: [], sidebarOpen: true
+            user: null,
+            darkMode: false,
+            activePageId: null,
+            structure: [],
+            expandedWorkspaces: new Set(),
+            sidebarOpen: true
         };
 
-        let ably = null, channel = null, sortableMain = null, sortableClipboard = null;
-        let localStream = null, peerConnections = {}, audioCtx = null, gainNode = null, isAudioTesting = false;
-        let saveTimeout = null;
-
-        // Global functions
-        function setActivePage(id) { 
-            state.activePageId = id; saveState(true); renderSidebar(); renderActivePage(); if(ably) joinChannel(id); 
-        }
-
-        window.saveInitialName = function() {
-            const name = document.getElementById('initial-name').value.trim();
-            if (!name) return; state.username = name;
-            document.getElementById('name-modal').classList.add('hidden');
-            saveState(true); init();
-        };
+        let ably = null, channel = null, sortableMain = null;
+        let modalWSContext = null; 
+        let modalWSColor = null;
 
         function init() {
-            loadState(); applyTheme();
-            if (!state.username) { document.getElementById('name-modal').classList.remove('hidden'); return; }
-            renderSidebar(); renderActivePage(); setupEmojiPicker(); setupSlashMenu();
-            initDragAndDrop(); setupMenuDragging();
-            document.addEventListener('mousedown', (e) => {
-                const menu = document.getElementById('slash-menu');
-                if (menu && menu.style.display === 'flex' && !menu.contains(e.target)) hideSlashMenu();
-            });
-            document.addEventListener('keydown', (e) => {
-                if (e.ctrlKey && e.key === '/') { e.preventDefault(); document.getElementById('search-input').focus(); }
-                if (e.ctrlKey && e.key === 's') { e.preventDefault(); saveState(); }
-                if (e.key === 'Escape') hideSlashMenu();
-            });
-            initAbly(); lucide.createIcons();
+            loadState();
+            if (!state.user) {
+                document.getElementById('auth-modal').classList.remove('hidden');
+            } else {
+                document.getElementById('auth-modal').classList.add('hidden');
+                document.getElementById('place-name-display').innerText = `${state.user.username}'s Place`;
+                applyTheme();
+                renderSidebar();
+                if (state.activePageId) renderActivePage();
+                setupEmojiPicker();
+                setupSlashMenu();
+                initAbly();
+                if(!state.sidebarOpen) toggleSidebar(false); 
+            }
+            lucide.createIcons();
+        }
+
+        function login() {
+            const name = document.getElementById('login-username').value.trim();
+            if (!name) return;
+            state.user = { username: name, placeId: 'place_' + Math.random().toString(36).substr(2, 6) };
+            state.structure = [{
+                id: 'home_' + Date.now(),
+                type: 'page',
+                title: 'Quick Start',
+                icon: '🚀',
+                cover: DEFAULT_COVERS[0],
+                blocks: [
+                    { id: 'b1', type: 'h1', content: `Welcome to ${name}'s Orbit` },
+                    { id: 'b2', type: 'callout', content: 'Type <b>/</b> to create blocks or drag images directly into the page.', emoji: '✨' }
+                ]
+            }];
+            state.activePageId = state.structure[0].id;
+            saveState();
+            init();
+        }
+
+        function logout() {
+            if(confirm("Logout? Your data is saved locally.")) {
+                state.user = null;
+                saveState();
+                location.reload();
+            }
         }
 
         function loadState() {
             const saved = localStorage.getItem(STORAGE_KEY);
-            if (saved) { try { Object.assign(state, JSON.parse(saved)); } catch (e) {} }
+            if (saved) {
+                try {
+                    const parsed = JSON.parse(saved);
+                    Object.assign(state, parsed);
+                    state.expandedWorkspaces = new Set(parsed.expandedWorkspaces || []);
+                } catch (e) {}
+            }
         }
 
-        function saveState(skipBroadcast = false) {
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-            const activePage = state.pages.find(p => p.id === state.activePageId);
-            if (!skipBroadcast && channel && activePage?.isShared) channel.publish('update', { pages: state.pages });
-            
-            const status = document.getElementById('save-status');
-            if(status) { status.style.opacity = '1'; clearTimeout(saveTimeout); saveTimeout = setTimeout(() => status.style.opacity = '0', 2000); }
-            updateEditorStats(); renderTOC();
+        function saveState() {
+            const toSave = { ...state, expandedWorkspaces: Array.from(state.expandedWorkspaces) };
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(toSave));
+            if (channel) channel.publish('update', { structure: state.structure });
         }
 
         function applyTheme() {
             document.body.classList.toggle('dark-mode', state.darkMode);
-            document.body.classList.toggle('focus-mode', state.focusMode);
-            document.body.classList.toggle('present-mode', state.presentMode);
         }
 
-        function toggleDarkModeUI() { state.darkMode = !state.darkMode; applyTheme(); saveState(true); }
-        function toggleFocusMode() { state.focusMode = !state.focusMode; applyTheme(); saveState(true); }
-        function togglePresentMode() { state.presentMode = !state.presentMode; applyTheme(); renderActivePage(); }
+        function toggleDarkModeUI() { state.darkMode = !state.darkMode; applyTheme(); saveState(); }
 
-        function updateProgressBar() {
-            const container = document.getElementById('main-scroll-container');
-            const scrolled = (container.scrollTop / (container.scrollHeight - container.clientHeight)) * 100;
-            document.getElementById('progress-bar').style.width = (scrolled || 0) + "%";
-        }
-
-        function updateEditorStats() {
-            const p = state.pages.find(pg => pg.id === state.activePageId); if (!p) return;
-            const statsBar = document.getElementById('editor-stats');
-            let text = p.blocks.map(b => (b.content || '').replace(/<[^>]*>?/gm, '')).join(' ');
-            let wordCount = text.trim() ? text.trim().split(/\s+/).length : 0;
-            document.getElementById('stat-words').innerText = wordCount;
-            document.getElementById('stat-chars').innerText = text.length;
-            document.getElementById('stat-read').innerText = `${Math.max(1, Math.ceil(wordCount / 200))}m`;
-            statsBar.style.opacity = (text.length > 0 || state.sidebarOpen) ? '1' : '0';
-        }
-
-        function renderTOC() {
-            const p = state.pages.find(pg => pg.id === state.activePageId);
-            const list = document.getElementById('toc-list');
-            const container = document.getElementById('toc-container');
-            if(!p) return;
-            const headings = p.blocks.filter(b => b.type === 'h1' || b.type === 'h2');
-            if (headings.length > 0) {
-                container.classList.remove('hidden');
-                list.innerHTML = headings.map(h => `<div class="toc-item ${h.type === 'h2' ? 'toc-h2' : ''}" onclick="scrollToBlock('${h.id}')">${h.content.replace(/<[^>]*>?/gm, '') || 'Untitled'}</div>`).join('');
-            } else container.classList.add('hidden');
-        }
-
-        function scrollToBlock(id) {
-            const el = document.querySelector(`[data-id="${id}"]`);
-            if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        }
-
-        function exportToMarkdown() {
-            const p = state.pages.find(pg => pg.id === state.activePageId);
-            let md = `# ${p.title}\n\n`;
-            p.blocks.forEach(b => {
-                if (b.type === 'h1') md += `# ${b.content}\n\n`;
-                else if (b.type === 'h2') md += `## ${b.content}\n\n`;
-                else if (b.type === 'todo') md += `- [${b.checked ? 'x' : ' '}] ${b.content}\n`;
-                else if (b.type === 'quote') md += `> ${b.content}\n\n`;
-                else md += `${b.content}\n\n`;
-            });
-            const blob = new Blob([md], { type: 'text/markdown' });
-            const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `${p.title}.md`; a.click();
-        }
-
-        function handleImportFile(input) {
-            const file = input.files[0]; if (!file) return;
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                const text = e.target.result; const lines = text.split('\n');
-                const newBlocks = lines.filter(l => l.trim()).map(line => {
-                    let type = 'text', content = line.trim();
-                    if (line.startsWith('# ')) { type = 'h1'; content = line.substring(2); }
-                    else if (line.startsWith('## ')) { type = 'h2'; content = line.substring(3); }
-                    else if (line.startsWith('> ')) { type = 'quote'; content = line.substring(2); }
-                    else if (line.startsWith('- [ ] ')) { type = 'todo'; content = line.substring(6); }
-                    return { id: 'b' + Math.random().toString(36).substr(2, 6), type, content };
-                });
-                const p = state.pages.find(pg => pg.id === state.activePageId);
-                p.blocks = newBlocks.length > 0 ? newBlocks : [{ id: 'b' + Date.now(), type: 'text', content: '' }];
-                renderActivePage(); saveState();
-            };
-            reader.readAsText(file);
-        }
-
-        // --- Audio Logic ---
-        async function toggleVoiceOrbit() {
-            state.onCall = !state.onCall;
-            const btn = document.getElementById('voice-btn');
-            const overlay = document.getElementById('voice-overlay');
-            if (state.onCall) {
-                try {
-                    const constraints = { audio: { echoCancellation: true, noiseSuppression: document.getElementById('iso-toggle').checked, autoGainControl: true } };
-                    localStream = await navigator.mediaDevices.getUserMedia(constraints);
-                    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-                    const source = audioCtx.createMediaStreamSource(localStream);
-                    gainNode = audioCtx.createGain(); source.connect(gainNode);
-                    btn.classList.add('voice-active'); overlay.style.display = 'block';
-                } catch (e) { state.onCall = false; return; }
+        function toggleSidebar(shouldToggle = true) {
+            if(shouldToggle) state.sidebarOpen = !state.sidebarOpen;
+            const sidebar = document.getElementById('sidebar');
+            const trigger = document.getElementById('reopen-sidebar-trigger');
+            if (state.sidebarOpen) {
+                sidebar.style.width = '256px';
+                sidebar.style.opacity = '1';
+                trigger.classList.add('hidden');
             } else {
-                btn.classList.remove('voice-active'); overlay.style.display = 'none';
-                if (localStream) { localStream.getTracks().forEach(t => t.stop()); localStream = null; }
-                if (audioCtx) { audioCtx.close(); audioCtx = null; }
-                Object.values(peerConnections).forEach(pc => pc.close()); peerConnections = {};
-                document.getElementById('remote-audio-container').innerHTML = ''; stopAudioTest();
+                sidebar.style.width = '0px';
+                sidebar.style.opacity = '0';
+                trigger.classList.remove('hidden');
             }
-            if (channel) { channel.presence.update({ onCall: state.onCall }); channel.publish('signal', { type: 'hello', from: ably.auth.clientId }); }
+            saveState();
+        }
+
+        // --- Structure Helpers ---
+
+        function findInStructure(id, list = state.structure) {
+            for (let item of list) {
+                if (item.id === id) return item;
+                if (item.children) {
+                    const found = findInStructure(id, item.children);
+                    if (found) return found;
+                }
+            }
+            return null;
+        }
+
+        function findParent(id, list = state.structure, parent = null) {
+            for (let item of list) {
+                if (item.id === id) return parent;
+                if (item.children) {
+                    const found = findParent(id, item.children, item);
+                    if (found) return found;
+                }
+            }
+            return null;
+        }
+
+        function addPage(parentWS = null) {
+            const page = {
+                id: 'pg_' + Math.random().toString(36).substr(2, 6),
+                type: 'page',
+                title: 'Untitled',
+                icon: '📄',
+                cover: DEFAULT_COVERS[0],
+                blocks: [{ id: 'b_' + Date.now(), type: 'text', content: '' }]
+            };
+            if (parentWS) {
+                const ws = findInStructure(parentWS);
+                if (ws) ws.children.push(page);
+                state.expandedWorkspaces.add(parentWS);
+            } else {
+                state.structure.push(page);
+            }
+            setActivePage(page.id);
+        }
+
+        function openWorkspaceModal(id = null) {
+            modalWSContext = id;
+            const modal = document.getElementById('ws-modal');
+            const input = document.getElementById('ws-modal-input');
+            if (id) {
+                const ws = findInStructure(id);
+                input.value = ws.title;
+                modalWSColor = ws.highlight;
+            } else {
+                input.value = "";
+                modalWSColor = null;
+            }
+            modal.classList.remove('hidden');
+            input.focus();
+        }
+
+        function closeWSModal() {
+            document.getElementById('ws-modal').classList.add('hidden');
+            modalWSContext = null;
+        }
+
+        function setWSModalColor(color) { modalWSColor = color; }
+
+        function saveWSModal() {
+            const name = document.getElementById('ws-modal-input').value.trim();
+            if (!name) return;
+            if (modalWSContext) {
+                const ws = findInStructure(modalWSContext);
+                ws.title = name;
+                ws.highlight = modalWSColor;
+            } else {
+                state.structure.push({
+                    id: 'ws_' + Math.random().toString(36).substr(2, 6),
+                    type: 'workspace',
+                    title: name,
+                    highlight: modalWSColor,
+                    children: []
+                });
+            }
+            renderSidebar(); saveState(); closeWSModal();
+        }
+
+        function deleteItem(e, id) {
+            if(e) e.stopPropagation();
+            if(!confirm("Delete this?")) return;
+            const parent = findParent(id);
+            if (parent) parent.children = parent.children.filter(i => i.id !== id);
+            else state.structure = state.structure.filter(i => i.id !== id);
+            if (state.activePageId === id) state.activePageId = null;
+            renderSidebar(); renderActivePage(); saveState();
+        }
+
+        function deleteBlock(id) {
+            const page = findInStructure(state.activePageId);
+            if (page && page.blocks.length > 1) {
+                page.blocks = page.blocks.filter(b => b.id !== id);
+                renderActivePage();
+                saveState();
+            }
+        }
+
+        // --- Render Sidebar ---
+
+        function renderSidebar() {
+            const list = document.getElementById('structure-list');
+            list.innerHTML = '';
+            state.structure.forEach(item => {
+                list.appendChild(createSidebarItem(item));
+            });
             lucide.createIcons();
         }
 
-        function updateMicVolume(val) { if (gainNode) gainNode.gain.value = val / 100; document.getElementById('vol-value').innerText = val + "%"; }
-        async function toggleIsolation() { if (!localStream) return; const track = localStream.getAudioTracks()[0]; await track.applyConstraints({ noiseSuppression: document.getElementById('iso-toggle').checked }); }
-        function toggleAudioTest() {
-            const testBtn = document.getElementById('test-mic-btn'); const testAudio = document.getElementById('self-test-audio'); const indicator = document.getElementById('self-test-indicator');
-            isAudioTesting = !isAudioTesting;
-            if (isAudioTesting && localStream) { testAudio.srcObject = localStream; testBtn.innerText = "Stop Test"; indicator.classList.remove('hidden'); }
-            else stopAudioTest();
-        }
-        function stopAudioTest() {
-            const testBtn = document.getElementById('test-mic-btn'); const testAudio = document.getElementById('self-test-audio'); const indicator = document.getElementById('self-test-indicator');
-            isAudioTesting = false; testAudio.srcObject = null; if (testBtn) testBtn.innerText = "Test Mic"; if (indicator) indicator.classList.add('hidden');
-        }
-
-        function createPeerConnection(remoteId) {
-            const pc = new RTCPeerConnection({ iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] });
-            if (localStream) localStream.getTracks().forEach(track => pc.addTrack(track, localStream));
-            pc.onicecandidate = (e) => { if (e.candidate) channel.publish('signal', { to: remoteId, from: ably.auth.clientId, type: 'ice', data: e.candidate }); };
-            pc.ontrack = (e) => {
-                let audio = document.createElement('audio'); audio.autoplay = true; audio.srcObject = e.streams[0];
-                document.getElementById('remote-audio-container').appendChild(audio);
-            };
-            peerConnections[remoteId] = pc; return pc;
-        }
-
-        async function handleSignal(m) {
-            const { from, to, type, data } = m.data;
-            if (from === ably.auth.clientId || (to && to !== ably.auth.clientId)) return;
-            let pc = peerConnections[from] || createPeerConnection(from);
-            if (type === 'offer') { await pc.setRemoteDescription(new RTCSessionDescription(data)); const ans = await pc.createAnswer(); await pc.setLocalDescription(ans); channel.publish('signal', { to: from, from: ably.auth.clientId, type: 'answer', data: ans }); }
-            else if (type === 'answer') await pc.setRemoteDescription(new RTCSessionDescription(data));
-            else if (type === 'ice') await pc.addIceCandidate(new RTCIceCandidate(data));
-            else if (type === 'hello' && state.onCall) { const offer = await pc.createOffer(); await pc.setLocalDescription(offer); channel.publish('signal', { to: from, from: ably.auth.clientId, type: 'offer', data: offer }); }
-        }
-
-        // --- Block Logic ---
-        function createBlockElement(block, isFirst) {
+        function createSidebarItem(item, depth = 0) {
             const div = document.createElement('div');
-            div.className = `group relative w-full block-container fade-in ${block.highlight || ''}`;
-            div.dataset.id = block.id; div.dataset.type = block.type;
-            let html = '';
-            switch (block.type) {
-                case 'h1': html = `<div contenteditable="${!state.presentMode}" class="w-full text-4xl font-extrabold py-2 outline-none text-[var(--text-main)]" placeholder="Heading 1">${block.content || ''}</div>`; break;
-                case 'h2': html = `<div contenteditable="${!state.presentMode}" class="w-full text-2xl font-bold py-1 outline-none text-[var(--text-main)]" placeholder="Heading 2">${block.content || ''}</div>`; break;
-                case 'todo': html = `<div class="flex items-start gap-3 py-1 flex-1"><input type="checkbox" onchange="toggleTodoState('${block.id}')" ${block.checked ? 'checked' : ''} class="mt-1.5 h-4 w-4 rounded border-gray-300 cursor-pointer" /><div contenteditable="${!state.presentMode}" class="flex-1 outline-none text-[var(--text-main)] ${block.checked ? 'line-through opacity-50' : ''}" placeholder="To-do">${block.content || ''}</div></div>`; break;
-                case 'quote': html = `<div contenteditable="${!state.presentMode}" class="quote-block flex-1 outline-none text-[var(--text-main)]" placeholder="Quote">${block.content || ''}</div>`; break;
-                case 'callout': html = `<div class="callout-block flex-1"><div class="text-xl">💡</div><div contenteditable="${!state.presentMode}" class="flex-1 outline-none text-[var(--text-main)]" placeholder="Callout">${block.content || ''}</div></div>`; break;
-                case 'playground': html = `<div class="playground-block flex-1"><div class="playground-header"><span class="text-[9px] font-bold text-gray-500 uppercase">Sandbox</span><button onclick="runPlayground('${block.id}')" class="bg-blue-600 text-white text-[9px] font-bold px-3 py-1 rounded-md hover:bg-blue-700">RUN</button></div><textarea class="playground-code outline-none" oninput="updatePlaygroundCode('${block.id}', this.value)">${block.content || ''}</textarea><iframe id="pg-preview-${block.id}" class="playground-preview"></iframe></div>`; break;
-                case 'divider': html = `<hr class="w-full my-6 border-[var(--border-color)]" />`; break;
-                case 'math': html = `<div class="w-full my-2"><div class="math-block" id="math-render-${block.id}" onclick="editMath('${block.id}')"></div><textarea class="math-editor hidden" id="math-editor-${block.id}" oninput="syncMath('${block.id}', this.value)" onblur="finishEditMath('${block.id}')">${block.content || 'e=mc^2'}</textarea></div>`; break;
-                case 'image': 
-                    html = block.content ? `<div class="media-block"><img src="${block.content}" onerror="this.src='https://via.placeholder.com/800x400?text=Invalid+Image+URL'" /><div class="media-overlay"><button onclick="clearMedia('${block.id}')" class="bg-black/50 text-white p-2 rounded-lg hover:bg-black/80 transition-all"><i data-lucide="edit-3" class="w-3.5 h-3.5"></i></button></div></div>` : 
-                    `<div class="media-input-box"><input type="text" placeholder="Paste direct image link..." class="media-url-input" onkeydown="handleMediaInput(event, '${block.id}')"></div>`;
-                    break;
-                case 'video': 
-                    if(block.content) {
-                        const videoId = block.content.includes('v=') ? block.content.split('v=')[1].split('&')[0] : (block.content.includes('youtu.be') ? block.content.split('/').pop() : block.content);
-                        html = `<div class="media-block"><iframe src="https://www.youtube.com/embed/${videoId}?enablejsapi=1&origin=${window.location.origin}" frameborder="0" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe><div class="media-overlay"><button onclick="clearMedia('${block.id}')" class="bg-black/50 text-white p-2 rounded-lg hover:bg-black/80 transition-all"><i data-lucide="edit-3" class="w-3.5 h-3.5"></i></button></div></div>`;
-                    } else {
-                        html = `<div class="media-input-box"><input type="text" placeholder="Paste YouTube link..." class="media-url-input" onkeydown="handleMediaInput(event, '${block.id}')"></div>`;
-                    }
-                    break;
-                case 'draw': 
-                    html = `<div class="whiteboard-block" id="draw-container-${block.id}"><canvas id="canvas-${block.id}" class="w-full h-full"></canvas><div class="whiteboard-controls"><button onclick="clearCanvas('${block.id}')" class="p-2 bg-white border rounded shadow hover:bg-gray-50"><i data-lucide="refresh-cw" class="w-3 h-3 text-gray-400"></i></button></div></div>`;
-                    break;
-                default: html = `<div contenteditable="${!state.presentMode}" class="flex-1 outline-none py-1.5 leading-relaxed text-[var(--text-main)]" placeholder="Type '/' for commands...">${block.content || ''}</div>`;
+            const isExp = state.expandedWorkspaces.has(item.id);
+            const isActive = state.activePageId === item.id;
+            const highlightClass = item.highlight ? `workspace-highlight-${item.highlight}` : '';
+
+            div.innerHTML = `
+                <div class="group flex items-center px-3 py-1 cursor-pointer transition-colors rounded-md text-[13px] ${isActive ? 'sidebar-active' : 'text-[#7e7c78] hover:bg-[var(--block-hover)]'}" style="padding-left: ${depth * 12 + 12}px">
+                    ${item.type === 'workspace' ? `
+                        <button onclick="toggleWS(event, '${item.id}')" class="p-0.5 hover:bg-gray-200 dark:hover:bg-gray-700 rounded mr-1 transition-transform ${isExp ? 'rotate-90' : ''}">
+                            <i data-lucide="chevron-right" class="w-3 h-3"></i>
+                        </button>
+                    ` : '<div class="w-4"></div>'}
+                    
+                    <div onclick="${item.type === 'page' ? `setActivePage('${item.id}')` : `toggleWS(event, '${item.id}')`}" class="flex-1 truncate flex items-center gap-2 ${highlightClass}">
+                        ${item.type === 'page' ? `<span>${item.icon}</span>` : ''}
+                        <span class="truncate">${item.title}</span>
+                    </div>
+
+                    <div class="opacity-0 group-hover:opacity-100 flex items-center gap-0.5 ml-auto">
+                        ${item.type === 'workspace' ? `
+                            <button onclick="addPage('${item.id}')" class="p-1 hover:bg-gray-200 dark:hover:bg-gray-700 rounded"><i data-lucide="plus" class="w-3 h-3"></i></button>
+                            <button onclick="openWorkspaceModal('${item.id}')" class="p-1 hover:bg-gray-200 dark:hover:bg-gray-700 rounded"><i data-lucide="settings-2" class="w-3 h-3"></i></button>
+                        ` : ''}
+                        <button onclick="deleteItem(event, '${item.id}')" class="p-1 hover:text-red-500 rounded"><i data-lucide="trash-2" class="w-3 h-3"></i></button>
+                    </div>
+                </div>
+            `;
+
+            if (item.type === 'workspace' && isExp && item.children) {
+                const sub = document.createElement('div');
+                item.children.forEach(c => sub.appendChild(createSidebarItem(c, depth + 1)));
+                div.appendChild(sub);
             }
-            div.innerHTML = `<div class="drag-handle opacity-0 group-hover:opacity-100 transition-opacity absolute -left-10 top-1 flex flex-col gap-1"><i data-lucide="grip-vertical" class="w-4 h-4"></i><button onclick="deleteBlock('${block.id}')" class="hover:text-red-500"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button></div>${html}`;
-            
-            const edit = div.querySelector('[contenteditable="true"]');
-            if (edit) {
-                edit.addEventListener('input', () => { 
-                    const raw = edit.innerText;
-                    if (raw === '# ') { edit.innerText = ''; selectSlashItem('h1', block.id); return; }
-                    if (raw === '[] ') { edit.innerText = ''; selectSlashItem('todo', block.id); return; }
-                    if (raw === '---') { edit.innerText = ''; selectSlashItem('divider', block.id); return; }
-                    block.content = edit.innerHTML; saveState(); if (raw.length > 5 && !raw.startsWith('/')) hideSlashMenu(); 
-                });
-                edit.addEventListener('keydown', (e) => {
-                    if (e.key === '/') { if (!edit.innerText.trim()) { e.preventDefault(); openSlashMenu(div, block.id); } }
-                    else if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); addBlockBelow(block.id); hideSlashMenu(); }
-                    else if (e.key === 'Backspace' && !edit.innerText.trim() && !isFirst) { e.preventDefault(); deleteBlock(block.id); }
-                });
-            }
-            if(block.type === 'playground') setTimeout(() => runPlayground(block.id), 50);
-            if(block.type === 'math') setTimeout(() => renderMath(block.id, block.content), 50);
-            if(block.type === 'draw') setTimeout(() => initCanvas(block.id, block.content), 50);
             return div;
         }
 
-        // --- Smart URL Logic ---
-        function handleMediaInput(e, id) {
-            if(e.key === 'Enter') {
-                let url = e.target.value;
-                try {
-                    const parsedUrl = new URL(url);
-                    const params = new URLSearchParams(parsedUrl.search);
-                    const direct = params.get('mediaurl') || params.get('imgurl');
-                    if(direct) url = decodeURIComponent(direct);
-                } catch(err) {}
-                setMediaURL(id, url);
-            }
-        }
-        function clearMedia(id) { setMediaURL(id, ''); }
-        function setMediaURL(id, url) {
-            const p = state.pages.find(pg => pg.id === state.activePageId);
-            const b = p.blocks.find(bk => bk.id === id);
-            if(b) { 
-                b.content = url; 
-                // Force a re-render for this block specifically to update from input box to media view
-                renderActivePage(); 
-                saveState(); 
-                // Always add a text block below for continuity
-                addBlockBelow(id);
-            }
+        function toggleWS(e, id) {
+            e.stopPropagation();
+            if (state.expandedWorkspaces.has(id)) state.expandedWorkspaces.delete(id);
+            else state.expandedWorkspaces.add(id);
+            renderSidebar(); saveState();
         }
 
-        function renderMath(id, content) { const el = document.getElementById(`math-render-${id}`); if(el) katex.render(content || 'e^{i\\pi} + 1 = 0', el, { throwOnError: false, displayMode: true }); }
-        function editMath(id) { document.getElementById(`math-render-${id}`).classList.add('hidden'); const ed = document.getElementById(`math-editor-${id}`); ed.classList.remove('hidden'); ed.focus(); }
-        function syncMath(id, val) { const p = state.pages.find(pg => pg.id === state.activePageId); const b = p.blocks.find(bk => bk.id === id); if(b) { b.content = val; renderMath(id, val); saveState(); } }
-        function finishEditMath(id) { document.getElementById(`math-render-${id}`).classList.remove('hidden'); document.getElementById(`math-editor-${id}`).classList.add('hidden'); }
+        // --- Main Editor Logic ---
 
-        // --- Whiteboard ---
-        function initCanvas(id, savedData) {
-            const canvas = document.getElementById(`canvas-${id}`); if(!canvas) return;
-            const ctx = canvas.getContext('2d'); const container = document.getElementById(`draw-container-${id}`);
-            canvas.width = container.offsetWidth; canvas.height = container.offsetHeight;
-            if(savedData) { const img = new Image(); img.onload = () => ctx.drawImage(img, 0, 0); img.src = savedData; }
-            let drawing = false;
-            canvas.onmousedown = (e) => { drawing = true; draw(e); };
-            canvas.onmousemove = draw;
-            canvas.onmouseup = () => { drawing = false; ctx.beginPath(); syncCanvas(id); };
-            function draw(e) {
-                if(!drawing) return; ctx.lineWidth = 3; ctx.lineCap = 'round'; ctx.strokeStyle = state.darkMode ? '#fff' : '#000';
-                const rect = canvas.getBoundingClientRect();
-                ctx.lineTo(e.clientX - rect.left, e.clientY - rect.top);
-                ctx.stroke(); ctx.beginPath(); ctx.moveTo(e.clientX - rect.left, e.clientY - rect.top);
+        function setActivePage(id) {
+            state.activePageId = id;
+            renderSidebar(); renderActivePage(); saveState();
+        }
+
+        function renderActivePage() {
+            const page = findInStructure(state.activePageId);
+            const blocksUI = document.getElementById('editor-blocks');
+            const breadUI = document.getElementById('breadcrumbs');
+            
+            if (!page || page.type !== 'page') {
+                blocksUI.innerHTML = `<div class="p-20 text-center text-gray-400 text-sm">Create or select a page.</div>`;
+                document.getElementById('main-title-input').value = "";
+                breadUI.innerHTML = "";
+                return;
             }
-        }
-        function syncCanvas(id) { const canvas = document.getElementById(`canvas-${id}`); if(!canvas) return; const p = state.pages.find(pg => pg.id === state.activePageId); const b = p.blocks.find(bk => bk.id === id); if(b) { b.content = canvas.toDataURL(); saveState(); } }
-        function clearCanvas(id) { const canvas = document.getElementById(`canvas-${id}`); const ctx = canvas.getContext('2d'); ctx.clearRect(0, 0, canvas.width, canvas.height); syncCanvas(id); }
 
-        // --- Slash Menu ---
-        function openSlashMenu(el, id) { 
-            state.activeBlockIdForMenu = id; const menu = document.getElementById('slash-menu'), container = document.getElementById('main-scroll-container');
-            const selection = window.getSelection(); let rect = (selection.rangeCount > 0) ? selection.getRangeAt(0).getBoundingClientRect() : el.getBoundingClientRect();
-            const cRect = container.getBoundingClientRect(); menu.style.display = 'flex'; menu.style.top = (rect.top - cRect.top + container.scrollTop) + 'px'; 
-            let rightOffset = state.sidebarOpen ? 450 : 240; 
-            menu.style.left = (rect.left - cRect.left + rightOffset) + 'px'; 
-            if (parseInt(menu.style.left) + 240 > cRect.width) menu.style.left = (cRect.width - 250) + 'px';
-            lucide.createIcons(); 
+            document.getElementById('page-cover').src = page.cover || DEFAULT_COVERS[0];
+            document.getElementById('page-icon').innerText = page.icon;
+            document.getElementById('main-title-input').value = page.title;
+            
+            const parent = findParent(page.id);
+            breadUI.innerHTML = `
+                <span class="hover:bg-gray-100 p-1 px-1.5 rounded cursor-pointer">${state.user.username}'s Place</span>
+                ${parent ? `<i data-lucide="chevron-right" class="w-3 h-3"></i> <span class="font-semibold p-1">${parent.title}</span>` : ''}
+                <i data-lucide="chevron-right" class="w-3 h-3"></i> <span class="font-bold text-[var(--text-main)] px-1">${page.title}</span>
+            `;
+
+            blocksUI.innerHTML = '';
+            page.blocks.forEach((b, i) => {
+                const el = createBlockElement(b, i === 0);
+                blocksUI.appendChild(el);
+                if (b.type === 'math') katex.render(b.content || 'c = \\sqrt{a^2 + b^2}', el.querySelector('.math-display'), { displayMode: true });
+            });
+
+            lucide.createIcons();
+            initDragAndDrop();
         }
+
+        function updatePageTitle(v) {
+            const p = findInStructure(state.activePageId);
+            if(p) { p.title = v; renderSidebar(); saveState(); }
+        }
+
+        function createBlockElement(block, isFirst) {
+            const div = document.createElement('div');
+            div.className = `group relative w-full block-container fade-in`;
+            div.dataset.id = block.id;
+            
+            let html = '';
+            switch (block.type) {
+                case 'h1': html = `<div contenteditable="true" class="w-full text-3xl font-bold py-2 outline-none" placeholder="Heading 1">${block.content || ''}</div>`; break;
+                case 'h2': html = `<div contenteditable="true" class="w-full text-2xl font-bold py-2 outline-none" placeholder="Heading 2">${block.content || ''}</div>`; break;
+                case 'h3': html = `<div contenteditable="true" class="w-full text-xl font-bold py-2 outline-none" placeholder="Heading 3">${block.content || ''}</div>`; break;
+                case 'todo': html = `<div class="flex items-start gap-2 py-1"><input type="checkbox" onchange="toggleTodo(this, '${block.id}')" ${block.checked ? 'checked' : ''} class="mt-1.5 accent-blue-600" /><div contenteditable="true" class="flex-1 outline-none ${block.checked ? 'line-through text-gray-400' : ''}" placeholder="To-do...">${block.content || ''}</div></div>`; break;
+                case 'quote': html = `<div contenteditable="true" class="quote-block outline-none" placeholder="Quote...">${block.content || ''}</div>`; break;
+                case 'callout': html = `<div class="callout-block"><span class="text-xl">${block.emoji || '💡'}</span><div contenteditable="true" class="flex-1 outline-none font-medium" placeholder="Callout...">${block.content || ''}</div></div>`; break;
+                case 'code': html = `<div contenteditable="true" class="code-block outline-none" placeholder="Paste code here...">${block.content || ''}</div>`; break;
+                case 'math': html = `<div class="math-display"></div><div contenteditable="true" class="text-xs text-gray-400 font-mono text-center outline-none hidden">${block.content || 'e = mc^2'}</div>`; break;
+                case 'image': 
+                    if (block.content) {
+                        html = `<div class="media-block relative group"><img src="${block.content}" /><button onclick="clearBlockContent('${block.id}')" class="absolute top-2 right-2 p-1 bg-black/60 text-white rounded opacity-0 group-hover:opacity-100"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button></div>`;
+                    } else {
+                        html = `<div class="image-drop-zone" id="drop-${block.id}" onclick="triggerImageUpload('${block.id}')">
+                                    <i data-lucide="image" class="w-8 h-8 mx-auto text-gray-300 mb-2"></i>
+                                    <p class="text-xs text-gray-400">Click to upload, paste URL, or drag and drop</p>
+                                    <input onkeydown="handleImageURL(event, '${block.id}')" class="mt-4 bg-white dark:bg-black/20 border rounded px-3 py-1 text-xs outline-none w-48 text-center" placeholder="Paste URL..." onclick="event.stopPropagation()"/>
+                                </div>`;
+                    }
+                    break;
+                case 'divider': html = `<hr class="my-6 w-full border-[var(--border-color)]" />`; break;
+                default: html = `<div contenteditable="true" class="flex-1 outline-none py-1.5 text-[15px] leading-relaxed" placeholder="Type '/' for commands...">${block.content || ''}</div>`;
+            }
+
+            div.innerHTML = `
+                <div class="drag-handle">
+                    <i data-lucide="grip-vertical" class="w-3.5 h-3.5"></i>
+                    <button onclick="deleteBlock('${block.id}')" class="p-1 hover:text-red-500 transition-colors">
+                        <i data-lucide="trash-2" class="w-3 h-3"></i>
+                    </button>
+                </div>${html}`;
+            
+            const editor = div.querySelector('[contenteditable="true"]');
+            if (editor) {
+                editor.addEventListener('input', () => { 
+                    block.content = editor.innerHTML; 
+                    if (block.type === 'math') {
+                        const raw = editor.innerText;
+                        katex.render(raw || '?', div.querySelector('.math-display'), { displayMode: true });
+                    }
+                    saveState(); 
+                });
+                editor.addEventListener('keydown', (e) => {
+                    if (e.key === '/') { if (!editor.innerText.trim()) { e.preventDefault(); openSlashMenu(div, block.id); } }
+                    else if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); addBlockBelow(block.id); }
+                    else if (e.key === 'Backspace' && !editor.innerText.trim() && !isFirst) { e.preventDefault(); deleteBlock(block.id); }
+                });
+                editor.addEventListener('focus', () => { if(block.type === 'math') editor.classList.remove('hidden'); });
+                editor.addEventListener('blur', () => { if(block.type === 'math') editor.classList.add('hidden'); });
+            }
+
+            // Setup Drop Zone
+            if (block.type === 'image' && !block.content) {
+                setTimeout(() => {
+                    const zone = document.getElementById(`drop-${block.id}`);
+                    if (!zone) return;
+                    zone.addEventListener('dragover', (e) => { e.preventDefault(); zone.classList.add('dragover'); });
+                    zone.addEventListener('dragleave', () => zone.classList.remove('dragover'));
+                    zone.addEventListener('drop', (e) => {
+                        e.preventDefault();
+                        const file = e.dataTransfer.files[0];
+                        if (file && file.type.startsWith('image/')) processImageFile(file, block.id);
+                    });
+                }, 50);
+            }
+
+            return div;
+        }
+
+        // --- Command Menu ---
 
         function setupSlashMenu() {
             const items = [
-                { type: 'text', icon: 'type', label: 'Plain Text' }, { type: 'h1', icon: 'heading-1', label: 'Heading 1' }, { type: 'todo', icon: 'check-square', label: 'To-do List' }, 
-                { type: 'quote', icon: 'quote', label: 'Blockquote' }, { type: 'draw', icon: 'pen-tool', label: 'Whiteboard' }, { type: 'highlight', icon: 'highlighter', label: 'Highlight' }, 
-                { type: 'playground', icon: 'code', label: 'Sandbox' }, { type: 'math', icon: 'sigma', label: 'LaTeX Math' }, 
-                { type: 'image', icon: 'image', label: 'Image URL' }, { type: 'video', icon: 'youtube', label: 'YouTube Embed' }, { type: 'divider', icon: 'minus', label: 'Divider' }
+                { type: 'text', icon: 'type', label: 'Text' },
+                { type: 'h1', icon: 'heading-1', label: 'Heading 1' },
+                { type: 'h2', icon: 'heading-2', label: 'Heading 2' },
+                { type: 'h3', icon: 'heading-3', label: 'Heading 3' },
+                { type: 'todo', icon: 'check-square', label: 'To-do List' },
+                { type: 'quote', icon: 'quote', label: 'Quote' },
+                { type: 'callout', icon: 'lightbulb', label: 'Callout' },
+                { type: 'code', icon: 'code', label: 'Code' },
+                { type: 'math', icon: 'sigma', label: 'Equation' },
+                { type: 'image', icon: 'image', label: 'Image' },
+                { type: 'divider', icon: 'minus', label: 'Divider' }
             ];
             document.getElementById('slash-menu-items').innerHTML = items.map(i => `
-                <button onclick="handleSlashAction('${i.type}')" class="slash-item w-full flex items-center gap-3 px-3 py-2.5 transition-all text-left group">
-                    <div class="icon-box w-6 h-6 flex items-center justify-center bg-gray-50 dark:bg-gray-800 border border-[var(--border-color)] rounded text-gray-400 shrink-0 transition-all"><i data-lucide="${i.icon}" class="w-3.5 h-3.5"></i></div>
-                    <div class="text-[11px] font-bold">${i.label}</div>
+                <button onclick="handleSlashAction('${i.type}')" class="w-full flex items-center gap-3 px-4 py-2 hover:bg-[var(--block-hover)] text-left group">
+                    <div class="w-8 h-8 rounded border border-[var(--border-color)] flex items-center justify-center text-gray-400 group-hover:text-blue-500 bg-white dark:bg-black/20">
+                        <i data-lucide="${i.icon}" class="w-4 h-4"></i>
+                    </div>
+                    <div>
+                        <div class="text-[13px] font-semibold text-[var(--text-main)]">${i.label}</div>
+                    </div>
                 </button>`).join('');
         }
 
-        function handleSlashAction(type) {
-            if (type === 'highlight') {
-                const p = state.pages.find(pg => pg.id === state.activePageId); const b = p.blocks.find(bk => bk.id === state.activeBlockIdForMenu);
-                const colors = ['', 'bg-highlight-blue', 'bg-highlight-green', 'bg-highlight-yellow', 'bg-highlight-red'];
-                b.highlight = colors[(colors.indexOf(b.highlight || '') + 1) % colors.length];
-                renderActivePage(); saveState(); hideSlashMenu();
-            } else selectSlashItem(type);
+        function openSlashMenu(el, id) {
+            state.activeBlockIdForMenu = id;
+            const menu = document.getElementById('slash-menu');
+            const rect = el.getBoundingClientRect();
+            menu.style.display = 'flex';
+            menu.style.top = (window.scrollY + rect.top - 280) + 'px'; 
+            menu.style.left = rect.left + 'px';
+            lucide.createIcons();
         }
 
-        function selectSlashItem(t, targetId = null) { 
-            const p = state.pages.find(pg => pg.id === state.activePageId); const b = p.blocks.find(bk => bk.id === (targetId || state.activeBlockIdForMenu)); 
-            if (b) { 
-                b.type = t; b.content = ''; renderActivePage(); saveState(); 
-                // For non-text blocks, auto-add a text block below so typing can continue
-                if(t !== 'text') addBlockBelow(b.id);
-                
-                setTimeout(() => { 
-                    const el = document.querySelector(`[data-id="${b.id}"] [contenteditable="true"]`) || document.querySelector(`[data-id="${b.id}"] input`);
-                    if (el) el.focus(); 
-                }, 50); 
+        function hideSlashMenu() { document.getElementById('slash-menu').style.display = 'none'; }
+
+        function handleSlashAction(type) {
+            const page = findInStructure(state.activePageId);
+            const block = page.blocks.find(b => b.id === state.activeBlockIdForMenu);
+            if (block) {
+                block.type = type;
+                block.content = '';
+                if(type === 'callout') block.emoji = '💡';
+                renderActivePage(); saveState();
+                if (type !== 'text') addBlockBelow(block.id);
             }
             hideSlashMenu();
         }
 
-        function hideSlashMenu() { document.getElementById('slash-menu').style.display = 'none'; state.activeBlockIdForMenu = null; }
+        // --- File & Image Logic ---
 
-        function renderActivePage() {
-            const page = state.pages.find(p => p.id === state.activePageId) || state.pages[0];
-            document.getElementById('page-cover').src = page.cover; document.getElementById('page-icon').innerText = page.icon;
-            document.getElementById('header-title').innerText = page.title || 'Untitled'; document.getElementById('main-title-input').value = page.title;
-            const container = document.getElementById('editor-blocks'); const currentFocusedId = document.activeElement?.closest('.block-container')?.dataset.id;
-            const domMap = new Map(); container.querySelectorAll('.block-container').forEach(el => domMap.set(el.dataset.id, el));
-            
-            if (page.blocks.length === 0) {
-                container.innerHTML = `<div class="empty-prompt" onclick="addBlockBelow()">Click here to start writing...</div>`;
-            } else {
-                page.blocks.forEach((b, i) => {
-                    let el = domMap.get(b.id);
-                    const needsForcedUpdate = (b.type === 'image' || b.type === 'video' || b.type === 'draw');
-                    
-                    if (el && el.dataset.type === b.type && !needsForcedUpdate) {
-                        const edit = el.querySelector('[contenteditable="true"]'); if (edit && b.id !== currentFocusedId && edit.innerHTML !== b.content) edit.innerHTML = b.content || '';
-                        if (b.highlight) el.className = `group relative w-full block-container fade-in ${b.highlight}`; else el.className = `group relative w-full block-container fade-in`;
-                        domMap.delete(b.id);
-                    } else {
-                        if (el) el.remove(); const newEl = createBlockElement(b, i === 0); container.insertBefore(newEl, container.children[i]);
-                    }
-                });
-            }
-            domMap.forEach(el => el.remove());
-            const clip = document.getElementById('block-clipboard'); clip.innerHTML = state.clipboard.map(b => `<div class="p-2 bg-[var(--bg-primary)] border border-[var(--border-color)] rounded-lg text-[10px] truncate shadow-sm cursor-grab" data-id="${b.id}">${(b.content || b.type).replace(/<[^>]*>?/gm, '')}</div>`).join('');
-            lucide.createIcons(); initDragAndDrop(); updateEditorStats(); updateProgressBar(); renderTOC();
+        function triggerImageUpload(id) {
+            const up = document.getElementById('image-block-uploader');
+            up.onchange = (e) => {
+                const file = e.target.files[0];
+                if (file) processImageFile(file, id);
+            };
+            up.click();
         }
 
-        function renderSidebar() {
-            const pList = document.getElementById('pages-list'); const filtered = state.pages.filter(p => p.title.toLowerCase().includes(state.searchQuery.toLowerCase()));
-            pList.innerHTML = filtered.map(p => `<div class="flex items-center group/page"><button onclick="setActivePage('${p.id}')" class="flex-1 flex items-center gap-2 px-3 py-2 text-xs rounded-xl transition-all ${p.id === state.activePageId ? 'sidebar-item-active' : 'text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800'}"><span>${p.icon}</span><span class="truncate">${p.title || 'Untitled'}</span></button><button onclick="deletePage('${p.id}')" class="opacity-0 group-hover/page:opacity-100 p-2 text-gray-400 hover:text-red-500 transition-opacity"><i data-lucide="trash-2" class="w-3 h-3"></i></button></div>`).join('');
-            lucide.createIcons();
+        function processImageFile(file, id) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const page = findInStructure(state.activePageId);
+                const block = page.blocks.find(b => b.id === id);
+                if (block) {
+                    block.content = e.target.result;
+                    renderActivePage(); saveState();
+                }
+            };
+            reader.readAsDataURL(file);
         }
 
-        function handleSearch(v) { state.searchQuery = v; renderSidebar(); }
-
-        function initAbly() {
-            if (!ROOT_ABLY_KEY || ably) return;
-            ably = new Ably.Realtime({ key: ROOT_ABLY_KEY, clientId: state.username + '_' + Math.random().toString(36).substr(2, 4) });
-            joinChannel(state.activePageId);
-        }
-
-        function joinChannel(id) {
-            if (channel) { channel.presence.leave(); channel.unsubscribe(); }
-            channel = ably.channels.get('orbit-sync-' + id, { params: { rewind: '1' } });
-            channel.subscribe('update', (m) => { if (m.clientId === ably.auth.clientId) return; const remote = m.data.pages.find(p => p.id === id); if (remote) { state.pages = state.pages.map(p => p.id === id ? remote : p); renderActivePage(); } });
-            channel.subscribe('signal', handleSignal);
-            channel.presence.enter({ onCall: state.onCall });
-            channel.presence.subscribe(() => channel.presence.get((err, m) => { if(!err) renderPresence(m); }));
-            document.getElementById('sync-status').classList.remove('hidden');
-        }
-
-        function renderPresence(members) {
-            document.getElementById('collaborators').innerHTML = members.map(m => `<div class="w-7 h-7 rounded-full bg-blue-500 border-2 border-white dark:border-gray-900 flex items-center justify-center text-[10px] text-white font-bold" title="${m.clientId}">${m.clientId.charAt(0).toUpperCase()}</div>`).join('');
-            const onCall = members.filter(m => m.data?.onCall);
-            document.getElementById('voice-participants').innerHTML = onCall.map(m => `<div class="flex items-center gap-2"><div class="w-5 h-5 rounded-full bg-orange-500 flex items-center justify-center text-[8px] text-white font-bold">${m.clientId.charAt(0).toUpperCase()}</div><span class="text-[10px] font-bold dark:text-white">${m.clientId.split('_')[0]}</span></div>`).join('');
-        }
-
-        async function joinFriendPage() { const code = document.getElementById('friend-page-code').value.trim(); if (!code) return; state.activePageId = code; if (!state.pages.find(p => p.id === code)) state.pages.push({ id: code, title: 'Shared Space', icon: '🌐', isShared: true, blocks: [], cover: DEFAULT_COVERS[0] }); setActivePage(code); document.getElementById('collab-modal').classList.add('hidden'); }
-        function openSharePageModal() { const p = state.pages.find(p => p.id === state.activePageId); if(!p) return; p.isShared = true; document.getElementById('share-code-display').innerText = p.id; document.getElementById('share-modal').classList.remove('hidden'); saveState(); }
-        function changeCover() { const p = state.pages.find(pg => pg.id === state.activePageId); if (p) { p.cover = DEFAULT_COVERS[Math.floor(Math.random()*DEFAULT_COVERS.length)]; renderActivePage(); saveState(); } }
-        function addPage() { const id = 'p' + Math.random().toString(36).substr(2, 6); state.pages.push({ id, title: 'Untitled', icon: '📄', cover: DEFAULT_COVERS[0], blocks: [{ id: 'b' + Date.now(), type: 'text', content: '' }] }); setActivePage(id); }
-        function deletePage(id) { if(state.pages.length > 1) { state.pages = state.pages.filter(p => p.id !== id); if(state.activePageId === id) setActivePage(state.pages[0].id); else renderSidebar(); saveState(true); } }
-        function addBlockBelow(id) { const p = state.pages.find(pg => pg.id === state.activePageId); const idx = p.blocks.findIndex(b => b.id === id); const nb = { id: 'b' + Math.random().toString(36).substr(2, 6), type: 'text', content: '' }; p.blocks.splice(idx + 1, 0, nb); renderActivePage(); saveState(); setTimeout(() => { const el = document.querySelector(`[data-id="${nb.id}"] [contenteditable]`); if(el) el.focus(); }, 10); }
-        function deleteBlock(id) { const p = state.pages.find(pg => pg.id === state.activePageId); if (p.blocks.length > 1) p.blocks = p.blocks.filter(b => b.id !== id); saveState(); renderActivePage(); }
-        function toggleTodoState(id) { const p = state.pages.find(pg => pg.id === state.activePageId); const b = p.blocks.find(bk => bk.id === id); if (b) { b.checked = !b.checked; renderActivePage(); saveState(); } }
-
-        function handleWorkspaceClick(e) { 
-            const p = state.pages.find(pg => pg.id === state.activePageId);
-            // Check if clicking main area, trigger area, or the prompt itself
-            if (e.target.id === 'main-scroll-container' || e.target.id === 'bottom-click-trigger' || e.target.id === 'editor-blocks' || e.target.classList.contains('empty-prompt')) {
-                if (p.blocks.length === 0 || (p.blocks[p.blocks.length-1].content.trim() !== '' && p.blocks[p.blocks.length-1].type === 'text')) {
-                    addBlockBelow(p.blocks[p.blocks.length - 1]?.id);
-                } else if (p.blocks.length > 0) {
-                    const lastEl = document.querySelector(`[data-id="${p.blocks[p.blocks.length-1].id}"] [contenteditable="true"]`);
-                    if (lastEl) lastEl.focus();
+        function handleImageURL(e, id) {
+            if (e.key === 'Enter') {
+                const val = e.target.value.trim();
+                if (!val) return;
+                const page = findInStructure(state.activePageId);
+                const block = page.blocks.find(b => b.id === id);
+                if (block) {
+                    block.content = val;
+                    renderActivePage(); saveState();
                 }
             }
         }
 
-        function initDragAndDrop() {
-            if (sortableMain) sortableMain.destroy(); if (sortableClipboard) sortableClipboard.destroy();
-            sortableMain = Sortable.create(document.getElementById('editor-blocks'), { group: 'blocks', handle: '.drag-handle', animation: 150, onEnd: (e) => {
-                const p = state.pages.find(x => x.id === state.activePageId);
-                const b = p.blocks.splice(e.oldIndex, 1)[0]; p.blocks.splice(e.newIndex, 0, b); saveState();
-            }});
-            sortableClipboard = Sortable.create(document.getElementById('block-clipboard'), { group: 'blocks', animation: 150 });
+        function clearBlockContent(id) {
+            const page = findInStructure(state.activePageId);
+            const block = page.blocks.find(b => b.id === id);
+            if(block) { block.content = ""; renderActivePage(); saveState(); }
         }
 
-        function updatePageTitle(v) { const p = state.pages.find(pg => pg.id === state.activePageId); if(p) { p.title = v; document.getElementById('header-title').innerText = v || 'Untitled'; saveState(); renderSidebar(); } }
-        function toggleSidebar() { state.sidebarOpen = !state.sidebarOpen; const sb = document.getElementById('sidebar'); const reopenBtn = document.getElementById('reopen-sidebar-btn'); sb.style.width = state.sidebarOpen ? '256px' : '0px'; sb.style.opacity = state.sidebarOpen ? '1' : '0'; reopenBtn.style.display = state.sidebarOpen ? 'none' : 'block'; updateEditorStats(); }
-        function openCollabModal() { document.getElementById('collab-modal').classList.remove('hidden'); }
-        function toggleEmojiPicker(e) { e.stopPropagation(); document.getElementById('emoji-picker').classList.toggle('hidden'); }
-        function setupEmojiPicker() { document.getElementById('emoji-grid').innerHTML = EMOJI_LIST.map(e => `<button onclick="selectEmoji('${e}')" class="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded text-2xl">${e}</button>`).join(''); }
-        function selectEmoji(e) { const p = state.pages.find(pg => pg.id === state.activePageId); if(p) { p.icon = e; renderSidebar(); renderActivePage(); saveState(); } document.getElementById('emoji-picker').classList.add('hidden'); }
-        function setupMenuDragging() { const m = document.getElementById('slash-menu'), h = document.getElementById('slash-menu-drag'); if(!h) return; let x, y, d = false; h.onmousedown = (e) => { d = true; x = e.clientX - m.offsetLeft; y = e.clientY - m.offsetTop; e.preventDefault(); e.stopPropagation(); }; document.onmousemove = (e) => { if (d) { m.style.left = (e.clientX - x) + 'px'; m.style.top = (e.clientY - y) + 'px'; } }; document.onmouseup = () => d = false; }
-        function handleCoverFile(i) { const f = i.files[0]; if(!f) return; const r = new FileReader(); r.onload = (e) => { const p = state.pages.find(x => x.id === state.activePageId); if(p) { p.cover = e.target.result; document.getElementById('page-cover').src = p.cover; saveState(); } }; r.readAsDataURL(f); }
+        // --- Basic UI ---
 
-        runPlayground = (id) => { const b = state.pages.find(pg => pg.id === state.activePageId).blocks.find(bk => bk.id === id); const preview = document.getElementById(`pg-preview-${id}`); if(!preview) return; const doc = preview.contentWindow.document; doc.open(); doc.write(b.content || ''); doc.close(); };
+        function addBlockBelow(id) {
+            const page = findInStructure(state.activePageId);
+            const idx = page.blocks.findIndex(b => b.id === id);
+            const nb = { id: 'b_' + Math.random().toString(36).substr(2, 6), type: 'text', content: '' };
+            page.blocks.splice(idx + 1, 0, nb);
+            renderActivePage();
+            setTimeout(() => {
+                const el = document.querySelector(`[data-id="${nb.id}"] [contenteditable]`);
+                if(el) el.focus();
+            }, 50);
+            saveState();
+        }
+
+        function toggleTodo(el, id) {
+            const page = findInStructure(state.activePageId);
+            const block = page.blocks.find(b => b.id === id);
+            if(block) { block.checked = el.checked; renderActivePage(); saveState(); }
+        }
+
+        function handleWorkspaceClick(e) {
+            if (e.target.id === 'main-scroll-container' || e.target.id === 'bottom-click-trigger') {
+                const page = findInStructure(state.activePageId);
+                if (page && page.blocks.length > 0) {
+                    const last = page.blocks[page.blocks.length - 1];
+                    if (last.content.trim() !== '') addBlockBelow(last.id);
+                }
+            }
+            hideSlashMenu();
+        }
+
+        function initDragAndDrop() {
+            if (sortableMain) sortableMain.destroy();
+            sortableMain = Sortable.create(document.getElementById('editor-blocks'), {
+                group: 'blocks', handle: '.drag-handle', animation: 150,
+                onEnd: (e) => {
+                    const page = findInStructure(state.activePageId);
+                    const b = page.blocks.splice(e.oldIndex, 1)[0];
+                    page.blocks.splice(e.newIndex, 0, b);
+                    saveState();
+                }
+            });
+        }
+
+        function updateProgressBar() {
+            const el = document.getElementById('main-scroll-container');
+            const p = (el.scrollTop / (el.scrollHeight - el.clientHeight)) * 100;
+            document.getElementById('progress-bar').style.width = (p || 0) + "%";
+        }
+
+        function changeCover() {
+            const p = findInStructure(state.activePageId);
+            if(!p) return;
+            p.cover = `https://images.unsplash.com/photo-${Math.floor(Math.random()*1000000)}?auto=format&fit=crop&q=80&w=2000`;
+            renderActivePage(); saveState();
+        }
+
+        function setupEmojiPicker() {
+            document.getElementById('emoji-grid').innerHTML = EMOJI_LIST.map(e => `
+                <button onclick="selectEmoji('${e}')" class="p-2 hover:bg-gray-100 rounded text-xl transition-transform hover:scale-125">${e}</button>
+            `).join('');
+        }
+
+        function toggleEmojiPicker(e) { e.stopPropagation(); document.getElementById('emoji-picker').classList.toggle('hidden'); }
+        function selectEmoji(e) {
+            const p = findInStructure(state.activePageId);
+            if(p) { p.icon = e; renderSidebar(); renderActivePage(); saveState(); }
+            document.getElementById('emoji-picker').classList.add('hidden');
+        }
+
+        function initAbly() {
+            ably = new Ably.Realtime({ key: ROOT_ABLY_KEY, clientId: state.user.username });
+            channel = ably.channels.get('orbit-place-' + state.user.placeId);
+            channel.subscribe('update', (m) => {
+                if(m.clientId === ably.auth.clientId) return;
+                state.structure = m.data.structure;
+                renderSidebar(); renderActivePage();
+            });
+        }
+
+        function handleSearch(v) { renderSidebar(); }
+        function openJoinModal() { document.getElementById('join-modal').classList.remove('hidden'); }
+        function openShareActiveModal() {
+            const p = findInStructure(state.activePageId);
+            if(!p) return;
+            document.getElementById('share-code-display').innerText = state.user.placeId;
+            document.getElementById('share-modal').classList.remove('hidden');
+        }
+        function copyShareCode() {
+            const c = document.getElementById('share-code-display').innerText;
+            navigator.clipboard.writeText(c).then(() => alert("Code Copied!"));
+        }
+
+        function toggleVoiceOrbit() {
+            // Voice signaling logic stub
+            lucide.createIcons();
+        }
+
         init();
     </script>
 </body>
