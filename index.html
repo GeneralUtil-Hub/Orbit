@@ -134,7 +134,6 @@
 
         .modal-bg { background: rgba(0,0,0,0.6); backdrop-filter: blur(4px); }
         
-        /* Modal Input visibility fixes */
         .modal-input { 
             color: #111827 !important; 
             background-color: #f9fafb !important;
@@ -151,13 +150,16 @@
 <body class="overflow-hidden">
     <div id="progress-bar" class="fixed top-0 left-0 h-0.5 bg-blue-500 z-[2000] transition-all duration-150" style="width: 0%"></div>
 
+    <!-- Reopen Sidebar Trigger -->
     <div id="reopen-sidebar-trigger" class="hidden flex items-center justify-center" onclick="toggleSidebar()">
         <i data-lucide="chevron-right" class="w-4 h-4 text-gray-400"></i>
     </div>
 
+    <!-- Multi-Space Tab Bar -->
     <div id="tab-bar" class="flex h-9 bg-[var(--sidebar-bg)] border-b border-[var(--border-color)] overflow-x-auto scrollbar-hide shrink-0 z-[100]"></div>
 
     <div id="app" class="flex h-[calc(100vh-36px)] w-full relative">
+        <!-- Sidebar -->
         <aside id="sidebar" class="sidebar-transition w-64 flex flex-col bg-[var(--sidebar-bg)] border-r border-[var(--border-color)] shrink-0 z-50 overflow-hidden relative">
             <div class="p-4 flex flex-col gap-4 min-w-[256px]">
                 <div class="flex items-center justify-between">
@@ -202,13 +204,14 @@
             </div>
         </aside>
 
+        <!-- Main Workspace -->
         <main class="flex-1 flex flex-col h-full bg-[var(--bg-primary)] overflow-hidden relative" onclick="handleWorkspaceClick(event)">
             <header class="h-12 flex items-center justify-between px-6 shrink-0 z-30">
                 <div id="breadcrumbs" class="flex items-center gap-2 text-xs text-gray-400 font-medium overflow-hidden"></div>
                 <div class="flex items-center gap-3">
                     <button onclick="toggleVoiceOrbit()" id="voice-btn" class="p-1.5 rounded hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-400 transition-all"><i data-lucide="mic" class="w-4 h-4"></i></button>
                     <div id="collaborators" class="flex -space-x-2"></div>
-                    <button id="share-btn" onclick="openShareActiveModal()" class="text-[11px] font-bold text-white bg-blue-600 px-3 py-1 rounded hover:bg-blue-700 transition-all">Share</button>
+                    <button id="share-btn" onclick="openShareActiveModal()" class="text-[11px] font-bold text-white bg-blue-600 px-3 py-1 rounded hover:bg-blue-700 transition-all">Share ID</button>
                 </div>
             </header>
 
@@ -216,7 +219,7 @@
                 <div class="relative h-56 group">
                     <img id="page-cover" class="w-full h-full object-cover" />
                     <div class="absolute bottom-4 right-8 opacity-0 group-hover:opacity-100 transition-opacity flex gap-2">
-                        <button onclick="changeCover()" class="bg-white/90 backdrop-blur px-3 py-1.5 rounded text-[10px] font-bold border border-gray-200 shadow-sm hover:bg-white">Random Cover</button>
+                        <button onclick="changeCover()" class="bg-white/90 backdrop-blur px-3 py-1.5 rounded text-[10px] font-bold border border-gray-200 shadow-sm hover:bg-white text-black">Random Cover</button>
                     </div>
                 </div>
 
@@ -248,7 +251,7 @@
             <div class="space-y-4">
                 <input id="ws-modal-input" type="text" class="modal-input w-full border rounded-md px-3 py-2 text-sm outline-none font-bold" placeholder="Name..." />
                 <div>
-                    <label class="text-[10px] font-bold text-gray-400 uppercase mb-2 block">Accent Color</label>
+                    <label class="text-[10px] font-bold text-gray-400 uppercase mb-2 block text-gray-500">Accent Color</label>
                     <div class="flex gap-3">
                         <button onclick="setWSModalColor(null)" class="w-6 h-6 rounded-full border border-gray-300 bg-white" title="None"></button>
                         <button onclick="setWSModalColor('blue')" class="w-6 h-6 rounded-full bg-[#2383e2]"></button>
@@ -258,50 +261,50 @@
                 </div>
             </div>
             <div class="flex gap-2 mt-8">
-                <button onclick="closeWSModal()" class="flex-1 py-2 text-xs font-medium text-gray-500">Cancel</button>
+                <button onclick="closeWSModal()" class="flex-1 py-2 text-xs font-medium text-gray-500 hover:bg-gray-100 rounded-md transition-colors">Cancel</button>
                 <button onclick="saveWSModal()" class="flex-1 py-2 bg-blue-600 rounded-md text-xs font-bold text-white shadow-lg">Done</button>
             </div>
         </div>
     </div>
 
     <div id="auth-modal" class="fixed inset-0 z-[3000] modal-bg flex items-center justify-center p-6">
-        <div class="bg-white dark:bg-[#191919] w-full max-w-sm rounded-3xl p-8 shadow-2xl text-center">
+        <div class="bg-white dark:bg-[#191919] w-full max-w-sm rounded-3xl p-8 shadow-2xl text-center border dark:border-gray-800">
             <div class="w-16 h-16 bg-blue-600 rounded-2xl flex items-center justify-center text-white mx-auto mb-6 shadow-xl">
                 <i data-lucide="orbit" class="w-8 h-8"></i>
             </div>
             <h2 class="text-2xl font-black mb-2 tracking-tight text-[var(--text-main)]">Orbit Workspace</h2>
-            <p class="text-xs text-gray-500 mb-8">Personal organization & collaboration.</p>
+            <p class="text-xs text-gray-500 mb-8 font-medium">Collaborative organization & planning.</p>
             <input id="login-username" type="text" class="modal-input w-full border rounded-lg px-4 py-3 text-sm outline-none mb-4 font-bold" placeholder="Enter your name" />
-            <button onclick="login()" class="w-full py-3 bg-blue-600 rounded-lg text-sm font-bold text-white shadow-lg hover:bg-blue-700">Enter Space</button>
+            <button onclick="login()" class="w-full py-3 bg-blue-600 rounded-lg text-sm font-bold text-white shadow-lg hover:bg-blue-700 transition-all">Enter Space</button>
         </div>
     </div>
 
     <div id="join-modal" class="hidden fixed inset-0 z-[2000] modal-bg flex items-center justify-center p-4">
-        <div class="bg-[var(--bg-primary)] w-full max-w-sm rounded-xl p-6 shadow-2xl text-center">
+        <div class="bg-[var(--bg-primary)] w-full max-w-sm rounded-xl p-6 shadow-2xl text-center border dark:border-gray-800">
             <h3 class="font-bold text-lg mb-2 text-[var(--text-main)]">Connect to Space</h3>
-            <p class="text-xs text-gray-500 mb-6">Enter a Place ID to join a collaborative space.</p>
-            <input id="join-code" type="text" class="modal-input w-full border border-[var(--border-color)] rounded-lg px-4 py-3 text-sm outline-none mb-4 font-mono font-bold" placeholder="place_id_..." />
+            <p class="text-xs text-gray-500 mb-6 font-medium">Enter a Place ID to join a collaborative environment.</p>
+            <input id="join-code" type="text" class="modal-input w-full border rounded-lg px-4 py-3 text-sm outline-none mb-4 font-mono font-bold" placeholder="place_id_..." />
             <div class="flex gap-2">
-                <button onclick="document.getElementById('join-modal').classList.add('hidden')" class="flex-1 py-2 text-sm text-gray-500">Cancel</button>
-                <button onclick="joinExternalSpace()" class="flex-1 py-2 bg-blue-600 rounded-lg text-sm font-bold text-white">Join</button>
+                <button onclick="document.getElementById('join-modal').classList.add('hidden')" class="flex-1 py-2 text-sm text-gray-500 font-medium hover:bg-gray-100 rounded-md transition-colors">Cancel</button>
+                <button onclick="joinExternalSpace()" class="flex-1 py-2 bg-blue-600 rounded-lg text-sm font-bold text-white shadow-md">Join</button>
             </div>
         </div>
     </div>
 
     <div id="share-modal" class="hidden fixed inset-0 z-[2000] modal-bg flex items-center justify-center p-4">
-        <div class="bg-[var(--bg-primary)] w-full max-w-sm rounded-xl p-8 shadow-2xl text-center">
+        <div class="bg-[var(--bg-primary)] w-full max-w-sm rounded-xl p-8 shadow-2xl text-center border dark:border-gray-800">
             <h3 class="font-bold text-xl mb-4 text-[var(--text-main)]" id="share-title">Invite</h3>
-            <p class="text-xs text-gray-400 mb-4">Share this ID with others so they can join your space.</p>
+            <p class="text-xs text-gray-400 mb-4 font-medium">Share this ID with others for full collaborative access.</p>
             <div class="bg-gray-100 dark:bg-gray-900 p-4 rounded-lg mb-6 font-mono text-sm font-bold text-blue-600 break-all select-all border border-blue-500/10" id="share-code-display"></div>
-            <button onclick="copyShareCode()" class="w-full py-3 bg-blue-600 rounded-lg text-sm font-bold text-white shadow-xl mb-4">Copy Code</button>
-            <button onclick="document.getElementById('share-modal').classList.add('hidden')" class="text-xs font-bold text-gray-400 uppercase">Close</button>
+            <button onclick="copyShareCode()" class="w-full py-3 bg-blue-600 rounded-lg text-sm font-bold text-white shadow-xl mb-4 transition-all active:scale-95">Copy ID</button>
+            <button onclick="document.getElementById('share-modal').classList.add('hidden')" class="text-xs font-bold text-gray-400 uppercase tracking-widest hover:text-gray-600 transition-colors">Close</button>
         </div>
     </div>
 
     <input type="file" id="image-block-uploader" class="hidden" accept="image/*">
 
     <script>
-        const STORAGE_KEY = 'orbit_pro_v6_sync_final';
+        const STORAGE_KEY = 'orbit_pro_v8_collab_final';
         const ROOT_ABLY_KEY = "LJhgHg.rF2whQ:Imz-F_d5gOcMGAiJNWIGjhaAXXba8Hpbefj3LtPaT0s";
         const DEFAULT_COVERS = ['https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&q=80&w=2000'];
         const EMOJI_LIST = ['🚀', '🪐', '✨', '🌍', '🎨', '📝', '🎯', '💡', '🔥', '📂', '⚡', '📐', '🧬', '🍎', '💻', '💼', '📅', '🔍'];
@@ -319,7 +322,7 @@
         let ably = null, channels = {}, sortableMain = null;
         let modalWSContext = null, modalWSColor = null;
 
-        // --- 1. CORE UTILS (DEFINED AT THE TOP) ---
+        // --- 1. CORE UTILS & STATE (DEFINED FIRST) ---
 
         function findInStructure(id, list = null) {
             if (!list) { 
@@ -365,16 +368,7 @@
             return null;
         }
 
-        function saveState() {
-            const toSave = { ...state, expandedWorkspaces: Array.from(state.expandedWorkspaces) };
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(toSave));
-            
-            const activePlace = state.places.find(p => p.id === state.activePlaceId);
-            if (ably && activePlace && activePlace.isOwner) {
-                const channel = ably.channels.get('orbit-place-' + activePlace.id);
-                channel.publish('update', { structure: activePlace.structure, name: activePlace.name });
-            }
-        }
+        function applyTheme() { document.body.classList.toggle('dark-mode', state.darkMode); }
 
         function loadState() {
             const saved = localStorage.getItem(STORAGE_KEY);
@@ -387,46 +381,17 @@
             }
         }
 
-        function applyTheme() { document.body.classList.toggle('dark-mode', state.darkMode); }
-        function toggleDarkModeUI() { state.darkMode = !state.darkMode; applyTheme(); saveState(); }
-
-        // --- 2. SIDEBAR & TABS RENDERING ---
-
-        function createSidebarItem(item, isOwner, depth = 0) {
-            const div = document.createElement('div');
-            const isExp = state.expandedWorkspaces.has(item.id);
-            const isActive = state.activePageId === item.id;
-            const highlightClass = item.highlight ? `workspace-highlight-${item.highlight}` : '';
-            div.innerHTML = `
-                <div class="group flex items-center px-3 py-1 cursor-pointer transition-colors rounded-md text-[13px] ${isActive ? 'sidebar-active' : 'text-[#7e7c78] hover:bg-[var(--block-hover)]'}" style="padding-left: ${depth * 12 + 12}px">
-                    ${item.type === 'workspace' ? `<button onclick="toggleWS(event, '${item.id}')" class="p-0.5 hover:bg-gray-200 dark:hover:bg-gray-700 rounded mr-1 transition-transform ${isExp ? 'rotate-90' : ''}"><i data-lucide="chevron-right" class="w-3 h-3"></i></button>` : '<div class="w-4"></div>'}
-                    <div onclick="${item.type === 'page' ? `setActivePage('${item.id}')` : `toggleWS(event, '${item.id}')`}" class="flex-1 truncate flex items-center gap-2 ${highlightClass}">
-                        ${item.type === 'page' ? `<span>${item.icon}</span>` : ''}
-                        <span class="truncate">${item.title}</span>
-                    </div>
-                    ${isOwner ? `<div class="opacity-0 group-hover:opacity-100 flex items-center gap-0.5 ml-auto">
-                        ${item.type === 'workspace' ? `<button onclick="addPage('${item.id}')" class="p-1 hover:bg-gray-200 dark:hover:bg-gray-700 rounded"><i data-lucide="plus" class="w-3 h-3"></i></button><button onclick="openWorkspaceModal('${item.id}')" class="p-1 hover:bg-gray-200 dark:hover:bg-gray-700 rounded"><i data-lucide="settings-2" class="w-3 h-3"></i></button>` : ''}
-                        <button onclick="deleteItem(event, '${item.id}')" class="p-1 hover:text-red-500 rounded"><i data-lucide="trash-2" class="w-3 h-3"></i></button>
-                    </div>` : ''}
-                </div>`;
-            if (item.type === 'workspace' && isExp && item.children) {
-                const sub = document.createElement('div');
-                item.children.forEach(c => sub.appendChild(createSidebarItem(c, isOwner, depth + 1)));
-                div.appendChild(sub);
+        function saveState() {
+            const toSave = { ...state, expandedWorkspaces: Array.from(state.expandedWorkspaces) };
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(toSave));
+            const activePlace = state.places.find(p => p.id === state.activePlaceId);
+            if (ably && activePlace) {
+                const channel = ably.channels.get('orbit-place-' + activePlace.id);
+                channel.publish('update', { structure: activePlace.structure, name: activePlace.name });
             }
-            return div;
         }
 
-        function renderSidebar() {
-            const list = document.getElementById('structure-list');
-            if(!list) return;
-            const place = state.places.find(p => p.id === state.activePlaceId);
-            list.innerHTML = '';
-            if (place && place.structure) {
-                place.structure.forEach(item => list.appendChild(createSidebarItem(item, place.isOwner)));
-            }
-            lucide.createIcons();
-        }
+        // --- 2. RENDERERS ---
 
         function renderTabs() {
             const bar = document.getElementById('tab-bar');
@@ -441,96 +406,38 @@
             lucide.createIcons();
         }
 
-        // --- 3. PAGE & BLOCK SYSTEM ---
-
-        function createBlockElement(block, isFirst, isOwner) {
+        function createSidebarItem(item, depth = 0) {
             const div = document.createElement('div');
-            div.className = `group relative w-full block-container fade-in ${block.highlight || ''}`;
-            div.dataset.id = block.id;
-            const editAttr = isOwner ? 'contenteditable="true"' : 'contenteditable="false"';
-            let html = '';
-
-            switch (block.type) {
-                case 'h1': html = `<div ${editAttr} class="w-full text-3xl font-bold py-2 outline-none" placeholder="Heading 1">${block.content || ''}</div>`; break;
-                case 'h2': html = `<div ${editAttr} class="w-full text-2xl font-bold py-2 outline-none" placeholder="Heading 2">${block.content || ''}</div>`; break;
-                case 'h3': html = `<div ${editAttr} class="w-full text-xl font-bold py-2 outline-none" placeholder="Heading 3">${block.content || ''}</div>`; break;
-                case 'todo': html = `<div class="flex items-start gap-2 py-1 w-full"><input type="checkbox" onchange="toggleTodo(this, '${block.id}')" ${block.checked ? 'checked' : ''} ${!isOwner ? 'disabled' : ''} class="mt-1.5 accent-blue-600" /><div ${editAttr} class="flex-1 outline-none ${block.checked ? 'line-through text-gray-400' : ''}" placeholder="To-do...">${block.content || ''}</div></div>`; break;
-                case 'toggle': 
-                    const isExp = block.expanded;
-                    html = `<div class="flex flex-col w-full"><div class="flex items-center gap-1 py-1"><button onclick="toggleBlockExpand('${block.id}')" class="p-1 hover:bg-gray-200 dark:hover:bg-gray-700 rounded transition-transform ${isExp ? 'rotate-90' : ''}"><i data-lucide="play" class="w-3 h-3 fill-current text-gray-400"></i></button><div ${editAttr} class="flex-1 outline-none font-semibold" placeholder="Toggle...">${block.content || ''}</div></div>${isExp ? `<div class="ml-6 border-l border-gray-200 dark:border-gray-700 pl-4 mt-1" id="children-${block.id}"></div>` : ''}</div>`;
-                    break;
-                case 'quote': html = `<div ${editAttr} class="quote-block outline-none w-full" placeholder="Quote...">${block.content || ''}</div>`; break;
-                case 'callout': html = `<div class="callout-block"><span class="text-xl">${block.emoji || '💡'}</span><div ${editAttr} class="flex-1 outline-none font-medium" placeholder="Callout...">${block.content || ''}</div></div>`; break;
-                case 'code': html = `<div ${editAttr} class="code-block outline-none" placeholder="Code...">${block.content || ''}</div>`; break;
-                case 'math': 
-                    html = `<div class="math-display w-full" id="math-view-${block.id}"></div><div ${editAttr} class="text-xs text-gray-400 font-mono text-center outline-none hidden" id="math-edit-${block.id}" placeholder="Type LaTeX...">${block.content || 'e = mc^2'}</div>`; 
-                    break;
-                case 'image': 
-                    if (block.content) html = `<div class="media-block relative group"><img src="${block.content}" />${isOwner ? `<button onclick="clearBlockContent('${block.id}')" class="absolute top-2 right-2 p-1 bg-black/60 text-white rounded"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>` : ''}</div>`;
-                    else html = isOwner ? `<div class="image-drop-zone" id="drop-${block.id}" onclick="triggerImageUpload('${block.id}')"><i data-lucide="image" class="w-8 h-8 mx-auto text-gray-300 mb-2"></i><p class="text-xs text-gray-400">Drag or Paste URL</p></div>` : ``;
-                    break;
-                case 'divider': html = `<hr class="my-6 w-full border-[var(--border-color)]" />`; break;
-                default: html = `<div ${editAttr} class="flex-1 outline-none py-1.5 text-[15px] leading-relaxed" placeholder="Type '/' for commands...">${block.content || ''}</div>`;
-            }
-
-            if(isOwner) {
-                div.innerHTML = `<div class="drag-handle"><i data-lucide="grip-vertical" class="w-3.5 h-3.5"></i><button onclick="cycleBlockHighlight('${block.id}')" class="p-1 hover:text-blue-500" title="Highlight"><i data-lucide="highlighter" class="w-3 h-3"></i></button><button onclick="deleteBlock('${block.id}')" class="p-1 hover:text-red-500"><i data-lucide="trash-2" class="w-3 h-3"></i></button></div>${html}`;
-            } else div.innerHTML = html;
-            
-            if (isOwner) {
-                const editor = div.querySelector('[contenteditable="true"]');
-                if (editor) {
-                    editor.addEventListener('input', () => { 
-                        block.content = editor.innerHTML; 
-                        if (block.type === 'math') {
-                            const raw = editor.innerText;
-                            const target = div.querySelector('.math-display');
-                            if(target) try { katex.render(raw || '?', target, { displayMode: true, throwOnError: false }); } catch(e){}
-                        }
-                        saveState(); 
-                    });
-                    editor.addEventListener('keydown', (e) => {
-                        if (e.key === '/') { if (!editor.innerText.trim()) { e.preventDefault(); openSlashMenu(div, block.id); } }
-                        else if (e.key === 'Enter' && !e.shiftKey) { 
-                            e.preventDefault(); 
-                            if (editor.innerText.trim() === '/') return;
-                            const inherit = (block.type === 'todo' || block.type === 'toggle');
-                            addBlockBelow(block.id, inherit); 
-                        }
-                        else if (e.key === 'Backspace' && !editor.innerText.trim() && !isFirst) { e.preventDefault(); deleteBlock(block.id); }
-                    });
-                    
-                    if (block.type === 'math') {
-                        const editDiv = div.querySelector(`#math-edit-${block.id}`);
-                        const viewDiv = div.querySelector(`#math-view-${block.id}`);
-                        if(viewDiv && editDiv) {
-                            viewDiv.onclick = (e) => { e.stopPropagation(); editDiv.classList.remove('hidden'); editDiv.focus(); };
-                            editDiv.onblur = () => editDiv.classList.add('hidden');
-                        }
-                    }
-                }
-                
-                if (block.type === 'image' && !block.content) {
-                    setTimeout(() => {
-                        const zone = document.getElementById(`drop-${block.id}`);
-                        if (zone) {
-                            zone.addEventListener('drop', (e) => { e.preventDefault(); const file = e.dataTransfer.files[0]; if (file) processImageFile(file, block.id); });
-                            zone.addEventListener('dragover', (e) => e.preventDefault());
-                        }
-                    }, 50);
-                }
-            }
-            if (block.type === 'math') setTimeout(() => {
-                const target = div.querySelector('.math-display');
-                if (target) try { katex.render(block.content || '?', target, { displayMode: true, throwOnError: false }); } catch(e){}
-            }, 10);
-            if (block.type === 'toggle' && block.expanded && block.children) {
-                setTimeout(() => {
-                    const childContainer = div.querySelector(`#children-${block.id}`);
-                    if (childContainer) block.children.forEach(c => childContainer.appendChild(createBlockElement(c, false, isOwner)));
-                }, 10);
+            const isExp = state.expandedWorkspaces.has(item.id);
+            const isActive = state.activePageId === item.id;
+            const highlightClass = item.highlight ? `workspace-highlight-${item.highlight}` : '';
+            div.innerHTML = `
+                <div class="group flex items-center px-3 py-1 cursor-pointer transition-colors rounded-md text-[13px] ${isActive ? 'sidebar-active' : 'text-[#7e7c78] hover:bg-[var(--block-hover)]'}" style="padding-left: ${depth * 12 + 12}px">
+                    ${item.type === 'workspace' ? `<button onclick="toggleWS(event, '${item.id}')" class="p-0.5 hover:bg-gray-200 dark:hover:bg-gray-700 rounded mr-1 transition-transform ${isExp ? 'rotate-90' : ''}"><i data-lucide="chevron-right" class="w-3 h-3 text-gray-400"></i></button>` : '<div class="w-4"></div>'}
+                    <div onclick="${item.type === 'page' ? `setActivePage('${item.id}')` : `toggleWS(event, '${item.id}')`}" class="flex-1 truncate flex items-center gap-2 ${highlightClass}">
+                        ${item.type === 'page' ? `<span>${item.icon}</span>` : ''}
+                        <span class="truncate font-medium">${item.title}</span>
+                    </div>
+                    <div class="opacity-0 group-hover:opacity-100 flex items-center gap-0.5 ml-auto">
+                        ${item.type === 'workspace' ? `<button onclick="addPage('${item.id}')" class="p-1 hover:bg-gray-200 dark:hover:bg-gray-700 rounded"><i data-lucide="plus" class="w-3 h-3 text-gray-400"></i></button><button onclick="openWorkspaceModal('${item.id}')" class="p-1 hover:bg-gray-200 dark:hover:bg-gray-700 rounded"><i data-lucide="settings-2" class="w-3 h-3 text-gray-400"></i></button>` : ''}
+                        <button onclick="deleteItem(event, '${item.id}')" class="p-1 hover:text-red-500 rounded"><i data-lucide="trash-2" class="w-3 h-3 text-gray-400"></i></button>
+                    </div>
+                </div>`;
+            if (item.type === 'workspace' && isExp && item.children) {
+                const sub = document.createElement('div');
+                item.children.forEach(c => sub.appendChild(createSidebarItem(c, depth + 1)));
+                div.appendChild(sub);
             }
             return div;
+        }
+
+        function renderSidebar() {
+            const list = document.getElementById('structure-list');
+            if(!list) return;
+            const place = state.places.find(p => p.id === state.activePlaceId);
+            list.innerHTML = '';
+            if (place && place.structure) place.structure.forEach(item => list.appendChild(createSidebarItem(item)));
+            lucide.createIcons();
         }
 
         function renderActivePage() {
@@ -540,7 +447,7 @@
             const breadUI = document.getElementById('breadcrumbs');
             
             if (!page || page.type !== 'page') { 
-                if(blocksUI) blocksUI.innerHTML = `<div class="p-20 text-center text-gray-400 text-sm">Select a page to begin.</div>`; 
+                if(blocksUI) blocksUI.innerHTML = `<div class="p-20 text-center text-gray-400 text-sm font-medium">Select a page to begin.</div>`; 
                 return; 
             }
 
@@ -551,7 +458,7 @@
             const parent = findParent(page.id);
             if(breadUI) {
                 breadUI.innerHTML = `
-                    <span class="p-1 px-1.5 rounded font-semibold text-blue-600 cursor-pointer hover:bg-blue-50" onclick="switchPlace('${activePlace.id}')">${activePlace.name}</span>
+                    <span class="p-1 px-1.5 rounded font-semibold text-blue-600 cursor-pointer hover:bg-blue-50 transition-colors" onclick="switchPlace('${activePlace.id}')">${activePlace.name}</span>
                     ${parent ? `<i data-lucide="chevron-right" class="w-3 h-3 text-gray-300"></i> <span class="font-semibold p-1 text-gray-500">${parent.title}</span>` : ''}
                     <i data-lucide="chevron-right" class="w-3 h-3 text-gray-300"></i> <span class="font-bold text-[var(--text-main)] px-1">${page.title}</span>
                 `;
@@ -559,11 +466,81 @@
 
             if(blocksUI) {
                 blocksUI.innerHTML = '';
-                if(page.blocks) page.blocks.forEach((b, i) => blocksUI.appendChild(createBlockElement(b, i === 0, activePlace.isOwner)));
+                if(page.blocks) page.blocks.forEach((b, i) => blocksUI.appendChild(createBlockElement(b, i === 0)));
             }
 
             lucide.createIcons();
-            if(activePlace.isOwner) initDragAndDrop();
+            initDragAndDrop();
+        }
+
+        // --- 3. BLOCK SYSTEM ---
+
+        function createBlockElement(block, isFirst) {
+            const div = document.createElement('div');
+            div.className = `group relative w-full block-container fade-in ${block.highlight || ''}`;
+            div.dataset.id = block.id;
+            let html = '';
+            const editAttr = 'contenteditable="true"';
+
+            switch (block.type) {
+                case 'h1': html = `<div ${editAttr} class="w-full text-3xl font-bold py-2 outline-none" placeholder="Heading 1">${block.content || ''}</div>`; break;
+                case 'h2': html = `<div ${editAttr} class="w-full text-2xl font-bold py-2 outline-none" placeholder="Heading 2">${block.content || ''}</div>`; break;
+                case 'h3': html = `<div ${editAttr} class="w-full text-xl font-bold py-2 outline-none" placeholder="Heading 3">${block.content || ''}</div>`; break;
+                case 'todo': html = `<div class="flex items-start gap-2 py-1 w-full"><input type="checkbox" onchange="toggleTodo(this, '${block.id}')" ${block.checked ? 'checked' : ''} class="mt-1.5 accent-blue-600 h-4 w-4" /><div ${editAttr} class="flex-1 outline-none ${block.checked ? 'line-through text-gray-400' : ''}" placeholder="To-do...">${block.content || ''}</div></div>`; break;
+                case 'toggle': 
+                    const isExp = block.expanded;
+                    html = `<div class="flex flex-col w-full"><div class="flex items-center gap-1 py-1"><button onclick="toggleBlockExpand('${block.id}')" class="p-1 hover:bg-gray-200 dark:hover:bg-gray-700 rounded transition-transform ${isExp ? 'rotate-90' : ''}"><i data-lucide="play" class="w-3 h-3 fill-current text-gray-400"></i></button><div ${editAttr} class="flex-1 outline-none font-semibold" placeholder="Toggle...">${block.content || ''}</div></div>${isExp ? `<div class="ml-6 border-l border-gray-200 dark:border-gray-700 pl-4 mt-1" id="children-${block.id}"></div>` : ''}</div>`;
+                    break;
+                case 'math': 
+                    html = `<div class="math-display w-full" id="math-view-${block.id}"></div><div ${editAttr} class="text-xs text-gray-400 font-mono text-center outline-none hidden" id="math-edit-${block.id}" placeholder="Type LaTeX...">${block.content || 'e = mc^2'}</div>`; 
+                    break;
+                case 'image': 
+                    if (block.content) html = `<div class="media-block relative group"><img src="${block.content}" /><button onclick="clearBlockContent('${block.id}')" class="absolute top-2 right-2 p-1 bg-black/60 text-white rounded opacity-0 group-hover:opacity-100 transition-opacity"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button></div>`;
+                    else html = `<div class="image-drop-zone" id="drop-${block.id}" onclick="triggerImageUpload('${block.id}')"><i data-lucide="image" class="w-8 h-8 mx-auto text-gray-300 mb-2"></i><p class="text-xs text-gray-400 font-medium">Click to Upload, Drop, or Paste URL</p><input onkeydown="handleImageURL(event, '${block.id}')" class="mt-4 bg-white dark:bg-black/20 border dark:border-gray-700 rounded px-3 py-1 text-xs outline-none w-48 text-center text-black dark:text-white" placeholder="Paste URL..." onclick="event.stopPropagation()"/></div>`;
+                    break;
+                case 'divider': html = `<hr class="my-6 w-full border-[var(--border-color)]" />`; break;
+                default: html = `<div ${editAttr} class="flex-1 outline-none py-1.5 text-[15px] leading-relaxed" placeholder="Type '/' for commands...">${block.content || ''}</div>`;
+            }
+
+            div.innerHTML = `<div class="drag-handle"><i data-lucide="grip-vertical" class="w-3.5 h-3.5"></i><button onclick="cycleBlockHighlight('${block.id}')" class="p-1 hover:text-blue-500" title="Highlight"><i data-lucide="highlighter" class="w-3 h-3"></i></button><button onclick="deleteBlock('${block.id}')" class="p-1 hover:text-red-500" title="Delete"><i data-lucide="trash-2" class="w-3 h-3"></i></button></div>${html}`;
+            
+            const editor = div.querySelector('[contenteditable="true"]');
+            if (editor) {
+                editor.addEventListener('input', () => { 
+                    block.content = editor.innerHTML; 
+                    if (block.type === 'math') {
+                        const target = div.querySelector('.math-display');
+                        if(target) try { katex.render(editor.innerText || '?', target, { displayMode: true, throwOnError: false }); } catch(e){}
+                    }
+                    saveState(); 
+                });
+                editor.addEventListener('keydown', (e) => {
+                    if (e.key === '/') { if (!editor.innerText.trim()) { e.preventDefault(); openSlashMenu(div, block.id); } }
+                    else if (e.key === 'Enter' && !e.shiftKey) { 
+                        e.preventDefault(); 
+                        if (editor.innerText.trim() === '/') return;
+                        const inherit = (block.type === 'todo' || block.type === 'toggle');
+                        addBlockBelow(block.id, inherit); 
+                    }
+                    else if (e.key === 'Backspace' && !editor.innerText.trim() && !isFirst) { e.preventDefault(); deleteBlock(block.id); }
+                });
+                
+                if (block.type === 'math') {
+                    const editDiv = div.querySelector(`#math-edit-${block.id}`);
+                    const viewDiv = div.querySelector(`#math-view-${block.id}`);
+                    if(viewDiv && editDiv) {
+                        viewDiv.onclick = (e) => { e.stopPropagation(); editDiv.classList.remove('hidden'); editDiv.focus(); };
+                        editDiv.onblur = () => editDiv.classList.add('hidden');
+                    }
+                }
+            }
+            
+            if (block.type === 'math') setTimeout(() => {
+                const target = div.querySelector('.math-display');
+                if (target) try { katex.render(block.content || '?', target, { displayMode: true, throwOnError: false }); } catch(e){}
+            }, 10);
+            
+            return div;
         }
 
         // --- 4. ACTION HANDLERS ---
@@ -590,17 +567,12 @@
 
         function addPage(parentWSId = null) {
             const activePlace = state.places.find(p => p.id === state.activePlaceId);
-            if(!activePlace || !activePlace.isOwner) return;
-
-            const page = {
-                id: 'pg_' + Math.random().toString(36).substr(2, 6),
-                type: 'page', title: 'Untitled', icon: '📄', cover: DEFAULT_COVERS[0],
-                blocks: [{ id: 'b_' + Date.now(), type: 'text', content: '' }]
-            };
+            if(!activePlace) return;
+            const page = { id: 'pg_' + Math.random().toString(36).substr(2, 6), type: 'page', title: 'Untitled', icon: '📄', cover: DEFAULT_COVERS[0], blocks: [{ id: 'b_' + Date.now(), type: 'text', content: '' }] };
             if (parentWSId) {
                 const ws = findInStructure(parentWSId);
                 if (ws) { if(!ws.children) ws.children = []; ws.children.push(page); state.expandedWorkspaces.add(parentWSId); }
-            } else { activePlace.structure.push(page); }
+            } else activePlace.structure.push(page);
             setActivePage(page.id);
         }
 
@@ -615,8 +587,6 @@
             const place = state.places.find(p => p.id === id);
             if (!place) return;
             state.activePlaceId = id; state.activePageId = place.activePageId;
-            const controls = document.getElementById('sidebar-controls');
-            if(controls) controls.classList.toggle('hidden', !place.isOwner);
             document.getElementById('place-name-display').innerText = place.name;
             renderTabs(); renderSidebar(); renderActivePage();
         }
@@ -631,8 +601,7 @@
         }
 
         function toggleWS(e, id) { e.stopPropagation(); if (state.expandedWorkspaces.has(id)) state.expandedWorkspaces.delete(id); else state.expandedWorkspaces.add(id); renderSidebar(); }
-        function deleteItem(e, id) { e.stopPropagation(); if(!confirm("Delete?")) return; const activePlace = state.places.find(p => p.id === state.activePlaceId); const parent = findParent(id); if (parent) parent.children = parent.children.filter(i => i.id !== id); else activePlace.structure = activePlace.structure.filter(i => i.id !== id); if (state.activePageId === id) state.activePageId = null; renderSidebar(); renderActivePage(); saveState(); }
-
+        function deleteItem(e, id) { e.stopPropagation(); if(!confirm("Are you sure?")) return; const activePlace = state.places.find(p => p.id === state.activePlaceId); const parent = findParent(id); if (parent) parent.children = parent.children.filter(i => i.id !== id); else activePlace.structure = activePlace.structure.filter(i => i.id !== id); if (state.activePageId === id) state.activePageId = null; renderSidebar(); renderActivePage(); saveState(); }
         function toggleTodo(el, id) { const block = findBlockById(findInStructure(state.activePageId).blocks, id); if(block) { block.checked = el.checked; renderActivePage(); saveState(); } }
         function cycleBlockHighlight(id) { const block = findBlockById(findInStructure(state.activePageId).blocks, id); if (!block) return; const colors = [null, 'hl-yellow', 'hl-green', 'hl-blue', 'hl-red']; block.highlight = colors[(colors.indexOf(block.highlight || null) + 1) % colors.length]; renderActivePage(); saveState(); }
         function toggleBlockExpand(id) { const block = findBlockById(findInStructure(state.activePageId).blocks, id); if (block) { block.expanded = !block.expanded; if(!block.children) block.children = []; renderActivePage(); saveState(); } }
@@ -641,11 +610,8 @@
             modalWSContext = id;
             const modal = document.getElementById('ws-modal');
             const input = document.getElementById('ws-modal-input');
-            if (id) {
-                const ws = findInStructure(id);
-                input.value = ws.title;
-                modalWSColor = ws.highlight;
-            } else { input.value = ""; modalWSColor = null; }
+            if (id) { const ws = findInStructure(id); input.value = ws.title; modalWSColor = ws.highlight; } 
+            else { input.value = ""; modalWSColor = null; }
             modal.classList.remove('hidden');
             input.focus();
         }
@@ -654,12 +620,8 @@
             const name = document.getElementById('ws-modal-input').value.trim();
             const activePlace = state.places.find(p => p.id === state.activePlaceId);
             if (!name || !activePlace) return;
-            if (modalWSContext) {
-                const ws = findInStructure(modalWSContext);
-                ws.title = name; ws.highlight = modalWSColor;
-            } else {
-                activePlace.structure.push({ id: 'ws_' + Math.random().toString(36).substr(2, 6), type: 'workspace', title: name, highlight: modalWSColor, children: [] });
-            }
+            if (modalWSContext) { const ws = findInStructure(modalWSContext); ws.title = name; ws.highlight = modalWSColor; } 
+            else activePlace.structure.push({ id: 'ws_' + Math.random().toString(36).substr(2, 6), type: 'workspace', title: name, highlight: modalWSColor, children: [] });
             renderSidebar(); saveState(); closeWSModal();
         }
 
@@ -676,13 +638,9 @@
                 document.getElementById('auth-modal').classList.add('hidden');
                 const place = state.places.find(p => p.id === state.activePlaceId);
                 document.getElementById('place-name-display').innerText = place ? place.name : 'Orbit';
-                applyTheme(); 
-                renderTabs(); 
-                renderSidebar();
+                applyTheme(); renderTabs(); renderSidebar();
                 if (state.activePageId) renderActivePage();
-                setupEmojiPicker(); 
-                setupSlashMenu(); 
-                initAbly();
+                setupEmojiPicker(); setupSlashMenu(); initAbly();
                 if(!state.sidebarOpen) toggleSidebar(false); 
             }
             lucide.createIcons();
@@ -693,10 +651,7 @@
             if (!name) return;
             const placeId = 'place_' + Math.random().toString(36).substr(2, 6);
             state.user = { username: name, placeId: placeId };
-            const initialStructure = [{
-                id: 'home_' + Date.now(), type: 'page', title: 'Home', icon: '🏠', cover: DEFAULT_COVERS[0],
-                blocks: [{ id: 'b1', type: 'h1', content: `Welcome to ${name}'s Orbit` }]
-            }];
+            const initialStructure = [{ id: 'home_' + Date.now(), type: 'page', title: 'Home', icon: '🏠', cover: DEFAULT_COVERS[0], blocks: [{ id: 'b1', type: 'h1', content: `Welcome to ${name}'s Orbit` }] }];
             state.places = [{ id: placeId, name: `${name}'s Place`, structure: initialStructure, isOwner: true, activePageId: initialStructure[0].id }];
             state.activePlaceId = placeId; state.activePageId = initialStructure[0].id;
             saveState(); init();
@@ -714,16 +669,11 @@
             channel.subscribe('update', (m) => {
                 if(m.clientId === ably.auth.clientId) return;
                 const target = state.places.find(pl => pl.id === p.id);
-                if (target) { 
-                    target.structure = m.data.structure; target.name = m.data.name; 
-                    if (state.activePlaceId === p.id) { renderSidebar(); renderActivePage(); renderTabs(); } 
-                }
+                if (target) { target.structure = m.data.structure; target.name = m.data.name; if (state.activePlaceId === p.id) { renderSidebar(); renderActivePage(); renderTabs(); } }
             });
             if(!p.isOwner) channel.publish('request-sync', {});
-            channel.subscribe('request-sync', () => { if(p.isOwner) channel.publish('update', { structure: p.structure, name: p.name }); });
+            channel.subscribe('request-sync', () => { if (p.structure && p.structure.length > 0) channel.publish('update', { structure: p.structure, name: p.name }); });
         }
-
-        // --- 6. MISC UTILS & INTERFACES ---
 
         function setupSlashMenu() {
             const items = [
@@ -731,9 +681,7 @@
                 { type: 'todo', icon: 'check-square', label: 'To-do List' }, { type: 'toggle', icon: 'chevron-right', label: 'Toggle List' },
                 { type: 'math', icon: 'sigma', label: 'Equation' }, { type: 'image', icon: 'image', label: 'Image' }
             ];
-            const menuList = document.getElementById('slash-menu-items');
-            if(!menuList) return;
-            menuList.innerHTML = items.map(i => `
+            document.getElementById('slash-menu-items').innerHTML = items.map(i => `
                 <button onclick="handleSlashAction('${i.type}')" class="w-full flex items-center gap-3 px-4 py-2 hover:bg-[var(--block-hover)] text-left group">
                     <div class="w-8 h-8 rounded border border-[var(--border-color)] flex items-center justify-center text-gray-400 group-hover:text-blue-500 bg-white dark:bg-black/20"><i data-lucide="${i.icon}" class="w-4 h-4"></i></div>
                     <div class="text-[13px] font-semibold text-[var(--text-main)]">${i.label}</div>
@@ -751,34 +699,20 @@
         function handleSlashAction(type) {
             const page = findInStructure(state.activePageId);
             const block = findBlockById(page.blocks, state.activeBlockIdForMenu);
-            if (block) { 
-                block.type = type; block.content = ''; if(type === 'toggle') block.expanded = true; renderActivePage(); saveState(); if (type !== 'text') addBlockBelow(block.id); 
-            }
+            if (block) { block.type = type; block.content = ''; if(type === 'toggle') block.expanded = true; renderActivePage(); saveState(); if (type !== 'text') addBlockBelow(block.id); }
             document.getElementById('slash-menu').style.display = 'none';
         }
 
         function initDragAndDrop() {
             const el = document.getElementById('editor-blocks');
-            if (!el) return;
             if (sortableMain) sortableMain.destroy();
-            sortableMain = Sortable.create(el, { 
-                group: 'blocks', handle: '.drag-handle', animation: 150, 
-                onEnd: (e) => { 
-                    const page = findInStructure(state.activePageId); 
-                    if(page && page.blocks) {
-                        const b = page.blocks.splice(e.oldIndex, 1)[0]; 
-                        page.blocks.splice(e.newIndex, 0, b); 
-                        saveState(); 
-                    }
-                } 
-            });
+            if(el) sortableMain = Sortable.create(el, { group: 'blocks', handle: '.drag-handle', animation: 150, onEnd: (e) => { const page = findInStructure(state.activePageId); if(page && page.blocks) { const b = page.blocks.splice(e.oldIndex, 1)[0]; page.blocks.splice(e.newIndex, 0, b); saveState(); } } });
         }
 
         function handleWorkspaceClick(e) { 
             if (e.target.id === 'main-scroll-container' || e.target.id === 'bottom-click-trigger') { 
                 const page = findInStructure(state.activePageId); 
-                const activePlace = state.places.find(p => p.id === state.activePlaceId); 
-                if (activePlace?.isOwner && page?.blocks && page.blocks.length > 0) { 
+                if (page && page.blocks && page.blocks.length > 0) { 
                     const last = page.blocks[page.blocks.length - 1]; 
                     if (last.content.trim() !== '') addBlockBelow(last.id); 
                     else { const el = document.querySelector(`[data-id="${last.id}"] [contenteditable]`); if(el) el.focus(); }
@@ -787,27 +721,29 @@
             const menu = document.getElementById('slash-menu'); if(menu) menu.style.display = 'none'; 
         }
 
-        function updateProgressBar() { const el = document.getElementById('main-scroll-container'); if(el) document.getElementById('progress-bar').style.width = (el.scrollTop / (el.scrollHeight - el.clientHeight)) * 100 + "%"; }
         function openJoinModal() { document.getElementById('join-modal').classList.remove('hidden'); }
-        function logout() { if(confirm("Logout? Data persists locally.")) { localStorage.removeItem(STORAGE_KEY); location.reload(); } }
         function openShareActiveModal() { document.getElementById('share-code-display').innerText = state.activePlaceId; document.getElementById('share-modal').classList.remove('hidden'); }
         function copyShareCode() { navigator.clipboard.writeText(document.getElementById('share-code-display').innerText); alert("ID Copied!"); }
-        function updatePageTitle(v) { const p = findInStructure(state.activePageId); if(p) { p.title = v; renderSidebar(); saveState(); } }
-        function changeCover() { const p = findInStructure(state.activePageId); if(!p) return; p.cover = `https://images.unsplash.com/photo-${Math.floor(Math.random()*1000000)}?auto=format&fit=crop&q=80&w=2000`; renderActivePage(); saveState(); }
+        function changeCover() { const p = findInStructure(state.activePageId); if(p) { p.cover = `https://images.unsplash.com/photo-${Math.floor(Math.random()*1000000)}?auto=format&fit=crop&q=80&w=2000`; renderActivePage(); saveState(); } }
         function toggleEmojiPicker(e) { e.stopPropagation(); document.getElementById('emoji-picker').classList.toggle('hidden'); }
         function selectEmoji(e) { const p = findInStructure(state.activePageId); if(p) { p.icon = e; renderSidebar(); renderActivePage(); saveState(); } document.getElementById('emoji-picker').classList.add('hidden'); }
         function setupEmojiPicker() { document.getElementById('emoji-grid').innerHTML = EMOJI_LIST.map(e => `<button onclick="selectEmoji('${e}')" class="p-2 hover:bg-gray-100 rounded text-xl transition-transform hover:scale-125">${e}</button>`).join(''); }
-        function toggleVoiceOrbit() { alert("Voice connection initialized..."); }
-        function removePlace(e, id) { e.stopPropagation(); if(confirm("Remove?")) { state.places = state.places.filter(p => p.id !== id); if (state.activePlaceId === id) switchPlace(state.places[0].id); else renderTabs(); saveState(); } }
+        function logout() { if(confirm("Logout?")) { localStorage.removeItem(STORAGE_KEY); location.reload(); } }
+        function removePlace(e, id) { e.stopPropagation(); if(confirm("Remove joined space?")) { state.places = state.places.filter(p => p.id !== id); if (state.activePlaceId === id) switchPlace(state.places[0].id); else renderTabs(); saveState(); } }
         function triggerImageUpload(id) { const up = document.getElementById('image-block-uploader'); up.onchange = (e) => { if (e.target.files[0]) processImageFile(e.target.files[0], id); }; up.click(); }
         function processImageFile(file, id) { const reader = new FileReader(); reader.onload = (e) => { const block = findBlockById(findInStructure(state.activePageId).blocks, id); if (block) { block.content = e.target.result; renderActivePage(); saveState(); } }; reader.readAsDataURL(file); }
+        function handleImageURL(e, id) { if (e.key === 'Enter') { const val = e.target.value.trim(); const block = findBlockById(findInStructure(state.activePageId).blocks, id); if (block && val) { block.content = val; renderActivePage(); saveState(); } } }
+        function clearBlockContent(id) { const block = findBlockById(findInStructure(state.activePageId).blocks, id); if(block) { block.content = ""; renderActivePage(); saveState(); } }
         function handleSearch(v) { renderSidebar(); }
+        function updateProgressBar() { const el = document.getElementById('main-scroll-container'); if(el) document.getElementById('progress-bar').style.width = (el.scrollTop / (el.scrollHeight - el.clientHeight)) * 100 + "%"; }
+        function toggleVoiceOrbit() { alert("Voice connection initialized..."); }
+        function updatePageTitle(v) { const p = findInStructure(state.activePageId); if(p) { p.title = v; renderSidebar(); saveState(); } }
 
         function joinExternalSpace() { 
             const code = document.getElementById('join-code').value.trim(); 
             if(!code.startsWith('place_')) return; 
             if (!state.places.find(p => p.id === code)) {
-                const newPlace = { id: code, name: "Joined Space", structure: [], isOwner: false, activePageId: null };
+                const newPlace = { id: code, name: "Joining...", structure: [], isOwner: false, activePageId: null };
                 state.places.push(newPlace);
                 connectToAbly(newPlace);
                 switchPlace(code);
@@ -815,7 +751,6 @@
             document.getElementById('join-modal').classList.add('hidden'); 
         }
 
-        // Start App
         init();
     </script>
 </body>
